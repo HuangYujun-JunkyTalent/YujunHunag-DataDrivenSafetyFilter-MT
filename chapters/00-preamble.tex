@@ -1,0 +1,71 @@
+%---------------------------------------------------------------------------
+% Preface
+
+\chapter*{Preface}
+
+Blah blah \dots
+
+ \cleardoublepage
+
+%---------------------------------------------------------------------------
+% Table of contents
+
+ \setcounter{tocdepth}{2}
+ \tableofcontents
+
+ \cleardoublepage
+
+%---------------------------------------------------------------------------
+% Abstract
+
+\chapter*{Abstract}
+ \addcontentsline{toc}{chapter}{Abstract}
+
+In this thesis, we investigated the designing, analysis, and application of data-driven predictive safety filters.
+% Predictive safety filters can keep the system safe under arbitrary given control input, by predicting future states of the system and applying a safe input that is close to the given input.
+The offline design of data-driven safety filters requires no knowledge of dynamics of the system, only some rich enough dataset trajectories of the system are needed.
+
+For noise-free Linear Time Invariant (LTI) system, the data-driven safety filter is equivalent to the model-based safety filter.
+The filter is also robust with respect to bounded noise.
+In this case, qualitative guarantees can be given for the safety filter, including recursive feasibility and constraint satisfaction in close loop.
+
+For general non-linear system, the safety filter can also perform well in practice.
+We propose a method of improving the performance by selecting and putting different weights on trajectory slices.
+It is tested on the kinematic and dynamic model of Chronos vehicle.
+It can be seen that the safety filter can keep the vehicle within the given safe constraints, while keeping the actual input as close as possible to the desired input.
+
+Question: add description and introduction to each chapter?
+
+ \cleardoublepage
+
+%---------------------------------------------------------------------------
+% Symbols
+
+\chapter*{Nomenclature}\label{chap:symbole}
+ \addcontentsline{toc}{chapter}{Nomenclature}
+
+\section*{Symbols}
+\begin{tabbing}
+ \hspace*{1.6cm} \= \hspace*{8cm} \= \kill
+ $\mathrm{EHC}$ \> Conditional equation \> [$-$] \\[0.5ex]
+ $e$ \> Willans coefficient \> [$-$] \\[0.5ex]
+ $F,G$ \> Parts of the system equation \> [\unitfrac[]{K}{s}]
+\end{tabbing}
+
+\section*{Indicies}
+\begin{tabbing}
+ \hspace*{1.6cm}  \= \kill
+ a \> Ambient \\[0.5ex]
+ air \> Air
+\end{tabbing}
+
+\section*{Acronyms and Abbreviations}
+\begin{tabbing}
+ \hspace*{1.6cm}  \= \kill
+ NEDC \> New European Driving Cycle \\[0.5ex]
+ ETH \> Eidgen\"{o}ssische Technische Hochschule
+\end{tabbing}
+
+ \cleardoublepage
+
+%---------------------------------------------------------------------------

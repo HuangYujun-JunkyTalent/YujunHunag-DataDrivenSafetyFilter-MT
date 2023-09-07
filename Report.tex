@@ -16,10 +16,7 @@
 % ______________________________________________________________________________
 \documentclass[10pt,twoside,a4paper,fleqn]{report}
 
-
-\usepackage[english,st]{ethidsc} % Special IDSC styles and commands      	
-								 % {german}/english: language of headings, etc.
-								 % {st}/bt/mt: {semester}/bachelor/master thesis
+\input{preamble}
 							
 % Page header (don't change)____________________________________________________
 \setlength{\parindent}{0em}                 % Disable parindent
@@ -29,13 +26,13 @@
 
 
 % Title page (please fill in)___________________________________________________
-\title{\LaTeX\ Thesis Template v.1.4}
+\title{Data-Drive Safety Filter}
 
 
-\studentA{Hans Muster}
-\ethidA{97-906-739}
-\semesterA{5}
-\emailA{muster@student.ethz.ch}
+\studentA{Yujun Huang}
+\ethidA{21-947-198}
+\semesterA{4}
+\emailA{yujhuang@student.ethz.ch}
 
 %\studentB{Second Student}
 %\ethidB{12-345-678}
@@ -60,12 +57,18 @@
 
 \pagenumbering{roman} 				% Begin roman page numbering (i,ii,...)
 
-\input{chapters/preamble}
+\input{chapters/00-preamble}
 
 % Chapters______________________________________________________________________
 
 \pagestyle{fancy}               	% Fancy headings
 \pagenumbering{arabic}				% Begin arabic page numbering (1,2,...)
+
+\input{chapters/01-introduction.tex}
+\input{chapters/02-nominal-ddsf.tex}
+\input{chapters/03-robust-ddsf-lti.tex}
+\input{chapters/04-non-linear-system.tex}
+\input{chapters/05-test-chronos.tex}
 
 \input{chapters/introduction}
 \cleardoublepage
@@ -79,7 +82,7 @@
 
 % Appendix______________________________________________________________________
 \appendix
-\input{chapters/appendix}
+\input{chapters/99-appendix}
 
 
 % Bibliography__________________________________________________________________

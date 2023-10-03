@@ -1,2 +1,37 @@
 \chapter{Introduction}\label{chap:introduction}
 TODO: Contains introduction, motivation, background, literature review, and outline of the thesis.
+
+\begin{lemma}\label{lemma:fundamental-lemma}
+    If dataset trajectory rich enough, and the LTI system is controllable, then...
+\end{lemma}
+
+We have the model-based safety filter as:
+\begin{IEEEeqnarray}{RL}\label{eq:model-based-safety-filter}
+    \min_{\substack{\bar{u}, \bar{y} \\ \bar{x}}} \quad & \norm{u_{[0]} - u^{\text{obj}}}_R^2 \IEEEyesnumber \IEEEyessubnumber* \label{model-based-safety-filter-cost}\\
+    \textrm{s.t.} \quad & 
+    \bar{x}_{k+1} = A \bar{x}_k + B \bar{u}_k \IEEEnonumber \\
+    &
+    \bar{y}_k = C \bar{x}_k + D \bar{u}_k,  \quad k \in \left[-n, L-1\right] \label{model-based-safety-filter-dynamics} \\
+    & 
+    \begin{bmatrix}
+        \subseq{-n}{-1}{\bar{u}} \\
+        \subseq{-n}{-1}{\bar{y}} \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \subseq{t-n}{t-1}{u} \\
+        \subseq{t-n}{t-1}{y} \\
+    \end{bmatrix} \label{model-based-safety-filter-initial}\\
+    & 
+    \begin{bmatrix}
+        \subseq{L-n}{L-1}{\bar{u}} \\
+        \subseq{L-n}{L-1}{\bar{y}} \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        u_n^s \\
+        y_n^s \\
+    \end{bmatrix} \label{model-based-safety-filter-terminal}\\
+    &
+    \bar{u}_k \in \mathbb{U}, \quad k \in \left[0, L-1\right] \label{model-based-safety-filter-input}\\
+    &
+    \bar{y}_k \in \mathbb{Y}, \quad k \in \left[0, L-1\right] \label{model-based-safety-filter-output}
+\end{IEEEeqnarray}

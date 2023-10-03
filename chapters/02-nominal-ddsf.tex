@@ -1,12 +1,10 @@
 \chapter{Nominal Data-Driven Safety Filter}\label{chap:nominal-ddsf}
-TODO:  Contains nominal data-driven safety filter for LTI. Proof of equivalence with Model based SF, recursive feasibility and constraint satisfaction.\\
-
 
 In this chapter, we first introduce the formulation of nominal data-driven safety filter.
 Then we show that the nominal data-driven safety filter is equivalent to the model-based safety filter for noise-free LTI system.
 
 \section{Formulation of Nominal Data-Driven Safety Filter}
-Based on \cref{lemma:fundamental-lemma}, the dataset trajectory can be used to replace the system dynamic constraint in the model-based safety filter \cref{eq:model-based-safety-filter}.
+Based on Lemma \ref{lemma:fundamental-lemma}, the dataset trajectory can be used to replace the system dynamic constraint in the model-based safety filter \ref{eq:model-based-safety-filter}.
 So we can formulate the nominal data-driven safety filter as:
 \begin{IEEEeqnarray}{RL}\label{nominal-ddsf}
     \min_{\alpha, \bar{u}, \bar{y}} \quad & \norm{u_{[0]} - u^{\text{obj}}}_R^2 \IEEEyesnumber \IEEEyessubnumber* \label{nominal-ddsf-cost}\\
@@ -43,5 +41,5 @@ So we can formulate the nominal data-driven safety filter as:
     \bar{y}_k \in \mathbb{Y}, \quad k \in \left[0, L-1\right] \label{nominal-ddsf-output}
 \end{IEEEeqnarray}
 
-We can see that in the formulation data-driven dynamic constraint 
-When assumptions \cref{assump:......} are satisfied, the nomi
+As described above, the constraint \cref{nominal-ddsf-dynamics} replaces the system dynamic constraint \cref{eq:model-based-safety-filter-dynamics} in the model-based safety filter.
+% When assumptions \cref{assump:......} are satisfied, the nomi

@@ -51,9 +51,16 @@ Recently, in \cite{bajelani_data-driven_2023}, the authors proposed a data-drive
 But an extensive discussion of robust properties, applicability, and comparison of different formulations is yet to be done.
 This thesis aims to fill this gap.
 
-
-\section{Outline of the Thesis}\label{sec:outline-of-the-thesis}
-We first introduce the 
+We first give a brief introduction of the background, motivation and preliminaries in \cref{chap:introduction}.
+Then we introduce the nominal data-driven safety filter in \cref{chap:nominal-ddsf}, and show that it is equivalent to the model-based safety filter for noise-free LTI system.
+As a result, guarantees including recursive feasibility and constraints satisfaction can be naturally established.
+In \cref{chap:robust-ddsf-lti}, we incorporate the robust methods into data-driven safety filter, and provide comparison and analysis of different formulations, including the direct and indirect methods.
+Numerical results are given to show that the proposed data-driven safety filter can successfully keep the system safe under arbitrary control inputs.
+Comparison between direct and indirect methods show that indirect method is better for the safety filter, since it better decouples the prediction and input interfere.
+In \cref{chap:non-linear-system}, we propose a data-driven prediction scheme for non-linear system, as well as a method of evaluating the quality of a certain dataset of trajectories.
+Numerical example using a simple non-linear system is given to show that with the proposed data-driven prediction scheme, datasets with better quality yield better prediction performance.
+Finally, in \cref{chap:test-chronos}, we test the proposed data-driven safety filter on Chronos, an RC model vehicle, and show that the safety filter can successfully keep the system safe under arbitrary control inputs.
+We also propose a scheme of dataset collection for general systems, and show that this scheme can be used to collect a rich enough dataset for Chronos.
 
 
 \section{Preliminaries}\label{sec:preliminaries}

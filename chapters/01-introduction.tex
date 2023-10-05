@@ -1,5 +1,62 @@
 \chapter{Introduction}\label{chap:introduction}
-TODO: Contains introduction, motivation, background, literature review, and outline of the thesis.
+
+
+\section{Background and Motivation}\label{sec:motivation-and-background}
+
+Recently, leaning-based control and reinforcement learning methods have been succeeding in more and more fields.
+However, one of the most important concern with these methods is safety, or constraint satisfaction, of the system.
+Usually, these methods do not incorporate system constraints in an explicit way, thus offering no guarantee of constraint satisfaction.
+
+In \cite{wabersich_predictive_sf_2021}, the authors proposed a model-based safety filter, which can be used to ensure safety of the system under arbitrary control inputs.
+It has successfully kept safety in the controlling of pendulum and quadrotor in \cite{wabersich_predictive_sf_2021}, as well as the controlling of Chronos \cite{carron_chronos_2022}, a radio controlled (RC) model vehicle, in \cite{tearle_psf_racing_2021}.
+This safety filter is model-based, since it uses a model of the system to predict the future states and outputs.
+Usually, this model comes from complicated modelling and system identification procedure.
+This process is almost always time-consuming, computationally expensive, and requires expert knowledge.
+
+In the meantime, data-driven predictive controllers have drawn more and more attention.
+As introduced in \cite{willems_fundamental_2005}, the behavior of an LTI system can be fully captured by a rich enough dataset trajectory, which is commonly referred to as the \emph{fundamental lemma} of data-driven predictive control.
+This result has also been extended to linear time invariant affine systems in \cite{martinelli_affine_2022}, and to multiple dataset trajectories in \cite{van_waarde_multiple_2020}.
+
+Based on this fundamental lemma, the prediction of future outputs of a system can be achieved without the need of a model.
+This idea enlightened \emph{Data-enabled predictive control (DeePC)} in \cite{coulson_deepc_2019}, which is a data-driven predictive controller that directly use a dataset trajectory to predict future trajectory of the system.
+In \cite{coulson_deepc_2019}, the authors also proposed a scheme of dealing with noise in both dataset trajectory and online observations: regularizing the auxiliary variables in the predictive controller.
+
+This data-driven predictive controller has been proved effective in many fields.
+In \cite{elokda_dataenabled_quadrotor_2021}, the authors used DeePC to control a quadrotor, and the results show that the quadrotor can successfully track a reference point.
+A sensitive analysis of hyperparameters in DeePC is also provided in \cite{elokda_dataenabled_quadrotor_2021}, as well as suggessttions of choosing these hyperparameters based on the empirical results.
+In \cite{muller_qcm_2022}, the authors used DeePC to model and control the noisy unknown dynamics of a quasi continuum manipulator.
+The results show that DeePC can successfully deal with the noise and model discrepancy in the system, resulting in a dramatically reduced tracking error.
+
+Apart from successful applications to real systems, there's also theoretical discussions regarding DeePC, for example the comparison between \emph{Direct} and \emph{Indirect} methods in DeePC, in \cite{dorfler_direct_indirect_2023}.
+The direct method, as the name suggests, deals with the data trajectory directly, while the indirect method accepts a mild preprocessing of the dataset.
+It has been shown in \cite{dorfler_direct_indirect_2023} that the regularized direct approach can be viewed as a convex relaxation of the indirect approach, and based on empirical results, the authors suggest indirect method in the case of variance errors such as output noise, and direct method in the case of bias errors such as model discrepancy.
+In \cite{mattsson_regularization_deepc_2023}, different regularizers are proposed and compared, both in the context of DeePC and purely prediction problems.
+The results reconfirm the conclusion in \cite{dorfler_direct_indirect_2023}, that the indirect method outperforms direct method in the case of variance error.
+In \cite{van_wingerden_instrumental_2022}, the authors discuss the relationship between direct DeePC, DeePC with instrumental variables, and the subspace identification method.
+It is shown that the proposed DeePC with instrumental variables is equivalent to the subspace identification method.
+
+Similar to the model predictive control (MPC), DeePC also faces the challenge of closed-loop guarantees, including recursive feasibility, constraint satisfaction and closed-loop stability.
+In \cite{berberich_data-driven-robust_2021} and \cite{berberich_stability_inherent_2022}, the authors proved that DeePC with mild modifications has qualitative guarantees, namely with small enough noise bound, recursive feasibility and asymptotic stability hold in closed-loop.
+The main drawback of these results is that no output constraints are considered.
+
+In \cite{berberich_data-driven-robust_2021}, the authors proposed a constraint tightening scheme to ensure output constraints satisfaction in DeePC.
+This scheme has the advantage of having rigorous guarantees, but the drawback of being conservative due to a generous estimation of prediction error.
+
+There are also works on a data-driven formulation that is different from DeePC, such as the one proposed in \cite{huang_robust_2023}.
+This scheme uses an auxiliary variable to take any possible error realization into account, and gives a tractable convex reformulation of the original problem.
+Bound of open loop cost can be established, but the closed-loop guarantees  and performance are yet to be discussed.
+
+With the success and in-depth discussions of data-driven predictive control, it is natural to ask whether it is possible to design a data-driven predictive safety filter, which can be used to ensure safety of the system under arbitrary control inputs, and only requires dataset trajectories for off-line design.
+Recently, in \cite{bajelani_data-driven_2023}, the authors proposed a data-driven safety filter for noise-free linear time invariant (LTI) systems.
+But an extensive discussion of robust properties, applicability, and comparison of different formulations is yet to be done.
+This thesis aims to fill this gap.
+
+
+\section{Outline of the Thesis}\label{sec:outline-of-the-thesis}
+We first introduce the 
+
+
+\section{Preliminaries}\label{sec:preliminaries}
 
 \begin{lemma}\label{lemma:fundamental-lemma}
     If dataset trajectory rich enough, and the LTI system is controllable, then...

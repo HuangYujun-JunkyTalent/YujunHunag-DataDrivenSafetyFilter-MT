@@ -22,50 +22,54 @@ Blah blah \dots
  \addcontentsline{toc}{chapter}{Abstract}
 
 In this thesis, we investigated the designing, analysis, and application of a novel data-driven predictive safety filter.
-% Predictive safety filters can keep the system safe under arbitrary given control input, by predicting future states of the system and applying a safe input that is close to the given input.
-The offline design of data-driven safety filters requires no knowledge of dynamics of the system, only some rich enough dataset trajectories of the system are needed.
+Predictive safety filters can keep the system safe under arbitrary given control input, by predicting future states of the system and applying a safe input that is close to the given input.
+Generally, making predictions requires a model of the system, which requires much knowledge about the system and a complicated system identification process.
+In contrast, the proposed data-driven safety filter requires no knowledge of dynamics of the system, only some rich enough dataset trajectories of the system are needed.
 
 For noise-free Linear Time Invariant (LTI) system, the data-driven safety filter is equivalent to the model-based safety filter.
-The filter is also robust with respect to bounded noise.
-In this case, qualitative guarantees can be given for the safety filter, including recursive feasibility and constraint satisfaction in close loop.
+In this case, recursive feasibility and constraint satisfaction in close loop can be guaranteed following the same proof as the model-based safety filter.
+
+The filter is also robust against bounded output noise.
+Qualitative guarantees can be given, namely recursive feasibility and constraint satisfaction in close loop hold when bound of output noise is small enough.
 
 For general non-linear system, the safety filter can also perform well in practice.
-We propose a method of improving the performance by selecting and putting different weights on trajectory slices.
-It is tested on the kinematic and dynamic model of Chronos vehicle.
-It can be seen that the safety filter can keep the vehicle within the given safe constraints, while keeping the actual input as close as possible to the desired input.
+We propose a method of evaluating the quality of the dataset, as well as a method of improving the prediction performance by selecting and putting different weights on trajectory slices of the dataset.
+These methods are tested on a simple non-linear system, it can be seen that with the proposed methods, better dataset yields better prediction performance.
 
-Question: add description and introduction to each chapter?
+The data-driven safety filter is also tested on the kinematic and dynamic model of Chronos vehicle.
+We propose a scheme of dataset collection and test for the vehicle, which can be used to generate a rich enough dataset for the safety filter.
+It can be seen that the safety filter can keep the vehicle within the given safe constraints, while keeping the actual input as close as possible to the desired input.
 
  \cleardoublepage
 
 %---------------------------------------------------------------------------
 % Symbols
 
-\chapter*{Nomenclature}\label{chap:symbole}
- \addcontentsline{toc}{chapter}{Nomenclature}
+% \chapter*{Nomenclature}\label{chap:symbole}
+%  \addcontentsline{toc}{chapter}{Nomenclature}
 
-\section*{Symbols}
-\begin{tabbing}
- \hspace*{1.6cm} \= \hspace*{8cm} \= \kill
- $\mathrm{EHC}$ \> Conditional equation \> [$-$] \\[0.5ex]
- $e$ \> Willans coefficient \> [$-$] \\[0.5ex]
- $F,G$ \> Parts of the system equation \> [\unitfrac[]{K}{s}]
-\end{tabbing}
+% \section*{Symbols}
+% \begin{tabbing}
+%  \hspace*{1.6cm} \= \hspace*{8cm} \= \kill
+%  $\mathrm{EHC}$ \> Conditional equation \> [$-$] \\[0.5ex]
+%  $e$ \> Willans coefficient \> [$-$] \\[0.5ex]
+%  $F,G$ \> Parts of the system equation \> [\unitfrac[]{K}{s}]
+% \end{tabbing}
 
-\section*{Indicies}
-\begin{tabbing}
- \hspace*{1.6cm}  \= \kill
- a \> Ambient \\[0.5ex]
- air \> Air
-\end{tabbing}
+% \section*{Indicies}
+% \begin{tabbing}
+%  \hspace*{1.6cm}  \= \kill
+%  a \> Ambient \\[0.5ex]
+%  air \> Air
+% \end{tabbing}
 
-\section*{Acronyms and Abbreviations}
-\begin{tabbing}
- \hspace*{1.6cm}  \= \kill
- NEDC \> New European Driving Cycle \\[0.5ex]
- ETH \> Eidgen\"{o}ssische Technische Hochschule
-\end{tabbing}
+% \section*{Acronyms and Abbreviations}
+% \begin{tabbing}
+%  \hspace*{1.6cm}  \= \kill
+%  NEDC \> New European Driving Cycle \\[0.5ex]
+%  ETH \> Eidgen\"{o}ssische Technische Hochschule
+% \end{tabbing}
 
- \cleardoublepage
+%  \cleardoublepage
 
 %---------------------------------------------------------------------------

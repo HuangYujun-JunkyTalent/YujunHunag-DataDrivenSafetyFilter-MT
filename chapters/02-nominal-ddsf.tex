@@ -1,7 +1,41 @@
 \chapter{Nominal Data-Driven Safety Filter}\label{chap:nominal-ddsf}
+TODO: constains discussion of nominal case safety filter and its equivalence to model-based safety filter. Also includes discussion of possible improvements on terminal ingredient.
 
-In this chapter, we first introduce the formulation of nominal data-driven safety filter.
+In this chapter, we focus on the design of safety filters for noise-free LTI system.
+We will firstly introduce the formulation of model-based safety filter and nominal data-driven safety filter, respectively.
 Then we show that the nominal data-driven safety filter is equivalent to the model-based safety filter for noise-free LTI system.
+Finally, we discuss the possible improvements on the designing of nominal data-driven safety filter.
+
+\section{Formulation of Model-Based and Data-Driven Safety Filter}
+
+\begin{IEEEeqnarray}{RL}\label{eq:model-based-safety-filter}
+    \min_{\substack{\bar{u}, \bar{y} \\ \bar{x}}} \quad & \norm{u_{[0]} - u^{\text{obj}}}_R^2 \IEEEyesnumber \IEEEyessubnumber* \label{model-based-safety-filter-cost}\\
+    \textrm{s.t.} \quad & 
+    \bar{x}_{k+1} = A \bar{x}_k + B \bar{u}_k \IEEEnonumber \\
+    &
+    \bar{y}_k = C \bar{x}_k + D \bar{u}_k,  \quad k \in \left[-n, L-1\right] \label{model-based-safety-filter-dynamics} \\
+    & 
+    \begin{bmatrix}
+        \subseq{\bar{u}}{-n}{-1} \\
+        \subseq{\bar{y}}{-n}{-1} \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \subseq{u}{t-n}{t-1} \\
+        \subseq{y}{t-n}{t-1} \\
+    \end{bmatrix} \label{model-based-safety-filter-initial}\\
+    & 
+    \begin{bmatrix}
+        \subseq{\bar{u}}{L-n}{L-1} \\
+        \subseq{\bar{y}}{L-n}{L-1} \\
+    \end{bmatrix} = \begin{bmatrix}
+        \vRepeatVec{\us}{n} \\
+        \vRepeatVec{\ys}{n} \\
+    \end{bmatrix} \label{model-based-safety-filter-terminal}\\
+    &
+    \bar{u}_k \in \mathbb{U}, \quad k \in \left[0, L-1\right] \label{model-based-safety-filter-input}\\
+    &
+    \bar{y}_k \in \mathbb{Y}, \quad k \in \left[0, L-1\right] \label{model-based-safety-filter-output}
+\end{IEEEeqnarray}
 
 \section{Formulation of Nominal Data-Driven Safety Filter}
 Based on Lemma \ref{lemma:fundamental-lemma}, the dataset trajectory can be used to replace the system dynamic constraint in the model-based safety filter \ref{eq:model-based-safety-filter}.

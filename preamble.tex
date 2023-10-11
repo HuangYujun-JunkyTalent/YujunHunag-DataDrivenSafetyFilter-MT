@@ -1,5 +1,6 @@
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathrsfs}
 \usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
@@ -10,6 +11,10 @@
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{IEEEtrantools}
+\usepackage{lipsum}
+\usepackage{enumitem}
+\usepackage{parskip}
+\setlist{nosep} % set itemized list style
 \usepackage[english,mt]{ethidsc} % Special IDSC styles and commands      	
 								 % {german}/english: language of headings, etc.
 								 % {st}/bt/mt: {semester}/bachelor/master thesis
@@ -18,9 +23,54 @@
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
 	T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{proposition}{Proposition}
 
-\newcommand\subseq[3]{#3_{\left[ #1, #2 \right]}}
+\renewcommand{\labelitemi}{\normalfont\bfseries\textendash}
+
+\def\imagedir{img}
+
+\theoremstyle{definition}
+	\newtheorem{definition}{Definition}
+	\newtheorem{assumption}{Assumption}
+\theoremstyle{plain}
+	\newtheorem{theorem}{Theorem}
+	\newtheorem{lemma}{Lemma}
+	\newtheorem{proposition}{Proposition}
+\theoremstyle{remark}
+	\newtheorem{remark}{Remark}
+
+\newcommand\tildex{\tilde{x}}
+\newcommand\tildeu{\tilde{u}}
+\newcommand\tildey{\tilde{y}}
+\newcommand\hatx{\hat{x}}
+\newcommand\hatu{\hat{u}}
+\newcommand\haty{\hat{y}}
+\newcommand\barx{\bar{x}}
+\newcommand\baru{\bar{u}}
+\newcommand\bary{\bar{y}}
+
+\newcommand\us{u^s}
+\newcommand\ys{y^s}
+\newcommand\xs{x^s}
+
+\newcommand\uObj{u^{\text{obj}}}
+
+\newcommand\transpose[1]{#1^{\top}}
+
+\newcommand\ones[1]{\mathbb{1}_{#1}}
+\newcommand\vRepeatVec[2]{#1 \otimes \ones{#2}}
+
+\newcommand\Real{\mathbb{R}}
+\newcommand\Xset{\mathcal{X}}
+\newcommand\Uset{\mathcal{U}}
+\newcommand\Yset{\mathcal{Y}}
+\newcommand\Sset{\mathcal{S}}
+
+\newcommand\RealVec[1]{\Real^{#1}}
+\newcommand\RealMat[2]{\Real^{#1 \times #2}}
+
+\newcommand\listinI[2]{\mathbb{I}_{\left[ #1, #2 \right]}}
+\newcommand\sequence[4]{\left\{#1_#2\right\}_{#2=#3}^{#4}}
+\newcommand\subseq[3]{#1_{\left[ #2, #3 \right]}}
 \newcommand\hankel[2]{H_{#1}\left( #2 \right)}
+
+\newcommand\datasetSequence[2]{\sequence{#1^d}{k}{0}{#2-1}}

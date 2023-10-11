@@ -42,9 +42,14 @@ The main drawback of these results is that no output constraints are considered.
 In \cite{berberich_data-driven-robust_2021}, the authors proposed a constraint tightening scheme to ensure output constraints satisfaction in DeePC.
 This scheme has the advantage of having rigorous guarantees, but the drawback of being conservative due to a generous estimation of prediction error.
 
+There are also works for DeePC on non-linear systems.
+In \cite{berberich_track_data_2022}, the authors provide a data-driven predictive controller for non-linear systems, which can be used to track a reference trajectory.
+Recent online dataset is used to ensure that the system is linearized around current state.
+Simulation results show that the proposed controller can successfully track a reference trajectory.
+
 There are also works on a data-driven formulation that is different from DeePC, such as the one proposed in \cite{huang_robust_2023}.
 This scheme uses an auxiliary variable to take any possible error realization into account, and gives a tractable convex reformulation of the original problem.
-Bound of open loop cost can be established, but the closed-loop guarantees  and performance are yet to be discussed.
+Bound of open loop cost can be established, but the closed-loop guarantees and performance are yet to be discussed.
 
 With the success and in-depth discussions of data-driven predictive control, it is natural to ask whether it is possible to design a data-driven predictive safety filter, which can be used to ensure safety of the system under arbitrary control inputs, and only requires dataset trajectories for off-line design.
 Recently, in \cite{bajelani_data-driven_2023}, the authors proposed a data-driven safety filter for noise-free linear time invariant (LTI) systems.
@@ -65,37 +70,203 @@ We also propose a scheme of dataset collection for general systems, and show tha
 
 \section{Preliminaries}\label{sec:preliminaries}
 
-\begin{lemma}\label{lemma:fundamental-lemma}
-    If dataset trajectory rich enough, and the LTI system is controllable, then...
+First we introduce some basic notations used in this thesis.
+
+{\renewcommand{\arraystretch}{1.5}%
+\begin{center}
+\begin{tabular}{ c|l }
+    $\listinI{i}{j}$ & List of integers from $i$ to $j$, $\left\{ i, i+1, \dots, j \right\}$ \\
+    \hline
+    $\subseq{x}{i}{j}$ & Sub-sequence of $\sequence{x}{k}{I}{J}$, with index from $i$ to $j$, $\left\{ x_i, x_{i+1}, \dots, x_j \right\}$ \\
+    \hline
+    $\norm{x}_P$ & $P$-norm of $x$, $\sqrt{\transpose{x} \times P \times x}$ \\
+    \hline
+    $\Real^n$ & Set of real vectors of length $n$ \\
+    \hline
+    $\Real^{m \times n}$ & Set of $m$-by-$n$ real matrices \\
+    \hline
+    $\Real^{(m \times n)}$ & Set of real vectors of length $m \times n$ \\
+\end{tabular}
+\end{center}
+}
+
+With a little abuse of notation, we also use $\subseq{x}{i}{j}$ to denote the column vector $\transpose{\begin{bmatrix}
+    \transpose{x_i} & \transpose{x_{i+1}} & \ldots & \transpose{x_j}
+\end{bmatrix}}$.
+Also, we simply use $x$ to denote a sequence $\sequence{x}{k}{i}{j}$ if the index range $i$ and $j$ are clear from the context.
+
+Without further notice, we always deal with discrete time invariant systems.
+A general discrete time invariant system can be defined as:
+
+\begin{definition}[Discrete Time Invariant Dynamic System]\label{def:dynamic-system}
+    A dynamic system is defined by $\left(\Xset, \Uset, \Yset, f, g\right)$, where:
+
+    $\Xset \subseteq \Real^n$ is the state constraint; $\Uset \subseteq \Real^m$ is the input constraint; $\Yset \subseteq \Real^p$ is the output constraint; $f: \Real^n \times \Real^m \rightarrow \Real^n$ is the state transition function; $g: \Real^n \times \Real^m \rightarrow \Real^p$ is the output function.
+
+    For the rest of the Thesis, without further notice, we always assume the dimension of state, input and output are $n$, $m$ and $p$ respectively.
+\end{definition}
+
+Note that we define the state transition function and output function on the ambient linear space $\Real^n$ and $\Real^m$.
+This is for the convenience of discussing \emph{trajectories} and \emph{safe trajectories} of the system.
+We define trajectories of a dynamic system as:
+
+\begin{definition}[Trajectory of a Dynamic System]\label{def:traj-dynamical-system}
+    A list of input-output pairs $\sequence{u}{k}{i}{j}$ and $\sequence{y}{k}{i}{j}$, with $u_k \in \Real^m$ and $y_k \in \Real^p$, is called a trajectory of the dynamic system $\left(\Xset, \Uset, \Yset, f, g\right)$, if there exist $\sequence{x}{k}{i}{j}$, with $x_k = f\left(x_{k-1}, u_{k-1}\right)$, $x_i \in \Real^n$, and $y_k = g\left(x_k, u_k\right)$ hold for any $k$ in $\listinI{i+1}{j}$.
+\end{definition}
+
+Considering the constraints, we define the safe trajectories of a dynamic system as:
+
+\begin{definition}[Safe Trajectory of Dynamic System]\label{def:dafe-traj}
+    A list of input-output pairs $\sequence{u}{k}{i}{j}$ and $\sequence{y}{k}{i}{j}$, with $u_k \in \Real^m$ and $y_k \in \Real^p$, is called a safe trajectory of the dynamic system $\left(\Xset, \Uset, \Yset, f, g\right)$, if there exist $\sequence{\tildeu}{k}{i}{\infty}$, $\sequence{\tildex}{k}{i}{\infty}$, and $\sequence{\tildey}{k}{i}{\infty}$ that satisfy:
+
+    \begin{itemize}
+        \item $\tildex_k = f\left(\tildex_{k-1}, \tildeu_{k-1}\right)$, $\tildey_k = g\left(\tildex_k, \tildeu_k\right)$ hold for any $k$ in $\left[i+1, \infty\right)$.
+        \item $\tildex_k \in \Xset$, $\tildeu_k \in \Uset$, $\tildey_k \in \Yset$ hold for any $k$ in $\left[i, \infty\right)$.
+        \item $\tildeu_k = u_k$, $\tildey_k = y_k$ hold for any $k$ in $\listinI{i}{j}$.
+    \end{itemize}
+
+\end{definition}
+
+In another word, we view a trajectory $\sequence{u}{k}{i}{j}$ and $\sequence{y}{k}{i}{j}$ as safe, if it is possible to extend it
+into an infinite trajectory of the system, and keep the constraints satisfied.
+
+Since we are dealing with data-driven methods, and the output $y_k$ of the system usually contains everything we can observe and care about for the system, for the rest of the Thesis, without further notice, we always assume $\Xset = \Real^n$
+That is, there is no state constraint for the system.
+
+As common in system theory, a dynamic system is linear if both the state transition function $f$ and output function $g$ are linear.
+In our case, where the system is time invariant and the input, state and output are all finite dimensional real vectors, it is equivalent to say that both $f$ and $g$ can be represented by matrices:
+There exist $A \in \RealMat{n}{n}$, $B \in \RealMat{n}{m}$, $C \in \RealMat{p}{n}$, $D \in \RealMat{p}{m}$, so that $f\left(x,u\right) = A x + B y$, $g\left(x, u\right) = C x + D u$.
+We denote these matrices $A$, $B$, $C$, $D$ as the \emph{dynamic matrices} of the dynamic system.
+
+A slightly more complicated family of systems is linear time invariant affine (LTI affine) systems, where $f$ and $g$ are affine functions.
+In another word, apart from the dynamic matrices, we also have affine terms $a_f$ and $a_g$, respectively:
+$f\left(x,u\right) = A x + B y + a_f$, $g\left(x, u\right) = C x + D u + a_g$.
+
+By \emph{Kalman Decomposition}, any LTI system can be decomposed to observable/unobservable and controllable/uncontrollable parts.
+As we always deal with the output of the system, the unobservable part is of no interest to us.
+
+For simplicity, we accept the following definition of controllability:
+
+\begin{definition}\label{def:lti-controllability}
+    A pair of dynamic matrices $A$ and $B$ is controllable, if the controllability matrix $\mathcal{C} = \begin{bmatrix} B & A B & \ldots & A^{n-1} B \end{bmatrix}$ has full row rank.
+    Where $n$ is the dimension of the state of the system.
+\end{definition}
+
+To ease the discussion in the Thesis, we also assume that the system is controllable.
+
+As a reference to behavior system theory discussed in \cite{markovsky_behavioral_2021}, different dynamic matrices may give the same input-output response behavior $\mathscr{B}$.
+Also, a certain behavior $\mathscr{B}$ can also be controllable or not.
+Different dynamic matrices pairs $(A, B, C, D)$ and $\tilde{A}, \tilde{B}, \tilde{C}, \tilde{D}$, that result in the same input-output response behavior $\mathscr{B}$, are called different \emph{representations} of the same behavior.
+And for a controllable behavior $\mathscr{B}$, we can always find a \emph{minimal realization} of the behavior, which is a dynamic matrices pair $(A, B, C, D)$ that is both controllable and observable.
+
+Within the scope of this Thesis, we always assume the system behavior we are dealing with is controllable.
+And when referring to the dynamic matrices of the system, we always refer to a minimal realization of the behavior.
+
+We define the following invariants of a certain LTI system behavior $\mathscr{B}$:
+
+\begin{definition}[Order and Lag of LTI System]\label{def:order-lag}
+    For a controllable LTI system bahavior $\mathscr{B}$ with a minimal realization $A$, $B$, $C$, $D$, we define the order $n$ of the system as the dimension of the state of the system, under this minimal realization.
+
+    We define the lag of the system as the minimal integer $l$, that makes the observability matrix $\mathcal{O}_l = \transpose{\begin{bmatrix} \transpose{C} & \transpose{(C A)} & \ldots & \transpose{(C A^{l-1})} \end{bmatrix}}$ of full rank.
+\end{definition}
+
+\begin{remark}\label{remark:order-lag}
+    Note that for any controllable LTI system behavior $\mathscr{B}$, the order and lag are well-defined, independent of the minimal realization, and $l \leq n$ holds.
+    Also, the lag $l$ is also the minimal number of input-output pairs needed to uniquely determine the state of the system.
+    See \cite{markovsky_behavioral_2021} for more details on behavioral system theory.
+\end{remark}
+
+In \cref{chap:nominal-ddsf} and \cref{chap:robust-ddsf-lti}, we will focus on linear time invariant (LTI) system.
+While in \cref{chap:non-linear-system}, we touch upon linear time invariant affine systems and non-linear systems.
+
+The \emph{Hankel Matrix} of certain depth constructed with a sequence of vectors is defined as:
+
+\begin{definition}[Hankel Matrix]\label{def:hankel-matrix}
+    For a sequence of vectors $\sequence{x}{k}{i}{j}$, with $x_k \in \Real^n$, the Hankel matrix of depth $L$ is defined as:
+
+    \begin{equation*}
+        \hankel{L}{\subseq{x}{i}{j}} = \begin{bmatrix}
+            x_i & x_{i+1} & \ldots & x_{j-L+1} \\
+            x_{i+1} & x_{i+2} & \ldots & x_{j-L+2} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            x_{i+L-1} & x_{i+L} & \ldots & x_{j}
+        \end{bmatrix} \in \RealMat{(n \times L)}{(j-i-L+2)}
+    \end{equation*}
+
+\end{definition}
+
+Intuitively, each column of the Hankel matrix is the vertical stack of a sub-sequence with length $L$ of the original sequence. 
+And all columns cover all possible length-$L$ sub-sequences of the original sequence.
+
+The \emph{fundamental lemma} of data-driven predictive control, as introduced in \cite{willems_fundamental_2005}, states that the behavior of an LTI system can be fully captured by a \emph{rich enough} dataset trajectory.
+Here rich enough is formally captured by the definition of \emph{persistently exciting} dataset trajectory:
+
+\begin{definition}[Persistently Exciting]\label{def:persistently-exciting}
+    We say a sequence of inputs $\sequence{u}{k}{0}{N-1}$ is persistently exciting of order $L$, if the Hankel matrix $\hankel{L}{\sequence{u}{k}{0}{N-1}}$ has full row rank (of rank $m \times L$).
+\end{definition}
+
+Then we can state the fundamental lemma as:
+
+\begin{lemma}[Fundamental Lemma]\label{lemma:fundamental-lemma}
+    Consider a controllable LTI system and a dataset trajectory of the system $\datasetSequence{u}{N}$ and $\datasetSequence{y}{N}$, with $\datasetSequence{u}{N}$ persistently exciting of order $L + n$, where $n$ is the order of the system.
+
+    Then, $\subseq{u}{0}{L-1}$ and $\subseq{y}{0}{L-1}$ are a trajectory of the system if and only if there exist $\alpha$, which makes the following equation hold:
+    \begin{equation*}
+        \begin{bmatrix}
+            \subseq{u}{0}{L-1} \\
+            \subseq{y}{0}{L-1} \\
+        \end{bmatrix} = \begin{bmatrix}
+            \hankel{L}{\datasetSequence{u}{N}} \\
+            \hankel{L}{\datasetSequence{y}{N}} \\
+        \end{bmatrix} \alpha
+    \end{equation*}
 \end{lemma}
 
-We have the model-based safety filter as:
-\begin{IEEEeqnarray}{RL}\label{eq:model-based-safety-filter}
-    \min_{\substack{\bar{u}, \bar{y} \\ \bar{x}}} \quad & \norm{u_{[0]} - u^{\text{obj}}}_R^2 \IEEEyesnumber \IEEEyessubnumber* \label{model-based-safety-filter-cost}\\
+\Cref{lemma:fundamental-lemma} states that a rich enough dataset trajectory can represent the system behavior up to a certain length, so it shows the possibility of replacing a model of the system with only a dataset trajectory.
+
+Also, as mentioned in \cref{remark:order-lag}, it is possible to uniquely determine the state of the system with a dataset trajectory of length that is larger than $l$.
+By this intuition, we can define the input-output equilibrium of the system:
+
+\begin{definition}[Input-Output Equilibrium]\label{def:input-output-equilibrium}
+    An input-output pair $\left(\us, \ys\right)$ is called an input-output equilibrium of the system, if $\left\{\us\right\}_{t=0}^{l}$ and $\left\{\ys\right\}_{t=0}^{l}$ is a trajectory of the system.
+    Where $l$ is the lag of the system.
+\end{definition}
+
+The intuition is that, if a pair $\left(\us, \ys\right)$ satisifies \cref{def:input-output-equilibrium}, then $\left\{\us\right\}_{t=0}^{\infty}$ and $\left\{\ys\right\}_{t=0}^{\infty}$ is a trajectory of the system.
+Which means the system can stay at the input-output equilibrium forever.
+
+Finally, we give a brief introduction to predictive safety filter, as introduced in \cite{wabersich_predictive_sf_2021}.
+As said in \cref{sec:motivation-and-background}, predictive safety filter aims at keeping the system safe under arbitrary control inputs.
+For now let's assume we have full observation of the system, which means $g(x,u) = x$.
+With a general leaning based controller, which can give any inputs, The overall data flow can be seen in \cref{img:predictive-safety-filter}.
+A safety filter is attached to the system, which takes input from the learning based controller, the state of the system, and gives out a safe input to the system.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{\imagedir/predictiveSF.pdf}
+    \caption{Predictive Safety Filter}
+    \label{img:predictive-safety-filter}
+\end{figure}
+
+With a dynamic system $\left(\Xset, \Uset, \Yset, f, g\right)$, the predictive safety filter solves the following optimization problem:
+
+\begin{IEEEeqnarray}{RL}\label{eq:state-based-safety-filter}
+    \min_{\substack{\bar{u}, \bar{x}}} \quad & \norm{u_{[0]} - u^{\text{obj}}}_R \IEEEyesnumber \IEEEyessubnumber* \label{state-based-safety-filter-cost}\\
     \textrm{s.t.} \quad & 
-    \bar{x}_{k+1} = A \bar{x}_k + B \bar{u}_k \IEEEnonumber \\
-    &
-    \bar{y}_k = C \bar{x}_k + D \bar{u}_k,  \quad k \in \left[-n, L-1\right] \label{model-based-safety-filter-dynamics} \\
+    \bar{x}_{k} = f(\barx_{k-1}, \baru_{k-1}) \quad k \in \left[1, L-1\right] \label{state-based-safety-filter-dynamics} \\
     & 
-    \begin{bmatrix}
-        \subseq{-n}{-1}{\bar{u}} \\
-        \subseq{-n}{-1}{\bar{y}} \\
-    \end{bmatrix} = 
-    \begin{bmatrix}
-        \subseq{t-n}{t-1}{u} \\
-        \subseq{t-n}{t-1}{y} \\
-    \end{bmatrix} \label{model-based-safety-filter-initial}\\
+    \barx_0 = x_t \label{state-based-safety-filter-initial}\\
     & 
-    \begin{bmatrix}
-        \subseq{L-n}{L-1}{\bar{u}} \\
-        \subseq{L-n}{L-1}{\bar{y}} \\
-    \end{bmatrix} = 
-    \begin{bmatrix}
-        u_n^s \\
-        y_n^s \\
-    \end{bmatrix} \label{model-based-safety-filter-terminal}\\
+    \barx_{L-1} \in \Sset_f \label{state-based-safety-filter-terminal} \\
     &
-    \bar{u}_k \in \mathbb{U}, \quad k \in \left[0, L-1\right] \label{model-based-safety-filter-input}\\
+    \bar{u}_k \in \Uset, \quad k \in \left[0, L-1\right] \label{state-based-safety-filter-input}\\
     &
-    \bar{y}_k \in \mathbb{Y}, \quad k \in \left[0, L-1\right] \label{model-based-safety-filter-output}
+    \bar{x}_k \in \Xset, \quad k \in \left[0, L-1\right] \label{state-based-safety-filter-output}
 \end{IEEEeqnarray}
+
+Where $L$ is the prediction horizon, $x_t$ is the current state of the system, $\uObj$ is current control input supposed by the learning based controller.
+
+$\Sset_f$ is a safe terminal set of the system, we refer to an in-detail discuss in Assumption 4.2 in \cite{wabersich_predictive_sf_2021}.
+Intuitively, it is a set of states, that there exists a safe feedback controller, which can keep the system within constraints for all future time steps if the system starts from this set.
+
+As discussed in \cite{wabersich_predictive_sf_2021}, recursive feasibility and closed-loop constraint satisfaction can be proved for this safety filter.

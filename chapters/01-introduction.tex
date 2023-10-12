@@ -81,6 +81,8 @@ First we introduce some basic notations used in this thesis.
     \hline
     $\norm{x}_P$ & $P$-norm of $x$, $\sqrt{\transpose{x} \times P \times x}$ \\
     \hline
+    $A \otimes B$ & Kronecker product of real matrices $A$ and $B$ \\
+    \hline
     $\Real^n$ & Set of real vectors of length $n$ \\
     \hline
     $\Real^{m \times n}$ & Set of $m$-by-$n$ real matrices \\
@@ -116,7 +118,7 @@ We define trajectories of a dynamic system as:
 
 Considering the constraints, we define the safe trajectories of a dynamic system as:
 
-\begin{definition}[Safe Trajectory of Dynamic System]\label{def:dafe-traj}
+\begin{definition}[Safe Trajectory of Dynamic System]\label{def:safe-traj}
     A list of input-output pairs $\sequence{u}{k}{i}{j}$ and $\sequence{y}{k}{i}{j}$, with $u_k \in \Real^m$ and $y_k \in \Real^p$, is called a safe trajectory of the dynamic system $\left(\Xset, \Uset, \Yset, f, g\right)$, if there exist $\sequence{\tildeu}{k}{i}{\infty}$, $\sequence{\tildex}{k}{i}{\infty}$, and $\sequence{\tildey}{k}{i}{\infty}$ that satisfy:
 
     \begin{itemize}
@@ -129,6 +131,14 @@ Considering the constraints, we define the safe trajectories of a dynamic system
 
 In another word, we view a trajectory $\sequence{u}{k}{i}{j}$ and $\sequence{y}{k}{i}{j}$ as safe, if it is possible to extend it
 into an infinite trajectory of the system, and keep the constraints satisfied.
+
+\begin{remark}\label{remark:safe-traj}
+    As discussed later in \cref{remark:order-lag}, it is only possible to uniquely determine the state of the system with a long enough input-output trajectory.
+    For example, the trajectory needs to be at least of length $l$ in the case of LTI system.
+
+    But a shorter trajectory that is not long enough to determine the state of the system can still be safe, according to \cref{def:safe-traj}.
+    In this case, the fact that \emph{observed a safe trajectory} does not imply that \emph{the system is safe}.
+\end{remark}
 
 Since we are dealing with data-driven methods, and the output $y_k$ of the system usually contains everything we can observe and care about for the system, for the rest of the Thesis, without further notice, we always assume $\Xset = \Real^n$
 That is, there is no state constraint for the system.
@@ -232,8 +242,12 @@ By this intuition, we can define the input-output equilibrium of the system:
     Where $l$ is the lag of the system.
 \end{definition}
 
-The intuition is that, if a pair $\left(\us, \ys\right)$ satisifies \cref{def:input-output-equilibrium}, then $\left\{\us\right\}_{t=0}^{\infty}$ and $\left\{\ys\right\}_{t=0}^{\infty}$ is a trajectory of the system.
+The intuition is that, if a pair $\left(\us, \ys\right)$ satisfies \cref{def:input-output-equilibrium}, then $\left\{\us\right\}_{t=0}^{\infty}$ and $\left\{\ys\right\}_{t=0}^{\infty}$ is a trajectory of the system.
 Which means the system can stay at the input-output equilibrium forever.
+
+\begin{remark}\label{remark:safe-equilibrium}
+    According to \cref{def:safe-traj}, if $\left(\us, \ys\right)$ is an input-output equilibrium of the system, and $\us \in \Uset$, $\ys \in \Yset$ hold, then $\constantSequence{\us}{0}{L-1}$ and $\constantSequence{\ys}{0}{L-1}$ is also a safe trajectory for the system with any length $L$.
+\end{remark}
 
 Finally, we give a brief introduction to predictive safety filter, as introduced in \cite{wabersich_predictive_sf_2021}.
 As said in \cref{sec:motivation-and-background}, predictive safety filter aims at keeping the system safe under arbitrary control inputs.
@@ -250,23 +264,36 @@ A safety filter is attached to the system, which takes input from the learning b
 
 With a dynamic system $\left(\Xset, \Uset, \Yset, f, g\right)$, the predictive safety filter solves the following optimization problem:
 
-\begin{IEEEeqnarray}{RL}\label{eq:state-based-safety-filter}
-    \min_{\substack{\bar{u}, \bar{x}}} \quad & \norm{u_{[0]} - u^{\text{obj}}}_R \IEEEyesnumber \IEEEyessubnumber* \label{state-based-safety-filter-cost}\\
+\begin{subequations}
+\label{eq:state-based-safety-filter} 
+\begin{align}
+    \min_{\substack{\bar{u}, \bar{x}}} \quad & \norm{u_{0} - u^{\text{obj}}}_R  \label{eq:state-based-safety-filter-cost} \\
     \textrm{s.t.} \quad & 
-    \bar{x}_{k} = f(\barx_{k-1}, \baru_{k-1}) \quad k \in \left[1, L-1\right] \label{state-based-safety-filter-dynamics} \\
+    \bar{x}_{k} = f(\barx_{k-1}, \baru_{k-1}) \quad k \in \left[1, L-1\right] \label{eq:state-based-safety-filter-dynamics} \\
     & 
-    \barx_0 = x_t \label{state-based-safety-filter-initial}\\
+    \barx_0 = x_t \label{eq:state-based-safety-filter-initial}\\
     & 
-    \barx_{L-1} \in \Sset_f \label{state-based-safety-filter-terminal} \\
+    \barx_{L-1} \in \Sset_f \label{eq:state-based-safety-filter-terminal} \\
     &
-    \bar{u}_k \in \Uset, \quad k \in \left[0, L-1\right] \label{state-based-safety-filter-input}\\
+    \bar{u}_k \in \Uset, \quad k \in \left[0, L-1\right] \label{eq:state-based-safety-filter-input}\\
     &
-    \bar{x}_k \in \Xset, \quad k \in \left[0, L-1\right] \label{state-based-safety-filter-output}
-\end{IEEEeqnarray}
+    \bar{x}_k \in \Xset, \quad k \in \left[0, L-1\right] \label{eq:state-based-safety-filter-output}
+\end{align}
+\end{subequations}
 
-Where $L$ is the prediction horizon, $x_t$ is the current state of the system, $\uObj$ is current control input supposed by the learning based controller.
+Within the scope of this thesis, we always use plain variables with subscripts to denote online observation and closed loop response, and use variables with a bar on top to denote the variables of optimization problems.
+When it is necessary, we also use brackets to denote the time step of the optimization problem, for example $\barx(t)$ is the optimization variable of the system state at time step $t$.
+Also, we denote the optimal solution by $(-)^*$, for example $u^*(t)$ represents the optimal solution at time step $t$, and candidate solution by a hat on top, for example $\hatx(t+1)$ represents the candidate solution for time step $t+1$.
+
+Where $L$ is the prediction horizon, $x_t$ is the current state of the system, $\uObj$ is current control input supposed by the learning based controller, $R$ is the weighting matrix used to examine the distance between the actual input and the desired input.
 
 $\Sset_f$ is a safe terminal set of the system, we refer to an in-detail discuss in Assumption 4.2 in \cite{wabersich_predictive_sf_2021}.
 Intuitively, it is a set of states, that there exists a safe feedback controller, which can keep the system within constraints for all future time steps if the system starts from this set.
 
-As discussed in \cite{wabersich_predictive_sf_2021}, recursive feasibility and closed-loop constraint satisfaction can be proved for this safety filter.
+When working with predictive style controllers, it is common to use \emph{one-step receding horizon} scheme.
+This means at each time step the optimization problem is solved, and only the first input of the optimal solution is applied to the system.
+Then the optimization problem is solved again at the next time step, with the new state of the system and the new desired input.
+Later in \cref{chap:robust-ddsf-lti}, we will introduce a slightly different \emph{multi-step receding horizon} scheme, which is needed for the robustness analysis, as discussed in \cite{berberich_data-driven-robust_2021}.
+
+As discussed in \cite{wabersich_predictive_sf_2021}, recursive feasibility and closed-loop constraint satisfaction can be proved for this safety filter, following the one-step receding horizon scheme.
+In another word, if the optimization problem is feasible at time step $0$, then the constraint will be satisfied and the optimization problem will be feasible at all future time steps $t \leq 0$.

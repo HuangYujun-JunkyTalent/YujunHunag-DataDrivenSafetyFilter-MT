@@ -1,19 +1,24 @@
 \chapter{Nominal Data-Driven Safety Filter}\label{chap:nominal-ddsf}
-TODO: constains discussion of nominal case safety filter and its equivalence to model-based safety filter. Also includes discussion of possible improvements on terminal ingredient.
+TODO: contains discussion of nominal case safety filter and its equivalence to model-based safety filter. Also includes discussion of possible improvements on terminal ingredient.
 
 In this chapter, we focus on the design of safety filters for noise-free LTI system.
 We will firstly introduce the formulation of model-based safety filter and nominal data-driven safety filter, respectively.
 Then we show that the nominal data-driven safety filter is equivalent to the model-based safety filter for noise-free LTI system.
 Finally, we discuss the possible improvements on the designing of nominal data-driven safety filter.
 
-\section{Formulation of Model-Based and Data-Driven Safety Filter}
+\section{Model-Based and Data-Driven Safety Filter for LTI system}\label{sec:formulation-nominal}
 
-\begin{IEEEeqnarray}{RL}\label{eq:model-based-safety-filter}
-    \min_{\substack{\bar{u}, \bar{y} \\ \bar{x}}} \quad & \norm{u_{[0]} - u^{\text{obj}}}_R^2 \IEEEyesnumber \IEEEyessubnumber* \label{model-based-safety-filter-cost}\\
+As discussed in \cref{chap:introduction}, the predictive safety filter \cref{eq:state-based-safety-filter} is designed based on the assumption that the system state is fully observable.
+Since we are working with noise-free LTI system that only the output is observable, we need to reformulate the safety filter \cref{eq:state-based-safety-filter} to an output-based safety filter as follows:
+
+\begin{subequations}
+\label{eq:model-based-safety-filter}
+\begin{align}
+    \min_{\substack{\bar{u}, \bar{y} \\ \bar{x}}} \quad & \norm{\baru_{0} - u^{\text{obj}}}_R^2 \label{eq:model-based-safety-filter-cost} \\
     \textrm{s.t.} \quad & 
-    \bar{x}_{k+1} = A \bar{x}_k + B \bar{u}_k \IEEEnonumber \\
+    \bar{x}_{k+1} = A \bar{x}_k + B \bar{u}_k \nonumber \\
     &
-    \bar{y}_k = C \bar{x}_k + D \bar{u}_k,  \quad k \in \left[-n, L-1\right] \label{model-based-safety-filter-dynamics} \\
+    \bar{y}_k = C \bar{x}_k + D \bar{u}_k,  \quad k \in \left[-n, L-1\right] \label{eq:model-based-safety-filter-dynamics} \\
     & 
     \begin{bmatrix}
         \subseq{\bar{u}}{-n}{-1} \\
@@ -22,7 +27,7 @@ Finally, we discuss the possible improvements on the designing of nominal data-d
     \begin{bmatrix}
         \subseq{u}{t-n}{t-1} \\
         \subseq{y}{t-n}{t-1} \\
-    \end{bmatrix} \label{model-based-safety-filter-initial}\\
+    \end{bmatrix} \label{eq:model-based-safety-filter-initial}\\
     & 
     \begin{bmatrix}
         \subseq{\bar{u}}{L-n}{L-1} \\
@@ -30,50 +35,127 @@ Finally, we discuss the possible improvements on the designing of nominal data-d
     \end{bmatrix} = \begin{bmatrix}
         \vRepeatVec{\us}{n} \\
         \vRepeatVec{\ys}{n} \\
-    \end{bmatrix} \label{model-based-safety-filter-terminal}\\
+    \end{bmatrix} \label{eq:model-based-safety-filter-terminal}\\
     &
-    \bar{u}_k \in \mathbb{U}, \quad k \in \left[0, L-1\right] \label{model-based-safety-filter-input}\\
+    \bar{u}_k \in \mathbb{U}, \quad k \in \left[0, L-1\right] \label{eq:model-based-safety-filter-input}\\
     &
-    \bar{y}_k \in \mathbb{Y}, \quad k \in \left[0, L-1\right] \label{model-based-safety-filter-output}
-\end{IEEEeqnarray}
+    \bar{y}_k \in \mathbb{Y}, \quad k \in \left[0, L-1\right] \label{eq:model-based-safety-filter-output}
+\end{align}
+\end{subequations}
 
-\section{Formulation of Nominal Data-Driven Safety Filter}
-Based on Lemma \ref{lemma:fundamental-lemma}, the dataset trajectory can be used to replace the system dynamic constraint in the model-based safety filter \ref{eq:model-based-safety-filter}.
+Where $\us$ and $\ys$ are a pair of safe input-output equilibrium, as defined in \cref{def:input-output-equilibrium} and \cref{remark:safe-equilibrium}.
+It still follows the predictive safety filter idea: evaluate the safety of a proposed input sequence by predicting future trajectory of the system, and the objective \cref{eq:model-based-safety-filter-cost} is also designed to minimize the deviation from the given control input.
+But there are some further discussions needed for this formulation:
+
+\begin{enumerate}
+    \item The optimization variables not only include candidate input sequence $\baru$ and output sequence $\bary$, but also the state sequence $\barx$.
+    Since we are working with system dynamics, this is necessary.
+    \item Since we only observe the output of the system, more than one step of input-output pairs are needed to uniquely determine the state of the system.
+    This is reflected in \cref{eq:model-based-safety-filter-initial}.
+    Here we choose to use the most recent $n$ steps of input-output pairs to uniquely determine the inner state of the system.
+    \item The terminal constraint \cref{eq:model-based-safety-filter-terminal} is less general than \cref{eq:state-based-safety-filter-terminal}.
+    As discussed in \cref{remark:safe-traj}, a long enough safe trajectory can be used to ensure the safety of system in all future time steps.
+    Here we use a safe input-output equilibrium to construct such a safe trajectory.
+    More complicated terminal constraints can be used, as will be briefly discussed in \cref{sec:improvements-nominal}.
+\end{enumerate}
+
+This formulation also provides closed-loop guarantees similar to the state-based safety filter \cref{eq:state-based-safety-filter}.
+
+\begin{theorem}[Closed-loop Guarantees for Model-based Safety Filter]\label{thm:guarantee-model-based-lti}
+    When the system is equipped with the safety filter \cref{eq:model-based-safety-filter}, and a one-step receding horizon scheme, closed-loop constraint satisfaction and recursive feasibility hold.
+\end{theorem}
+
+\begin{proof}\label{prf:guarantee-model-based-lti}
+    First we show constraint satisfaction for the next time step, then we show recursive feasibility by providing a feasible solution for the next time step.
+    Then the closed-loop constraint satisfaction for all future time steps is shown by induction.
+
+    Due to initial constraint \cref{eq:model-based-safety-filter-initial} and dynamic constraint \cref{eq:model-based-safety-filter-dynamics}, the initial state of the system $x_t$ is the same as the optimal solution $\starx_0(t)$.
+    Then due to dynamic constraint \cref{eq:model-based-safety-filter-dynamics}, after $\staru_0$ is applied to the real system, the output will be $\stary_0(t)$, which satisfies the constraint $\Yset$ due to \cref{eq:model-based-safety-filter-output}.
+
+    At time step $t+1$, we define the candidate solution $\baru(t+1)$, $\barx(t+1)$, and $\bary(t+1)$ as follows:
+    {
+    \setlength{\abovedisplayskip}{3pt}
+    \setlength{\belowdisplayskip}{3pt}
+    % \setlength{\abovedisplayshortskip}{0pt}
+    % \setlength{\belowdisplayshortskip}{0pt}
+    \begin{align*}
+        \subseq{\baru}{0}{L-2}(t+1) = \subseq{\staru}{1}{L-1}(t), \quad \baru_{L-1}(t+1) = \us \\
+        \subseq{\barx}{0}{L-2}(t+1) = \subseq{\starx}{1}{L-1}(t), \quad \barx_{L-1}(t+1) = \xs \\
+        \subseq{\bary}{0}{L-2}(t+1) = \subseq{\stary}{1}{L-1}(t), \quad \bary_{L-1}(t+1) = \ys
+    \end{align*}
+    }
+    Where $\xs$ is the equilibrium state implicitly defined by $\us$ and $\ys$.
+    Due to terminal constraint \cref{eq:model-based-safety-filter-terminal}, we have $\barx_{L-2}(t+1) = \xs$, also because the optimal solution $\staru(t)$, $\starx(t)$, and $\stary(t)$ satisfy the dynamic constraint \cref{eq:model-based-safety-filter-dynamics}, we can conclude that $\subseq{\baru}{0}{L-1}(t+1)$, $\subseq{\barx}{0}{L-1}(+1)$, and $\subseq{\bary}{0}{L-1}$ is a trajectory of the system, thus satisfies the dynamic constraint \cref{eq:model-based-safety-filter-dynamics}.
+
+    It's also easy to verify that \crefrange{eq:model-based-safety-filter-initial}{eq:model-based-safety-filter-terminal} are also satisfied by the candidate solution.
+
+    So recursive feasibility is shown.
+\end{proof}
+
+\begin{remark}\label{remark:usage-output-safety-filter}
+    As seen in the formulation \cref{eq:model-based-safety-filter}, the safety filter needs more than one step of input-output pairs as the initial condition.
+    This can be problematic at first time steps, when there are not enough input-output pairs available.
+    To walk around this problem, we can either run the system without a safety filter for a few time steps, or use expert knowledge to construct a proper initial condition.
+\end{remark}
+
+Based on Lemma \ref{lemma:fundamental-lemma}, the dataset trajectory can be used to reconstruct the system dynamic constraint in the model-based safety filter \ref{eq:model-based-safety-filter}.
 So we can formulate the nominal data-driven safety filter as:
-\begin{IEEEeqnarray}{RL}\label{nominal-ddsf}
-    \min_{\alpha, \bar{u}, \bar{y}} \quad & \norm{u_{[0]} - u^{\text{obj}}}_R^2 \IEEEyesnumber \IEEEyessubnumber* \label{nominal-ddsf-cost}\\
+
+\begin{subequations}
+\label{eq:nominal-ddsf} 
+\begin{align}
+    \min_{\alpha, \bar{u}, \bar{y}} \quad & \norm{\baru_{0} - u^{\text{obj}}}_R^2  \label{eq:nominal-ddsf-cost}\\
     \textrm{s.t.} \quad & 
     \begin{bmatrix}
-        \subseq{-n}{L-1}{\bar{u}} \\
-        \subseq{-n}{L-1}{\bar{y}} \\
+        \subseq{\bar{u}}{-n}{L-1} \\
+        \subseq{\bar{y}}{-n}{L-1} \\
     \end{bmatrix} = 
     \begin{bmatrix}
         \hankel{L+n}{u^d} \\
         \hankel{L+n}{y^d} \\
-    \end{bmatrix} \alpha \label{nominal-ddsf-dynamics}\\
+    \end{bmatrix} \alpha \label{eq:nominal-ddsf-dynamics}\\
     & 
     \begin{bmatrix}
-        \subseq{-n}{-1}{\bar{u}} \\
-        \subseq{-n}{-1}{\bar{y}} \\
+        \subseq{\bar{u}}{-n}{-1} \\
+        \subseq{\bar{y}}{-n}{-1} \\
     \end{bmatrix} = 
     \begin{bmatrix}
-        \subseq{t-n}{t-1}{u} \\
-        \subseq{t-n}{t-1}{y} \\
-    \end{bmatrix} \label{nominal-ddsf-initial}\\
+        \subseq{u}{t-n}{t-1} \\
+        \subseq{y}{t-n}{t-1} \\
+    \end{bmatrix} \label{eq:nominal-ddsf-initial}\\
     & 
     \begin{bmatrix}
-        \subseq{L-n}{L-1}{\bar{u}} \\
-        \subseq{L-n}{L-1}{\bar{y}} \\
+        \subseq{\bar{u}}{L-n}{L-1} \\
+        \subseq{\bar{y}}{L-n}{L-1} \\
     \end{bmatrix} = 
     \begin{bmatrix}
         u_n^s \\
         y_n^s \\
-    \end{bmatrix} \label{nominal-ddsf-terminal}\\
+    \end{bmatrix} \label{eq:nominal-ddsf-terminal}\\
     &
-    \bar{u}_k \in \mathbb{U}, \quad k \in \left[0, L-1\right] \label{nominal-ddsf-input}\\
+    \bar{u}_k \in \mathbb{U}, \quad k \in \left[0, L-1\right] \label{eq:nominal-ddsf-input}\\
     &
-    \bar{y}_k \in \mathbb{Y}, \quad k \in \left[0, L-1\right] \label{nominal-ddsf-output}
-\end{IEEEeqnarray}
+    \bar{y}_k \in \mathbb{Y}, \quad k \in \left[0, L-1\right] \label{eq:nominal-ddsf-output}
+\end{align}
+\end{subequations}
 
-As described above, the constraint \cref{nominal-ddsf-dynamics} replaces the system dynamic constraint \cref{eq:model-based-safety-filter-dynamics} in the model-based safety filter.
-% When assumptions \cref{assump:......} are satisfied, the nomi
+As described above, the constraint \cref{eq:nominal-ddsf-dynamics} replaces the system dynamic constraint \cref{eq:model-based-safety-filter-dynamics} in the model-based safety filter.
+Where $u^d$ and $y^d$ represent a dataset trajectory of length $N$: $\datasetSequence{u}{N}$ and $\datasetSequence{y}{N}$.
+
+And we have the following theorem:
+
+\begin{theorem}[Equivalence of Data-driven and Model-based Safety Filters]\label{thm:nominal-equivalence}
+    Suppose:
+    \begin{enumerate}
+        \item The system is a controllable LTI system.
+        \item The dataset input sequence $\datasetSequence{u}{N}$ is persistently exciting with order $L+n$, where $L$ is the prediction horizon and $n$ is order of the system.
+    \end{enumerate}
+    Then we have: the optimization problem \cref{eq:nominal-ddsf} is equivalent to the optimization problem \cref{eq:model-based-safety-filter}.
+    In another word, any feasible solution of \cref{eq:nominal-ddsf} can be transformed to a feasible solution of \cref{eq:model-based-safety-filter} with the same candidate input sequence, and vice versa.
+\end{theorem}
+
+\begin{proof}\label{prf:nominal-equivalence}
+    
+\end{proof}
+
+\section{Improvements on Nominal Data-Driven Safety Filter}\label{sec:improvements-nominal}

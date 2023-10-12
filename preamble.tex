@@ -8,16 +8,17 @@
 \usepackage{physics}
 \usepackage{mathtools}
 \usepackage{bbold}
-\usepackage{hyperref}
-\usepackage{cleveref}
-\usepackage{IEEEtrantools}
 \usepackage{lipsum}
 \usepackage{enumitem}
 \usepackage{parskip}
+\usepackage[retainorgcmds]{IEEEtrantools}
+
 \setlist{nosep} % set itemized list style
 \usepackage[english,mt]{ethidsc} % Special IDSC styles and commands      	
 								 % {german}/english: language of headings, etc.
 								 % {st}/bt/mt: {semester}/bachelor/master thesis
+\usepackage{hyperref}
+\usepackage{cleveref} % load cleverref as the last package!
 
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
@@ -32,7 +33,7 @@
 	\newtheorem{definition}{Definition}
 	\newtheorem{assumption}{Assumption}
 \theoremstyle{plain}
-	\newtheorem{theorem}{Theorem}
+	\newtheorem{theorem}{Theorem}[chapter]
 	\newtheorem{lemma}{Lemma}
 	\newtheorem{proposition}{Proposition}
 \theoremstyle{remark}
@@ -47,6 +48,9 @@
 \newcommand\barx{\bar{x}}
 \newcommand\baru{\bar{u}}
 \newcommand\bary{\bar{y}}
+\newcommand\starx{x^*}
+\newcommand\staru{u^*}
+\newcommand\stary{y^*}
 
 \newcommand\us{u^s}
 \newcommand\ys{y^s}
@@ -74,3 +78,4 @@
 \newcommand\hankel[2]{H_{#1}\left( #2 \right)}
 
 \newcommand\datasetSequence[2]{\sequence{#1^d}{k}{0}{#2-1}}
+\newcommand\constantSequence[3]{\sequence{#1}{k}{#2}{#3-1}}

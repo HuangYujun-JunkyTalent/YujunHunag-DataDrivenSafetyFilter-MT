@@ -1,2 +1,293 @@
-\chapter{Data-Driven Safety Filter for Non-linear Systems}\label{chap:non-linear-system}
+\chapter{Data-Driven Predictive Method for Non-linear Systems}\label{chap:non-linear-system}
 TODO: Introduce the weighting method, fractal dimension method, and multi-dataset linear affine system method.
+Lose the advantage of independent of dataset size.
+Include the proof of multi-dataset linear affine system method if possible.
+
+In this chapter, we briefly discuss how to extend the data-driven prediction method to non-linear systems.
+To avoid unnecessary complexity, we only consider noise-free systems in this chapter.
+
+First we introduce a method of effectively using one or more dataset trajectories of a non-linear system to make predictions in \cref{sec:weithing-method}.
+Then we introduce a metric for evaluating the quality of a dataset in \cref{sec:fractal-dimension-method}.
+Finally, we use a numerical example in \cref{sec:non-linear-system-numerical-example} to show that dataset that is better evaluated by the metric can make better predictions using the method we propose.
+
+In this section, we still use $l$ to denote the number of input-output pairs used for implicitly determining the internal state of the system, and use $L$ to denote the prediction horizon.
+But in the case of non-linear case, $l$ is just supposed to be long enough to determine the internal state, but lacks a formal definition as in the case of linear systems.
+
+
+\section{Weighting Method for Non-linear Systems in Data-driven Prediction Methods}\label{sec:weighting-method}
+
+As introduced in \cref{sec:motivation-and-background}, although originally designed for linear systems, experiments show that the data-driven control method can be applied to non-linear systems, such as quadrotors in \cite{elokdaDataQuad2021} and quasi-continuum manipulators in \cite{mullerDataDrivenQCR2022}.
+
+There's also attempt to extend the data-driven control method to general non-linear systems, such as \cite{berberichLinearTrackingMPCData2022}.
+Intuitively, this method in \cite{berberichLinearTrackingMPCData2022} is trying to make a linear affine approximation of the non-linear system around current state, by constructing the Hankel matrix using the last $N$ online observations.
+
+But this method has many drawbacks.
+It relies on the assumption that online observations are informative enough to approximate the local dynamics of the system, but in practice, the system can fairly be operating consistently in a certain manner, making the online observations not informative enough.
+Also, it has very few adjustments that can be done for different systems, but in practice, different systems can behave very differently, and the method should be able to adapt to them.
+
+In this section, we take the intuition of making local linear affine approximation of non-linear systems, and propose a method of making predictions for non-linear systems using dataset trajectories.
+
+As stated in \cref{sec:motivation-and-background}, each column of the Hankel matrix of a long sequence, with depth $L$, is a subsequence of length $L$.
+And all columns of the Hankel matrix cover all such subsequences.
+Now consider the Hankel matrix of a dataset trajectory $\datasetSequence{u}{N}$ and $\datasetSequence{y}{N}$, with depth $l+L$, which reads:
+
+\begin{equation*}
+    \begin{bmatrix}
+        \hankel{L+l}{\ud} \\
+        \hankel{L+l}{\yd}
+    \end{bmatrix} = \begin{bmatrix}
+        \ud_0 & \ud_1 & \ldots & \ud_{N-L-l} \\
+        \ud_1 & \ud_2 & \ldots & \ud_{N-L-l+1} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \ud_{L+l-1} & \ud_{L+l} & \ldots & \ud_{N-1} \\
+        \yd_0 & \yd_1 & \ldots & \yd_{N-L-l} \\
+        \yd_1 & \yd_2 & \ldots & \yd_{N-L-l+1} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \yd_{L+l-1} & \yd_{L+l} & \ldots & \yd_{N-1}
+    \end{bmatrix}
+\end{equation*}
+
+We can see that each column of the Hankel matrix is a sub-trajectory of length $L+l$.
+And all columns of the Hankel matrix cover all such sub-trajectories that can be extracted from the dataset trajectory.
+By multiplying the Hankel matrix with a vector $\alpha$, we are essentially taking a linear combination of all such sub-trajectories.
+For linear system, such a combination will in turn be a trajectory of the system, and if the dataset trajectory is rich enough (as defined by the persistently exciting of the input sequence), all such linear combinations can cover all possible trajectories of the system.
+
+To simplify further discussion, as in \cite{dorflerBridgingDirectIndirect2023}, we use the following notations:
+\begin{align*}
+    \Up = \hankel{l}{\subseq{\ud}{0}{N-L-1}} = \begin{bmatrix}
+        \ud_0 & \ud_1 & \ldots & \ud_{N-L-l} \\
+        \ud_1 & \ud_2 & \ldots & \ud_{N-L-l+1} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \ud_{l-1} & \ud_{l} & \ldots & \ud_{N-L-1}
+    \end{bmatrix} \\
+    \Uf = \hankel{L}{\subseq{\ud}{l}{N-1}} = \begin{bmatrix}
+        \ud_l & \ud_{l+1} & \ldots & \ud_{N-L} \\
+        \ud_{l+1} & \ud_{l+2} & \ldots & \ud_{N-L+1} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \ud_{l+L-1} & \ud_{l+L} & \ldots & \ud_{N-1}
+    \end{bmatrix} \\
+    \Yp = \hankel{l}{\subseq{\yd}{0}{N-L-1}} = \begin{bmatrix}
+        \yd_0 & \yd_1 & \ldots & \yd_{N-L-l} \\
+        \yd_1 & \yd_2 & \ldots & \yd_{N-L-l+1} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \yd_{l-1} & \yd_{l} & \ldots & \yd_{N-L-1}
+    \end{bmatrix} \\
+    \Yf = \hankel{L}{\subseq{\yd}{l}{N-1}} = \begin{bmatrix}
+        \yd_l & \yd_{l+1} & \ldots & \yd_{N-L} \\
+        \yd_{l+1} & \yd_{l+2} & \ldots & \yd_{N-L+1} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \yd_{l+L-1} & \yd_{l+L} & \ldots & \yd_{N-1}
+    \end{bmatrix}
+\end{align*}
+
+That is, separate the first $l$ rows of the Hankel matrix and the last $L$ rows of the Hankel matrix.
+Intuitively, the first $l$ rows ($\Up$ and $\Yp$) will be used for fitting the extended initial condition, and the last $L$ rows ($\Uf$ and $\Yf$) will be used for fitting proposed future input sequence and making predictions.
+
+We can also extend this idea to multiple dataset trajectories, as stated in \cite{vanwaardeMultiple2020}.
+Suppose we have $K$ dataset trajectories, each of them being $\sequence{\ud^{\scriptscriptstyle{(i)}}}{t}{0}{{N_i}}$, $\sequence{\yd^{\scriptscriptstyle{(i)}}}{t}{0}{{N_i}}$, $i = 1, \ldots, K$, then we can construct the mosaic-Hankel matrix, as defined in \cite{vanwaardeMultiple2020}, as:
+
+\begin{equation*}
+    \begin{bmatrix}
+        \hankel{L+l}{\ud^{\scriptscriptstyle{(1)}}} & \hankel{L+l}{\ud^{\scriptscriptstyle{(2)}}} & \ldots & \hankel{L+l}{\ud^{\scriptscriptstyle{(K)}}} \\
+        \hankel{L+l}{\yd^{\scriptscriptstyle{(1)}}} & \hankel{L+l}{\yd^{\scriptscriptstyle{(2)}}} & \ldots & \hankel{L+l}{\yd^{\scriptscriptstyle{(K)}}} \\
+    \end{bmatrix}
+\end{equation*}
+
+This mosaic-Hankel matrix contains all possible sub-trajectories of length $L+l$ that can be extracted from the $K$ dataset trajectories.
+And we can also separate the first $l$ rows and the last $L$ rows of the mosaic-Hankel matrix, as we do for the singe dataset trajectory case.
+We also denote the width of the mosaic-Hankel matrix (number of sub-trajectories) as $\NH$.
+
+Now we can formulate the problem of making predictions for non-linear systems using dataset trajectories as:
+\emph{Given $K$ dataset trajectories $\sequence{\ud^{\scriptscriptstyle{(i)}}}{t}{0}{{N_i}}$, $\sequence{\yd^{\scriptscriptstyle{(i)}}}{t}{0}{{N_i}}$, $i = 1, \ldots, K$, the extended initial condition $\xi_t = \begin{bmatrix}\subseq{u}{t-l}{t-1} \\ \subseq{y}{t-l}{t-1}\end{bmatrix}$, and a sequence of future inputs $\subseq{u}{t}{t+L-1}$ How to make good prediction of future outputs $\subseq{y}{t}{t+L-1}$ of the system?}
+
+For now, we suppose that we have a \emph{rich enough} dataset that in principle can cover all possible predictions we want to make about the system, and the only question is how to make good use of the dataset to make predictions.
+In \cref{sec:fractal-dimension-method}, we will discuss a metric for evaluating the richness of a dataset.
+
+Taking the intuition from the case of linear systems, we can try to find a good vector $\alpha$, which is used for taking linear combinations of all sub-trajectories of length $L+l$ that can be extracted from the dataset trajectories, to approximate the trajectory $\subseq{u}{t-l}{t+L-1}$ and $\subseq{y}{t-l}{t+L-1}$.
+
+As stated in \cite{dorflerBridgingDirectIndirect2023}, in the LTI system case the problem is formulated as:
+
+\begin{subequations}
+\label{eq:original-indirect-method}
+\begin{align}
+    \min_{\alpha} \quad & \norm{\alpha} \label{eq:original-indirect-method-cost} \\
+    \text{s.t.} \quad &
+    \begin{bmatrix}
+        \Up \\
+        \Uf \\
+        \Yp
+    \end{bmatrix} \alpha = \begin{bmatrix}
+        \subseq{u}{t-l}{t-1} \\
+        \subseq{u}{t}{T+L-1} \\
+        \subseq{y}{t-l}{t-1}
+    \end{bmatrix} \label{eq:original-indirect-method-constraint} \\
+    & \subseq{y}{t}{t+L-1} = \Yf \alpha \label{eq:original-indirect-method-prediction}
+\end{align}
+\end{subequations}
+
+The cost \cref{eq:original-indirect-method-cost} is used to make the vector $\alpha$ as small as possible, to deal with possible noise in the dataset.
+The constraint \cref{eq:original-indirect-method-constraint} is used to make sure that the extended initial condition $\xi_t$ and proposed future input sequence $\subseq{u}{t}{t+L-1}$ are well fitted by the vector $\alpha$.
+And if the system is LTI, and the dataset is rich enough as defined in \cite{vanwaardeMultiple2020}, there will always exist a vector $\alpha$ that satisfies the constraint \cref{eq:original-indirect-method-constraint}.
+And the prediction is made by \cref{eq:original-indirect-method-prediction}.
+
+However, in the non-linear case, we need to approximate the system with a \emph{local linear affine} system, which requires the answer to two questions:
+
+\begin{enumerate}
+    \item How to find a better way of choosing $\alpha$, so that it can pick sub-trajectories (columns) from the mosaic-Hankel matrix, that are more relevant to the \emph{local} dynamics of the system, near current extended initial condition $\xi_t$?
+    \item How to make the prediction based on an \emph{LTI affine system}, not an LTI system?
+\end{enumerate}
+
+Note that in non-linear case, the matrix $\begin{bmatrix}
+    \Up \\
+    \Uf \\
+    \Yp
+\end{bmatrix}$ is almost always of full row rank, so the constraint \cref{eq:original-indirect-method-constraint} can always be satisfied by some $\alpha$.
+
+For the second question, we can use the result from \cite{martinelliDataDrivenAffine2022}, which states that we just need to add an extra constraint to the optimization problem: $\transpose{\ones{\NH}} \alpha = 1$.
+
+For the first question, we propose a method of weighting different sub-trajectories in the mosaic-Hankel matrix, to put more weight onto sub-trajectories that are closer to the current extended initial condition $\xi_t$, in order to make better approximation of the local dynamics of the system.
+
+For the i-th sub-trajectory (column) of the mosaic-Hankel matrix $\subseq{\ud}{i}{i+L+l-1}$ and $\subseq{\yd}{i}{i+L+l-1}$, we can define a distance to the current extended initial condition $\xi_t$ as: $d\left(\mnormsq{\left(\xi_t - \xi_i\right)}{Q}\right)$, where $\xi_i = \begin{bmatrix}\subseq{u}{i}{i+l-1} \\ \subseq{y}{i}{i+l-1}\end{bmatrix}$ is the extended initial condition of the sub-trajectory (the i-th column of $\Up$ and $\Yp$); $Q$ is a positive definite matrix used to weight the distance; $d$ is a non-decreasing function.
+
+Then, with this distance defined for each sub-trajectory, we can define a diagonal distance matrix $\Dt$ as: $\Dt(i,i) = d\left(\mnormsq{\left(\xi_t - \xi_i\right)}{Q}\right)$, and use this matrix to weight the sub-trajectories in the mosaic-Hankel matrix.
+The subscript $t$ is used to emphasize its dependence on the current extended initial condition $\xi_t$.
+
+Then we formulate the problem as:
+
+\begin{subequations}
+\label{eq:weighted-indirect-method}
+\begin{align}
+    \min_{\alpha} \quad & \norm{\alpha}_\Dt \label{eq:weighted-indirect-method-cost} \\
+    \text{s.t.} \quad &
+    \begin{bmatrix}
+        \Up \\
+        \Uf \\
+        \Yp
+    \end{bmatrix} \alpha = \begin{bmatrix}
+        \subseq{u}{t-l}{t-1} \\
+        \subseq{u}{t}{T+L-1} \\
+        \subseq{y}{t-l}{t-1}
+    \end{bmatrix} \label{eq:weighted-indirect-method-hankel} \\
+    & \transpose{\ones{\NH}} \alpha = 1 \label{eq:weighted-indirect-method-affine} \\
+    & \subseq{y}{t}{t+L-1} = \Yf \alpha \label{eq:weighted-indirect-method-prediction}
+\end{align}
+\end{subequations}
+
+The cost \cref{eq:weighted-indirect-method-cost} is designed to force the choice of $\alpha$ wisely, so that we put more weight to sub-trajectories that are close to the current extended initial condition $\xi_t$.
+
+This optimization problem \cref{eq:weighted-indirect-method} can be solved in closed form, with the optimal $\alpha$ being:
+
+\begin{equation}\label{eq:weighted-indirect-method-solution}
+    \alpha = \inv{\Dt}\transpose{\hankeluyone}\inv{\left(\hankeluyone \inv{\Dt} \transpose{\hankeluyone}\right)} \begin{bmatrix}
+        \subseq{u}{t-l}{t-1} \\
+        \subseq{u}{t}{t+L-1} \\
+        \subseq{y}{t-l}{t-1} \\
+        1
+    \end{bmatrix}
+\end{equation}
+
+\begin{remark}\label{remark:weiting-proposed-input}
+    It might be tempting to also include the proposed input sequence $\subseq{u}{t}{t+L-1}$ into the weighting of sub-trajectories, and indeed it can be a good idea for the problem of making predictions only.
+
+    However, since the prediction will be used for a predictive controller or safety filter, and the proposed input sequence $\subseq{u}{t}{t+L-1}$ will in these cases be formulated as optimization variables, including them into the weighting method will make the optimization problem non-convex, and thus hard to solve.
+
+    In contrast, the extended initial condition $\xi_t$ is usually given as parameters to the optimization problem, and thus can be used for the weighting method without making the optimization problem non-convex.
+\end{remark}
+
+We can see that the solution only depends on the inverse of the distance matrix $\Dt$.
+So we can further define a diagonal weighting matrix $\Wt$, where: $\Wt(i,i) = w\left(\mnormsq{\left(\xi_i - \xi_t\right)}{Q}\right)$, where $w$ is a non-increasing function.
+And replace $\inv{\Dt}$ by $\Wt$ in the solution \cref{eq:weighted-indirect-method-solution}.
+
+Intuitively, $\Wt(i,i)$ represents the weight of the i-th sub-trajectory, and the weight is higher if the sub-trajectory is closer to the current extended initial condition $\xi_t$.
+This method has the advantage that, we can set the weight of sub-trajectories that are far away from the current extended initial condition $\xi_t$ to zero, that is let $\Wt(i,i)=0$, so that they will not be used for making predictions.
+This is roughly equivalent to setting $\Dt(i,i)=\infty$, but avoids the problem of dealing with $\infty$.
+
+Then the solution can be rewritten as:
+
+\begin{subequations}
+\label{eq:weighted-indirect-method-w-solution}
+\begin{align}
+    \alpha &= \Wt \transpose{\hankeluyone}\inv{\left(\hankeluyone \Wt \transpose{\hankeluyone}\right)} \begin{bmatrix}
+        \subseq{u}{t-l}{t-1} \\
+        \subseq{u}{t}{T+L-1} \\
+        \subseq{y}{t-l}{t-1} \\
+        1
+    \end{bmatrix} \label{eq:weighted-indirect-method-w-solution-alpha} \\
+    \subseq{y}{t}{t+L-1} &= \Yf \alpha \label{eq:weighted-indirect-method-w-solution-prediction}
+\end{align}
+\end{subequations}
+
+Lots of possibilities are open for this weighting method.
+We just enumerate some of them here.
+
+\begin{enumerate}
+    \item The weighting matrix $Q$ and weighting function $w$ can be chosen for different extended initial state $\xi_t$.
+    \item There might be a better way to choose these hyperparameters $Q$ and $w$.
+    One possible method is to formulate the problem as an optimization problem, with prediction error as the cost.
+    In this way it will be possible to use machine learning methods, such as neural networks, to learn the optimal weighting matrix $Q$ and approximate the weighting function $w$.
+    \item It is also possible to incorporate the weighting method into the direct method, by using the matrix $\Dt$ to regularize the variable $\alpha$ in formulations like \cref{eq:robust-ddsf-direct}.
+\end{enumerate}
+
+These possibilities are left for future work.
+
+
+\section{Fractal Dimension Method Evaluating Dataset}\label{sec:fractal-dimension-method}
+
+In this section, we introduce a metric for evaluating the richness of a dataset for non-linear system, where the dataset consists of several dataset trajectories as introduced in \cref{sec:weighting-method}.
+
+The intuition is, for a dataset to be rich enough, it should be able to cover all possible input-output pairs of the system.
+In another word, we want to evaluate the ability of some curves to cover a higher dimensional space $\Yset \times \Uset$.
+To evaluate this \emph{space-filling property}, we can refer to the idea of fractal dimension and space-filling curves, as introduced in \cite{saganSpaceFillingCurves1994} and the box-counting dimension introduced in \cite{kennethAlternativeDefinitionsDimension2003}.
+% Here we give a brief introduction to the box-counting dimension.
+
+% \subsection{Introduction to Box-counting Dimension}\label{subsec:box-counting-dimension}
+
+% The box-counting dimension is a method of estimating the fractal dimension of a set $S$.
+% For simplicity, we assume that $S$ is a subset of $\Real^d$.
+For fractals, the box-counting dimension is defined as:
+
+\begin{equation}
+    \label{eq:box-counting-dimension-limit}
+    d \defeq \lim_{\epsilon \to 0} \frac{\log N(\epsilon)}{\log \frac{1}{\epsilon}}
+\end{equation}
+
+where $N(\epsilon)$ is the number of boxes of size $\epsilon$ needed to cover the fractal.
+
+The intuition is, if $\epsilon$ is small enough, the number of boxes of size $\epsilon$ to cover a smooth manifold of dimension $d$ will be $N(\epsilon) \approx C \left(\frac{1}{\epsilon}\right)^d$, so taking the logarithm of both sides and dividing by $\log \frac{1}{\epsilon}$ will give $d$, as $\epsilon \to 0$.
+So we use a similar method to determine the dimension of a fractal.
+
+Intuitively, the box-counting dimension can be seen as a metric of how well a set can cover the ambient space.
+So we can borrow this idea to evaluate how well the dataset trajectories cover the input-output space $\Yset \times \Uset$.
+
+In practice, we only have access to a finite number of dataset input-output points $\ud_i$ and $\yd_i$, $i = 1, \ldots, N_1+N_2+\dots+N_K$, each of them belonging to a certain dataset trajectory.
+We can try to 
+
+The drawbacks and further improvements for this method may include:
+
+\begin{enumerate}
+    \item The fractal dimension only deals with the space-filling property of a set, but not the size of the covered region.
+    For example, if we rescale a fractal into a smaller size, the fractal dimension will not change, but the region it covers will be smaller.
+    That also holds for the box-counting dimension of dataset trajectories.
+    With a set of dataset trajectories that covers a small region very well but does not contain any information outside the small region, the box-counting dimension might be larger, but the dataset is not so rich.
+    \item The box-counting dimension can only be a metric for evaluating the richness of a dataset, but does not provide any information about how well the dataset can be used for making predictions or fitting a model.
+    The quantitative relation between the box-counting dimension and the quality of prediction or fitted model is still unknown.
+\end{enumerate}
+
+They are left for future work.
+
+
+\section{Numerical Example}\label{sec:non-linear-system-numerical-example}
+
+\begin{align}
+    x = \begin{bmatrix}
+        \xelone \\
+        \xeltwo
+    \end{bmatrix} \quad &
+    \dot{x} = \begin{bmatrix}
+        \dot{\xelone} \\
+        \dot{\xeltwo}
+    \end{bmatrix} = \begin{bmatrix}
+        3 \xeltwo \\
+        u - 0.5 \sin(\xelone) - 0.5 \xelone \left(\cos(\xeltwo^2)\right)^2
+    \end{bmatrix}
+\end{align}

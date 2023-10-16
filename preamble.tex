@@ -11,14 +11,16 @@
 \usepackage{lipsum}
 \usepackage{enumitem}
 \usepackage{parskip}
-\usepackage[retainorgcmds]{IEEEtrantools}
+\usepackage{caption}
+% \usepackage[retainorgcmds]{IEEEtrantools}
 
 \setlist{nosep} % set itemized list style
 \usepackage[english,mt]{ethidsc} % Special IDSC styles and commands      	
 								 % {german}/english: language of headings, etc.
 								 % {st}/bt/mt: {semester}/bachelor/master thesis
 \usepackage{hyperref}
-\usepackage{cleveref} % load cleverref as the last package!
+\usepackage[capitalise]{cleveref} % load cleverref as the last package!
+\usepackage{crossreftools} % but load crossreftools after cleverref!
 
 % \crefname{opt}{optimization problem}{optimization problems}
 % \Crefname{opt}{Optimization problem}{Optimization problems}
@@ -28,7 +30,7 @@
 	T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 
-\renewcommand{\labelitemi}{\normalfont\bfseries\textendash}
+% \renewcommand{\labelitemi}{\normalfont\bfseries\textendash}
 
 \def\imagedir{img}
 
@@ -36,11 +38,52 @@
 	\newtheorem{definition}{Definition}
 	\newtheorem{assumption}{Assumption}
 \theoremstyle{plain}
-	\newtheorem{theorem}{Theorem}[chapter]
+	\newtheorem{theorem}{Theorem}
 	\newtheorem{lemma}{Lemma}
 	\newtheorem{proposition}{Proposition}
 \theoremstyle{remark}
 	\newtheorem{remark}{Remark}
+
+% redefine the reference styles
+\crefname{equation}{}{}
+\Crefname{equation}{}{}
+% \crefname{definition}{Definition}{Definitions}
+% \crefname{lemma}{Lemma}{Lemmas}
+% \crefname{theorem}{Theorem}{Theorems}
+% \crefname{remark}{Remark}{Remarks}
+% \crefname{chapter}{Chapter}{Chapters}
+% \crefname{section}{Section}{Sections}
+
+% create new label for types of proofs
+\newcounter{theoremproofcntr}
+\newcounter{lemmaproofcntr}
+\newcounter{propositionproofcntr}
+\crefname{theoremproofcntr}{proof of Theorem}{proofs of Theorems}
+\Crefname{theoremproofcntr}{Proof of Theorem}{Proofs of Theorems}
+\crefname{lemmaproofcntr}{proof of Lemma}{proofs of Lemmas}
+\Crefname{lemmaproofcntr}{proof of Lemma}{proofs of Lemmas}
+\crefname{propositionproofcntr}{proof of Proposition}{proofs of Propositions}
+\Crefname{propositionproofcntr}{proof of Proposition}{proofs of Propositions}
+
+\NewDocumentCommand{\prooflabel}{o +m+m}{
+	\setcounter{#1proofcntr}{\crtcrefcountervalue{#2}-1}
+	\refstepcounter{#1proofcntr}
+	% \crefformat{#1proofcntr}{#2\arabic{chapter}.#1#3}
+	\label{#3}
+	% \crtprovidecurrentlabel{\crtextractcref{reference}{#2}}
+	% \crtprovidecurrentlabelname{#3}
+}
+
+\newcommand\includefig[4]{
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=#2\textwidth]{\imagedir/#1}
+		\caption{#3}
+		\label{#4}
+	\end{figure}
+}
+
+\newcommand\defeq{\vcentcolon=}
 
 \newcommand\tildex{\tilde{x}}
 \newcommand\tildeu{\tilde{u}}
@@ -51,26 +94,96 @@
 \newcommand\barx{\bar{x}}
 \newcommand\baru{\bar{u}}
 \newcommand\bary{\bar{y}}
-\newcommand\starx{x^*}
-\newcommand\staru{u^*}
-\newcommand\stary{y^*}
+\newcommand\starx{{x^*}}
+\newcommand\staru{{u^*}}
+\newcommand\stary{{y^*}}
 
-\newcommand\us{u^s}
-\newcommand\ys{y^s}
-\newcommand\xs{x^s}
+\newcommand\tildexi{\tilde{\xi}}
+\newcommand\hatxi{\hat{\xi}}
+\newcommand\barxi{\bar{\xi}}
+\newcommand\starxi{{\xi^*}}
+
+\newcommand\barvareps{\bar{\varepsilon}}
+\newcommand\varepsmax{\varepsilon_{\text{max}}}
+
+\newcommand\barD{\bar{D}}
+
+\newcommand\us{{u^s}}
+\newcommand\ys{{y^s}}
+\newcommand\xs{{x^s}}
+
+\newcommand\ud{{u^d}}
+\newcommand\yd{{y^d}}
+
+\newcommand\NH{{N_H}}
+
+\newcommand\xelone{{x^{\scriptscriptstyle{(1)}}}}
+\newcommand\xeltwo{{x^{\scriptscriptstyle{(2)}}}}
 
 \newcommand\uObj{u^{\text{obj}}}
 
+\newcommand\lamalpha{\lambda_\alpha}
+\newcommand\lamsigma{\lambda_\sigma}
+
+\newcommand\Up{{U_p}}
+\newcommand\Uf{{U_f}}
+\newcommand\Yp{{Y_p}}
+\newcommand\tildeYp{{\tilde{Y}_p}}
+\newcommand\Yf{Y_f}
+\newcommand\tildeYf{{\tilde{Y}_f}}
+\newcommand\hankeluy{
+	\begin{bmatrix}
+		\Up \\
+		\Uf \\
+		\Yp \\
+	\end{bmatrix}
+}
+\newcommand\hankeluyone{
+	\begin{bmatrix}
+		\Up \\
+		\Uf \\
+		\Yp \\
+		\transpose{\ones{\NH}}
+	\end{bmatrix}
+}
+\newcommand\hankelutildey{
+	\begin{bmatrix}
+		\Up \\
+		\Uf \\
+		\tildeYp \\
+	\end{bmatrix}
+}
+\newcommand\hankelutildeyone{
+	\begin{bmatrix}
+		\Up \\
+		\Uf \\
+		\tildeYp \\
+		\transpose{\ones{\NH}}
+	\end{bmatrix}
+}
+\newcommand\Wt{{W_t}}
+\newcommand\Dt{{D_t}}
+
+\newcommand\rhoLmax{\rho_{L}^{\text{max}}}
+
+\newcommand\infnorm[1]{\norm{#1}_\infty}
+\newcommand\twonorm[1]{\norm{#1}_2}
+\newcommand\onenorm[1]{\norm{#1}_1}
+
 \newcommand\transpose[1]{#1^{\top}}
+\newcommand\inv[1]{#1^{-1}}
+
+\newcommand\mnormsq[2]{\transpose{#1} #2 #1}
 
 \newcommand\ones[1]{\mathbb{1}_{#1}}
-\newcommand\vRepeatVec[2]{#1 \otimes \ones{#2}}
+\newcommand\vRepeatVec[2]{\ones{#2} \otimes #1}
 
 \newcommand\Real{\mathbb{R}}
 \newcommand\Xset{\mathcal{X}}
 \newcommand\Uset{\mathcal{U}}
 \newcommand\Yset{\mathcal{Y}}
 \newcommand\Sset{\mathcal{S}}
+\newcommand\Epset{\mathcal{\Epsilon}}
 
 \newcommand\RealVec[1]{\Real^{#1}}
 \newcommand\RealMat[2]{\Real^{#1 \times #2}}

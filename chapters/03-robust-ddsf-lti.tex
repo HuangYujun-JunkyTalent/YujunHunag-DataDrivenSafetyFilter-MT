@@ -1,9 +1,367 @@
 \chapter{Robust Data-Driven Safety Filter}\label{chap:robust-ddsf-lti}
 TODO: Contains robust data-driven safety filter formulation and proof of qualitative guarantees.
 
-Question: is it good to have the indirect formulation and the proof here? Yes
+In this chapter, we will discuss and compare different formulations of robust data-driven safety filters for LTI system with bounded output noise.
+We will first introduce the direct formulation of the robust data-driven safety filter with rigorous constraint tightening scheme, and illustrate its limitations using a single-input-single-output (SISO) LTI system.
+Then we will introduce the indirect formulation with qualitative constraint tightening scheme, and show that it can overcome the limitations of the direct formulation.
 
-Question: is it good to move the proof of qualitative guarantees into appendix? Yes
+Before jumping into the details of data-driven safety filters, we first introduce the system we will be working with: LTI system with bounded output noise, as well as some notations that will be used later.
 
-Question: is it good to put SISO simple example here? Yes
+\begin{definition}[LTI System with Output Noise]\label{def:lit-output-noise}
+    Starting from an LTI system without noise, as defined in \cref{def:dynamic-system} with linear dynamic and output functions, we can add a bounded output noise to the system.
+    In another word, we can only observe $\tildey = y + \varepsilon$, where $\varepsilon$ is an unknown noise.
 
+    We do not discuss or care about the distribution or stochastic properties of $\varepsilon$, the only condition we put on it is that it is bounded by a known constant $\barvareps$: $\infnorm{\varepsilon} \leq \barvareps$.
+\end{definition}
+
+\begin{remark}\label{remark:state-noise-lti}
+    Although we do not explicitly deal with state noise in this chapter, we can incorporate bounded state noise when the system is \emph{asymptotically stable}.
+    We do not discuss this point in detail in this Thesis.
+
+    The intuition is, ``noise on the state'' will be transformed into ``noise on the output'' by the system dynamics.
+    If the dynamics is asymptotically stable, this transformed noise on output will also be bounded.
+\end{remark}
+
+To simplify the discussion, we also assume the output constraint is a hypersquare, that is: $\Yset = \left\{y \, | \, \infnorm{y} \leq y_{\text{max}}\right\}$.
+
+Within this chapter and the proof in appendix \cref{apps:prf-roubust-direct,apps:prf-roubust-indirect}, we will use the following notation:
+Variables with tilde, like $\tildey$ represent observed variables with noise.
+We will use $\varepsilon$ to represent noise variables, and $\barvareps$ to represent bound of the noise.
+Note that usually we also extensively use variables with bar, like $\bary$, to represent the optimization variables.
+This will not cause too much confusion, since noise variables are usually not optimization variables.
+
+Also, similar to the notation in \cite{berberichDataDrivenRobust2021}, we use $\xi$ to denote the extended state of the system, which is a long vector that contains necessarily input-output pairs to determine the state of the system
+For example, at time step $t$, the extended state can be written as $\xi_t = \transpose{\begin{bmatrix} \transpose{\subseq{u}{t-n}{t-1}} & \transpose{\subseq{y}{t-n}{t-1}} \end{bmatrix}}$.
+Similar to other variables, it also has the version with output noise: $\tildexi_t = \transpose{\begin{bmatrix} \transpose{\subseq{u}{t-n}{t-1}} & \transpose{\subseq{\tildey}{t-n}{t-1}} \end{bmatrix}}$.
+Note that we do not consider input noise in this Thesis, so the input is always exact.
+Depending on the context, the number of input-output pairs used to construct $\xi$ can be $l$ or $n$.
+
+
+\section{Direct Formulation}\label{sec:direct-formulation}
+
+As has been discussed in \cite{coulsonDataenabledPredictiveControl2019}, when the dataset output sequence $\datasetSequence{\tildey}{N}$ is noisy, the Hankel matrix $\hankel{L+n}{\tildey^d}$ will become full rank, which means the column space of $\hankel{L+n}{\tildey^d}$ will be $\Real^{L+n}$.
+In another word, the original data driven safety filter formulation \cref{eq:nominal-ddsf} will be able to make \emph{any prediction} possible.
+
+To overcome this problem, it is advised in \cite{coulsonDataenabledPredictiveControl2019} to add a regularizer into the objective function.
+As mentioned in \cref{sec:motivation-and-background}, we have a lot of discussions about choices and properties of different regularizers.
+To allow more discussion about guarantees, we will use a \emph{2-norm} regularizer.
+
+Also, as in common MPC schemes, it is also necessary to modify the constraint to deal with the noise.
+We incorporate the constraint tightening scheme proposed and analysed in \cite{berberichRobustConstraintSatisfaction2020}.
+
+The final point mention here is, we will consider the n-step receding horizon scheme, in contrast to the one-step receding horizon scheme used for nominal data-driven safety filter introduced in \cref{chap:nominal-ddsf}. 
+Namely, the optimization problem \cref{eq:robust-ddsf-direct} will be solved every $n$ time steps, and the first $n$ inputs of the optimal solution will be applied to the system.
+
+With all these modifications, the robust data-driven safety filter can be formulated as: 
+
+\begin{subequations}
+\label{eq:robust-ddsf-direct}
+\begin{align}
+    \min_{\substack{\alpha, \sigma \\ \baru, \bary}} \quad & \norm{\subseq{\baru}{0}{n-1} - \subseq{\uObj}{0}{n-1}(t)}_{\subseq{R}{0}{n-1}}^2 + \lamalpha \bar{\varepsilon} \norm{\alpha}_2^2 + \lamsigma \norm{\sigma}_2^2 \label{eq:robust-ddsf-direct-cost}\\
+    \textrm{s.t.} \quad & 
+    \begin{bmatrix}
+        \subseq{\baru}{-n}{L-1} \\
+        \subseq{\bary}{-n}{L-1} + \sigma \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \hankel{L+n}{u^d} \\
+        \hankel{L+n}{\tildey^d} \\
+    \end{bmatrix} \alpha \label{eq:robust-ddsf-direct-dynamic}\\
+    & 
+    \begin{bmatrix}
+        \subseq{\baru}{-n}{-1} \\
+        \subseq{\bary}{-n}{-1} \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \subseq{u}{t-n}{t-1} \\
+        \subseq{\tildey}{t-n}{t-1} \\
+    \end{bmatrix} \label{eq:robust-ddsf-direct-initial}\\
+    & 
+    \begin{bmatrix}
+        \subseq{\baru}{L-n}{L-1} \\
+        \subseq{\bary}{L-n}{L-1} \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \vRepeatVec{\us}{n} \\
+        \vRepeatVec{\ys}{n} \\
+    \end{bmatrix} \label{eq:robust-ddsf-direct-terminal}\\
+    &
+    \baru_k \in \Uset, \quad k \in \left[0, L-1\right] \label{eq:robust-ddsf-direct-input}\\
+    &
+    \infnorm{\bary_k} + a_{1,k}\norm{\baru}_1 + a_{2,k}\norm{\alpha}_1 \nonumber \\
+    &
+    \quad + a_{3,k}\norm{\sigma}_1 + a_{4,k} \leq y_{\max}, \quad k \in \left[0, L-1\right] \label{eq:robust-ddsf-direct-output} \\
+    &
+    \norm{\sigma}_\infty \leq \bar{\varepsilon}\left( \norm{\alpha}_1 + 1 \right) \label{eq:robust-ddsf-direct-sigma}
+\end{align}
+\end{subequations}
+
+where $\sigma$ is a slack variable introduced to deal with noise in dataset and online observation, $\lamalpha$ and $\lamsigma$ are two regularizing weights, $\subseq{\uObj}{0}{n-1}$ are $n$ objective inputs given by the arbitrary controller, $\subseq{R}{0}{n-1}$ represents the block-diagonal matrix with $n$ weighting matrices $R_0$ to $R_{n-1}$ on the diagonal, $\tildey^d$ is the noisy dataset output sequence, $a_{1,k}$ to $a_{4,k}$ are constraint tightening constants introduced in \cite{berberichRobustConstraintSatisfaction2020}, and $\bar{\varepsilon}$ is the bound of the noise.
+
+We also need some discussion about the formulation:
+
+\begin{enumerate}
+    \item Since we are using the n-step receding horizon scheme, the first $n$ inputs of the optimal solution will be applied to the system.
+    For the same reason, we need $n$ objective inputs from the arbitrary controller.
+    This is not a big issue in practice, since the output of most learning algorithms are adjustable.
+    \item As mentioned before introducing the formulation, we need a regularizer term $\lamalpha \barvareps \twonorm{\alpha}^2$ to keep control of the prediction error.
+    Here we add $\barvareps$ by the intuition that, the regularizing effect on $\alpha$ should be smaller given a smaller noise bound.
+    As an extreme case, if $\barvareps = 0$, the regularizer will vanish.
+    \item Slack variable $\sigma$ is introduced to compensate for the effect of noise.
+    Intuitively, we want it counteract the noise in the prediction, introduced by noisy dataset and online observation, as seen in constraint \cref{eq:robust-ddsf-direct-dynamic}.
+    There is also a regularizer term $\lamsigma \twonorm{\sigma}^2$ to keep control of the slack variable.
+    Here this regularizing constant is not affected by $\barvareps$, since this regularizing effect should still exist even if the noise bound is zero.
+    \item It is worth-noticing that in the constraints \cref{eq:robust-ddsf-direct-dynamic,eq:robust-ddsf-direct-initial}, both the dataset and online observation are noisy, as can be seen from the tilde on $\tildey^d$ and $\tildey$.
+    \item Constraint \cref{eq:robust-ddsf-direct-output} is the output constraint with tightening scheme included in \cite{berberichRobustConstraintSatisfaction2020}.
+    We refer to (11) and (12) in \cite{berberichRobustConstraintSatisfaction2020} for a rigorous definition of the constraint tightening constants $a_{1,k}$ to $a_{4,k}$.
+    \item Constraint \cref{eq:robust-ddsf-direct-sigma} is an auxiliary constraint to keep control of the slack variable $\sigma$.
+    Intuitively, since the purpose of $\sigma$ is to compensate for the effect of noise, it should have an upper bound related to $\barvareps$.
+    Also, since the noise originate from the dataset is amplified by $\alpha$, this upper bound should also be related to $\alpha$.
+    It is worth-noticing that, constraint \cref{eq:robust-ddsf-direct-sigma} is not convex.
+    As stated in \cite{berberichDataDrivenRobust2021}, in practice it can be omitted, since with proper choice of regularizing constants $\lamalpha$ and $\lamsigma$, it will be satisfied automatically.
+    Also, from the point of the proof, it is enough to replace the constraint with a convex relaxation, as will be discussed in \cref{apps:prf-roubust-direct}.
+\end{enumerate}
+
+We can prove that the formulation \cref{eq:robust-ddsf-direct} can provide qualitative guarantees for the system.
+
+\begin{theorem}[Qualitative Guarantees for Direct Formulation]\label{thm:robust-ddsf-direct}
+    Given an LTI system with noise as defined in \cref{def:lit-output-noise}, which is also controllable; a dataset trajectory $\datasetSequence{\tildey}{N}$ and $\datasetSequence{u}{N}$ of the system, where $\datasetSequence{u}{N}$ is persistently exciting with order $L=2n$; and the prediction horizon $L$ in \cref{eq:robust-ddsf-direct} satisfies $L \geq 2n$; an n-step receding horizon scheme.
+    And suppose the objective input satisfies that, maximum deviation from objective input is bounded, that is: $\norm{\subseq{\baru}{0}{n-1} - \subseq{\uObj}{0}{n-1}}_{\subseq{R}{0}{n-1}} \leq \barD$ for some positive constant $\barD$, for any feasible input sequence candidate $\subseq{\baru}{0}{n-1}$.
+
+    Then, with proper choice of regularizing constants $\lamalpha$ and $\lamsigma$, there exist a constant $\varepsmax$, when the noise bound satisfies $\barvareps \leq \varepsmax$, recursive feasibility and closed-loop constraint satisfaction can be guaranteed for the formulation \cref{eq:robust-ddsf-direct}.
+\end{theorem}
+
+We leave the proof of \cref{thm:robust-ddsf-direct} to \cref{apps:prf-roubust-direct}.
+
+This guarantee is called \emph{qualitative}, since it does not provide any quantitative information about the choice of regularizing constants $\lamalpha$ and $\lamsigma$, and the maximum noise bound $\varepsmax$.
+We refer to \cref{apps:prf-roubust-direct} for a more detailed discussion.
+In practice, $\lamalpha$ and $\lamsigma$ are two hyperparameters that can be chosen by trial and error.
+
+Note that we need the assumption that the deviation of candidate input from objective input is bounded.
+This is not a big issue in practice, since the input constraint $\Uset$ is usually known and bounded, and we can always first project the objective input to the input constraint set $\Uset$.
+
+\subsection{Numerical Example for Direct Formulation}\label{subsec:numerical-example-direct}
+
+In this section, we provide a numerical example to illustrate the limitations of the direct formulation \cref{eq:robust-ddsf-direct}.
+To simplify the illustration, we choose an SISO system, which is the same as the one used in \cite{berberichRobustConstraintSatisfaction2020}, with transfer function:
+
+\begin{equation*}
+    G(z) = 0.01\frac{2z^2 + 6.1z + 1}{z^3 - 2.1z^2 + 1.5z - 0.3}
+\end{equation*}
+
+equipped with constraint sets $\Uset = \Yset = \left[-10, 10\right]$.
+This is an LTI system with $m=p=1$ and $n=l=3$.
+
+We choose a very small noise bound $\barvareps = 0.0001$, with regularizing constants $\barvareps\lamalpha = 500$ and $\lamsigma = 500$.
+The output noise for each time step, both in dataset trajectory and online observation, is sampled uniformly random from $\left[-\barvareps, \barvareps\right]$.
+The reason for this small noise bound will be clear later.
+
+The dataset trajectory is of length $2000$, generated by sampling input uniformly random from $\Uset$ at each time step, and starting from the initial state $x_0 = \transpose{\begin{bmatrix}0 & 0 & 0\end{bmatrix}}$.
+The prediction horizon is $L=20$, and we set the equilibrium point to be $\us = \ys = 0$.
+
+By applying an open-loop objective control input of a sine wave with amplitude $15$, we observe the closed-loop input and output as shown in \cref{fig:robust-direct-conservative}.
+
+\includefig{robust-direct-conservative.png}{1.0}{Closed-loop input and output with direct method and unsafe objective input}{fig:robust-direct-conservative}
+
+As can be seen from \cref{fig:robust-direct-conservative}, the closed-loop input and output are far from the constraint limit.
+This is due to the very conservative constraint tightening scheme used in \cite{berberichRobustConstraintSatisfaction2020}, based on a generous estimation of bound of prediction error.
+
+Note that the constraint tightening constants $a_{1,k}$ to $a_{4,k}$ depend on the dataset trajectory, the system constants and the noise bound $\barvareps$.
+To illustrate the conservative nature of this constraint tightening scheme, we list the value of $a_{4, 19}$ with different noise bound in \cref{tab:robust-direct-tightening}.
+
+{\renewcommand{\arraystretch}{1.3}%
+\begin{center}
+\captionof{table}{Constraint Tightening in Direct Method \label{tab:robust-direct-tightening}}
+\begin{tabular}{ r|c|c|c|c|c }
+    Noise bound $\barvareps$ & 0.0001 & 0.0005 & 0.001 & 0.0015 & 0.002 \\
+    \hline
+    $a_{4, 19}$ & 7.411 & 418.66 & 5344.73 & 28486.42 & 99467.18 \\
+\end{tabular}
+\end{center}
+}
+
+As can be seen from \cref{tab:robust-direct-tightening}, the constraint tightening constant is large, and increases very quickly with the noise bound.
+Remember that our output constraint is $\Yset = \left[-10, 10\right]$, so with a slightly larger noise bound, constraint \cref{eq:nominal-ddsf-output} will be trivially infeasible since $a_{4, 19} \geq 10$.
+This is also the reason that we need to choose a very small noise bound $\barvareps = 0.0001$ in this example.
+
+By applying an open-loop objective control input of a sine wave with amplitude $15$, we observe the closed-loop input and output as shonw in \cref{fig:robust-direct-unwanted-interference}.
+
+\includefig{robust-direct-unwanted-interference.png}{1.0}{Closed-loop input and output with direct method and safe objective input}{fig:robust-direct-unwanted-interference}
+
+As can be seen from \cref{fig:robust-direct-unwanted-interference}, the closed-loop input differs slightly from the objective input, even if the objective input is safe.
+
+This is due to the coupling of regularizing term $\lamalpha \barvareps \twonorm{\alpha}^2$ in the objective function \cref{eq:nominal-ddsf-cost} and the dynamic constraint \cref{eq:robust-ddsf-direct-dynamic}.
+As can be seen from \cref{eq:robust-ddsf-direct-dynamic}, with smaller $\alpha$, the input candidate sequence $\subseq{\baru}{0}{n-1}$ will also be smaller.
+The regularizing term tries to make $\alpha$ smaller and make the candidate input $\subseq{\baru}{0}{n-1}$ smaller, in order to get a smaller overall cost, even if the objective input is safe.
+This is unwanted input interference.
+
+
+\section{Indirect Formulation}\label{sec:indirect-formulation}
+
+To overcome the limitations of the direct formulation, we introduce the indirect formulation of the robust data-driven safety filter, with a qualitative constraint tightening scheme.
+
+Firstly, to deal with the conservative constraint tightening scheme, we introduce a new constraint tightening scheme, which makes the constraint tightening constants hyperparameters that we can choose.
+Intuitively, since we only have qualitative guarantees for recursive feasibility and closed-loop stability, it is not necessary to have a rigorous but conservative constraint tightening scheme, as used in the constraint \cref{eq:robust-ddsf-direct-output}.
+
+Secondly, we take advantage of the \emph{indirect method} to decompose the cost of safety filter and the dynamic constraint.
+
+With these modifications, the direct formulation of the robust data-driven safety filter can be formulated as:
+
+\begin{subequations}
+\label{eq:robust-ddsf-indirect}
+\begin{align}
+    \min_{\substack{\sigma \\ \bar{u}, \bar{y}}} \quad & \norm{\subseq{\baru}{0}{n-1} - \subseq{\uObj}{0}{n-1}(t)}_{\subseq{R}{0}{n-1}}^2 + \lambda_\sigma \norm{\sigma}_2^2 \label{eq:robust-ddsf-indirect-cost} \\
+    \textrm{s.t.} \quad & 
+    \subseq{\bary}{0}{L-1} + \sigma 
+    = \hankel{L}{\subseq{\tildey^d}{l}{N-1}} 
+    \begin{bmatrix}
+        \hankel{L+l}{u^d} \\
+        \hankel{l}{\subseq{\tildey^d}{0}{N-L-1}} \\
+    \end{bmatrix}^{\dagger}
+    \begin{bmatrix}
+        \subseq{\baru}{-l}{L-1} \\
+        \subseq{\bary}{-l}{-1} \\
+    \end{bmatrix} \label{eq:robust-ddsf-indirect-dynamic} \\
+    & 
+    \begin{bmatrix}
+        \subseq{\baru}{-l}{-1} \\
+        \subseq{\bary}{-l}{-1} \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \subseq{u}{t-l}{t-1} \\
+        \subseq{\tildey}{t-l}{t-1} \\
+    \end{bmatrix} \label{eq:robust-ddsf-indirect-initial} \\
+    & 
+    \begin{bmatrix}
+        \subseq{\baru}{L-n}{L-1} \\
+        \subseq{\bary}{L-n}{L-1} \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \vRepeatVec{\us}{n} \\
+        \vRepeatVec{\ys}{n} \\
+    \end{bmatrix} \label{eq:robust-ddsf-indirect-terminal} \\
+    &
+    \bar{u}_k \in \Uset, \quad k \in \left[0, L-1\right] \label{eq:robust-ddsf-indirect-input} \\
+    &
+    \norm{\bar{y}_k}_\infty + a_k \leq y_{\max}, \quad k \in \left[0, L-1\right] \label{eq:robust-ddsf-indirect-output} \\
+    &
+   \norm{\sigma}_\infty \leq \bar{\varepsilon}\left( \left(1+\rho_{L}^{\max}\right)\norm{\alpha}_1 + \rho_{L}^{\max} \right) \label{eq:robust-ddsf-indirect-sigma}
+\end{align}
+\end{subequations}
+
+where $\alpha = \begin{bmatrix}
+    \hankel{L+l}{u^d} \\
+    \hankel{l}{\subseq{\tildey^d}{0}{N-L-1}} \\
+\end{bmatrix}^{\dagger}
+\begin{bmatrix}
+    \subseq{\baru}{-l}{L-1} \\
+    \subseq{\bary}{-l}{-1} \\
+\end{bmatrix}$, $\rhoLmax$ is a constant of the system, as defined in (7) and discussion after (12) in \cite{berberichRobustConstraintSatisfaction2020}.
+Note that $\alpha$ is not an optimization variable, it's only an auxiliary variable used to construct \cref{eq:robust-ddsf-indirect-sigma}.
+
+The constraint tightening constants $a_k$ in \cref{eq:robust-ddsf-indirect-output} are formulated as: $a_k = \sum_{i=1}^{\ceil{\frac{k+1}{n}}} c_i$, where $\sequence{c}{k}{1}{\ceil{\frac{L}{n}}}$ is a sequence of positive constants that we can choose.
+Intuitively, we are tightening the output constraint by a constant $a_k$ at each time step, and the constant $a_k$ increases by a positive constant $c_i$ every $n$ time steps.
+In another word, the constraint becomes more tight every $n$ time steps.
+
+We also need some discussion about the formulation:
+
+\begin{enumerate}
+    \item Since we are using an indirect method of making prediction, the variable $\alpha$ is not an optimization variable anymore.
+    The cost \cref{eq:robust-ddsf-indirect-cost} if formulated similar to the cost in direct formulation \cref{eq:robust-ddsf-indirect-cost}, with the only difference that we do not have a regularizer term for $\alpha$.
+    \item The dynamic constraint \cref{eq:robust-ddsf-indirect-dynamic} is formulated using the indirect method, as discussed in \cite{dorflerBridgingDirectIndirect2023}.
+    The pseudo inverse is introduced by the closed form solution of an inner optimization problem.
+    We refer to \cite{dorflerBridgingDirectIndirect2023} for more details.
+    \item The initial constraint \cref{eq:robust-ddsf-indirect-initial} only uses $l$ pairs of input-output, instead of $n$ pairs as in the direct formulation.
+    This is needed for the proof, and requires some knowledge about the system.
+    \item As discussed before in this chapter, we design a qualitative constraint tightening scheme, which makes the constraint tightening constants $a_k$ hyperparameters that we can choose.
+    \item Constraint \cref{eq:robust-ddsf-indirect-sigma} is again an auxiliary constraint to keep control of the slack variable $\sigma$.
+    Since we are using an indirect method, $\sigma$ only contains $\sequence{\sigma}{k}{0}{L-1}$, corresponding to the output prediction.
+    This affects our construction of candidate solution in the proof of \cref{thm:robust-ddsf-indirect}, so constraint \cref{eq:robust-ddsf-indirect-sigma} is different from \cref{eq:robust-ddsf-direct-sigma}.
+    Similar discussion about this constraint can be made as in the direct formulation.
+\end{enumerate}
+
+We can prove that the formulation \cref{eq:robust-ddsf-indirect} can also provide qualitative guarantees for the system, but with slightly different assumptions from the direct formulation stated in \cref{thm:robust-ddsf-direct}.
+
+\begin{theorem}[Qualitative Guarantees for Indirect Formulation]\label{thm:robust-ddsf-indirect}
+    Given an LTI system with noise as defined in \cref{def:lit-output-noise}, which is also controllable; a dataset trajectory $\datasetSequence{\tildey}{N}$ and $\datasetSequence{u}{N}$ of the system, where $\datasetSequence{u}{N}$ is persistently exciting with order $L=2n$; and the prediction horizon $L$ in \cref{eq:robust-ddsf-indirect} satisfies $L \geq 2n$; an n-step receding horizon scheme.
+    And suppose the system constant satisfies: $n=l \times p$.
+
+    Then, with a certain choice of constraint tightening constants $\sequence{c}{k}{1}{\ceil{\frac{L}{n}}}$, there exists a constant $\varepsmax$, when the noise bound satisfies $\barvareps \leq \varepsmax$, recursive feasibility and closed-loop constraint satisfaction can be guaranteed for the formulation \cref{eq:robust-ddsf-indirect}.
+\end{theorem}
+
+We leave the proof of \cref{thm:robust-ddsf-indirect} to \cref{apps:prf-roubust-indirect}.
+
+Note that we drop the constraint that the deviation of candidate input from objective input is bounded, which is needed in the proof of \cref{thm:robust-ddsf-direct}.
+
+Also, we need the assumption that $n=l \times p$, which is automatically satisfied for SISO systems and for systems that we can directly observe the state.
+It seems quite restrictive in theory, but in practice, even when this assumption is not satisfied, the formulation \cref{eq:robust-ddsf-indirect} can still perform well, as will be illustrated in \cref{subsec:numerical-example-indirect}.
+
+\subsection{Numerical Example for Indirect Formulation}\label{subsec:numerical-example-indirect}
+
+We use the same system as in \cref{subsec:numerical-example-direct}, to illustrate the effectiveness of the indirect formulation \cref{eq:robust-ddsf-indirect}.
+
+First we use exactly the same setup as in \cref{subsec:numerical-example-direct}, and we choose the constraint tightening constants $c_i$ to be: $c_1 = 0.5$, $c_i = 0.1$ for $i \geq 2$.
+
+The closed-loop input and output are shown in \cref{fig:robust-indirect-nonconservative} and \cref{fig:robust-indirect-no-interference}.
+
+\includefig{robust-indirect-nonconservative.png}{1.0}{Closed-loop input and output with indirect method and unsafe objective input}{fig:robust-indirect-nonconservative}
+
+\includefig{robust-indirect-no-interference.png}{1.0}{Closed-loop input and output with indirect method and safe objective input}{fig:robust-indirect-no-interference}
+
+It can be seen in \cref{fig:robust-indirect-nonconservative} that, the constraint tightening scheme is not conservative anymore, and the closed-loop input and output are close to the constraint limit.
+And in \cref{fig:robust-indirect-no-interference}, the closed-loop input is the same as the objective input, which is the desired behavior.
+
+Then we change the noise bound to $\barvareps = 0.5$, in order to illustrate the effectiveness of formulation \cref{eq:robust-ddsf-indirect} under larger noise bound.
+Note that the direct formulation \cref{eq:robust-ddsf-direct} will be trivially infeasible with this noise bound, since $a_{4, 19} \geq 10$.
+
+If we use the same constraint tightening constants $c_i$ as before, the closed-loop input and output are shown in \cref{fig:robust-indirect-violation}.
+The output constraint is violated, due to prediction error and not large enough constraint tightening constants.
+
+\includefig{robust-indirect-violation.png}{1.0}{Closed-loop input and output with indirect method and too small tightening constant}{fig:robust-indirect-violation}
+
+We can choose another set of constraint tightening constants $c_i$: $c_1 = 1.5$, $c_i = 0.2$ for $i \geq 2$.
+We can see from \cref{fig:robust-indirect-noviolation} that the output constraint is satisfied, and the closed-loop input and output are close to the constraint limit.
+
+\includefig{robust-indirect-noviolation.png}{1.0}{Closed-loop input and output with indirect method and proper tightening constant}{fig:robust-indirect-noviolation}
+
+\newpage
+Next, we change the system into a system with two outputs, to illustrate that the formulation \cref{eq:robust-ddsf-indirect} can also work, even if the assumption $n=l \times p$ is not satisfied.
+
+To do this, we write the system into a state space model:
+
+\begin{align*}
+    A = \begin{bmatrix}
+        2.1 & -1.5 & 0.3 \\
+        1 & 0 & 0 \\
+        0 & 1 & 0 \\
+    \end{bmatrix}, \quad
+    B = \begin{bmatrix}
+        1 \\
+        0 \\
+        0 \\
+    \end{bmatrix}, \quad
+    C = 0.01 \begin{bmatrix}
+        2 & 6.1 & 1.1 \\
+        0 & 10 & 0 \\
+    \end{bmatrix}, \quad
+    D = \begin{bmatrix}
+        0 \\
+        0 \\
+    \end{bmatrix}
+\end{align*}
+
+Note that in this case, $n=3$, $l=2$, $p=1$ and $m=2$.
+And the first output is the same as the output of the original system, and the second output is not constrained.
+We also need to modify the constraint tightening constants to be: $c_1 = 1.7$, $c_i = 0.1$ for $i \geq 2$.
+
+We can see from \cref{fig:robust-indirect-simo} that the closed-loop input and output are close to the constraint limit, and the output constraint is satisfied.
+
+\includefig{robust-indirect-simo.png}{1.0}{Closed-loop input and first output with indirect method, on system with two outputs}{fig:robust-indirect-simo}
+
+The problem of how to choose the constraint tightening constants properly is left for future research.
+In practice, we can always start from a conservative constraint tightening scheme, and then gradually decrease the tightening until the input interference is small enough and the constraints are still satisfied.
+
+Also, it's well noticing that the number of optimization variables in the indirect formulation \cref{eq:robust-ddsf-indirect} has nothing to do with the size of dataset trajectory, and is only related to the prediction horizon $L$.
+This is a big advantage of the indirect formulation, since it makes the problem scalable to large dataset trajectory.
+Also, due to less optimization variables, the indirect formulation is usually faster to solve than the direct formulation.
+In the example above, the direct formulation takes about $1.3$ seconds to solve, while the indirect formulation only takes about $0.01$ seconds to solve.

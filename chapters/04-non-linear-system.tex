@@ -6,7 +6,7 @@ Include the proof of multi-dataset linear affine system method if possible.
 In this chapter, we briefly discuss how to extend the data-driven prediction method to non-linear systems.
 To avoid unnecessary complexity, we only consider noise-free systems in this chapter.
 
-First we introduce a method of effectively using one or more dataset trajectories of a non-linear system to make predictions in \cref{sec:weithing-method}.
+First we introduce a method of effectively using one or more dataset trajectories of a non-linear system to make predictions in \cref{sec:weighting-method}.
 Then we introduce a metric for evaluating the quality of a dataset in \cref{sec:fractal-dimension-method}.
 Finally, we use a numerical example in \cref{sec:non-linear-system-numerical-example} to show that dataset that is better evaluated by the metric can make better predictions using the method we propose.
 
@@ -236,7 +236,7 @@ These possibilities are left for future work.
 In this section, we introduce a metric for evaluating the richness of a dataset for non-linear system, where the dataset consists of several dataset trajectories as introduced in \cref{sec:weighting-method}.
 
 The intuition is, for a dataset to be rich enough, it should be able to cover all possible input-output pairs of the system.
-In another word, we want to evaluate the ability of some curves to cover a higher dimensional space $\Yset \times \Uset$.
+In another word, we want to evaluate the ability of some curves to cover a certain volume in the higher dimensional space.
 To evaluate this \emph{space-filling property}, we can refer to the idea of fractal dimension and space-filling curves, as introduced in \cite{saganSpaceFillingCurves1994} and the box-counting dimension introduced in \cite{kennethAlternativeDefinitionsDimension2003}.
 % Here we give a brief introduction to the box-counting dimension.
 
@@ -253,32 +253,89 @@ For fractals, the box-counting dimension is defined as:
 
 where $N(\epsilon)$ is the number of boxes of size $\epsilon$ needed to cover the fractal.
 
-The intuition is, if $\epsilon$ is small enough, the number of boxes of size $\epsilon$ to cover a smooth manifold of dimension $d$ will be $N(\epsilon) \approx C \left(\frac{1}{\epsilon}\right)^d$, so taking the logarithm of both sides and dividing by $\log \frac{1}{\epsilon}$ will give $d$, as $\epsilon \to 0$.
+The intuition is, if $\epsilon$ is small enough, the number of boxes of size $\epsilon$ to cover a smooth manifold of dimension $d$ will be $N(\epsilon) \approx C \left(\frac{1}{\epsilon}\right)^d$, so taking the logarithm of both sides will yield:
+
+\begin{equation}
+    \label{eq:box-counting-dimension-log}
+    \log \left(N(\epsilon)\right) \approx \log C + d \log \left(\frac{1}{\epsilon}\right)
+\end{equation}
+
+and dividing by $\log \frac{1}{\epsilon}$ will give $d$, as $\epsilon \to 0$.
 So we use a similar method to determine the dimension of a fractal.
 
 Intuitively, the box-counting dimension can be seen as a metric of how well a set can cover the ambient space.
 So we can borrow this idea to evaluate how well the dataset trajectories cover the input-output space $\Yset \times \Uset$.
 
 In practice, we only have access to a finite number of dataset input-output points $\ud_i$ and $\yd_i$, $i = 1, \ldots, N_1+N_2+\dots+N_K$, each of them belonging to a certain dataset trajectory.
-We can try to 
+We can also try to sample a number of different box sizes $\epsilon$, and count the number of boxes needed to cover all the input-ouput points.
+
+Also, we face the choice of evaluating the box-counting dimension only using input-output pairs within the constraint set $\Yset \times \Uset$ or using the whole dataset.
+The former choice might be able to pick the most important part of the dataset, while the latter can give a more comprehensive evaluation of the dataset.
+These two choices are also compared in the numerical example in \cref{sec:non-linear-system-numerical-example}.
+
+For illustration, we choose a dataset from the numerical example in \cref{sec:non-linear-system-numerical-example}, which consists of 40 dataset trajectories, each of them having 50 input-output pairs.
+As mentioned before, we take one pair of input-output as one point in the input-output space $\Yset \times \Uset$.
+In this case, the input-output space is three-dimensional: $\Real^1 \times \Real^2$.
+For visualization, we only plot the output part of the trajectory, as seen in \cref{fig:two-dim-dataset-example}.
+The preprocessing of the dataset can be found in \cref{sec:non-linear-system-numerical-example}.
+In \cref{fig:two-dim-dataset-example}, the x-axis is the first system state $\xelone$, and the y-axis is the second system state $\xeltwo$.
+The blue curves represent the dataset trajectories.
+
+\includefig{two-dim-dataset-example.png}{0.6}{Output part of example dataset trajectories}{fig:two-dim-dataset-example}
+
+Then we sample a number of box sizes $\epsilon$, and count the number of boxes needed to cover all the input-output points.
+As we care about the logarithm of box size, we sample in the logarithmic space.
+In this test case, we choose 30 different $\log_2(\epsilon)$ values with uniform distance from the range $[-5, 0]$.
+Note that as the box size becomes smaller, only the sampled box size that results in a different number of box than the previous size is kept.
+Then we can plot the number of boxes needed to cover the dataset trajectories, as a function of the logarithm of box size, as seen in \cref{fig:two-dim-dataset-large-size-range}.
+
+\includefig{two-dim-dataset-large-size-range.png}{0.6}{Number of boxes needed to cover the dataset trajectories and box size, drawn in logarithmic scale}{fig:two-dim-dataset-large-size-range}
+
+In the figure, x-axis is the logarithm of reciprocal of box size, and y-axis is the logarithm of the number of boxes needed to cover the dataset trajectories.
+The blue dots represent the sampled points.
+
+We can see that, when the box size is not small enough, in \cref{fig:two-dim-dataset-large-size-range} when the size is larger than $2^{-2}$, we can not observe the linear behavior as described in \cref{eq:box-counting-dimension-log}.
+This is plausible, as \cref{eq:box-counting-dimension-log} is only a good approximation if the box size is small, even in the case of smooth manifold or actual fractals.
+
+And when the box size is too small, in \cref{fig:two-dim-dataset-large-size-range} when the size is smaller than $2^{-4}$, the number of boxes needed to cover the dataset tends to a constant.
+This is due to the fact that we are working with a finite number of dataset points, so when the box size is small enough, each box will contain at most one dataset point, and the number of boxes needed to cover the dataset will be the same as the number of dataset points.
+
+So with this observation, we need to choose a proper range of box size to evaluate the box-counting dimension of the dataset.
+As shown in \cref{fig:two-dim-dataset-large-size-range}, we choose the range $[2^{-3.3}, 2^{-2.2}]$ to evaluate the box-counting dimension of the dataset.
+Within this region, $\log_2\left(N(\epsilon)\right)$ and $\log_2\left(\frac{1}{\epsilon}\right)$ shows a fairly good linear behavior, as seen in \cref{fig:two-dim-dataset-good-size-range}.
+
+\includefig{two-dim-dataset-good-size-range.png}{0.7}{Number of boxes needed to cover the dataset trajectories and box size, drawn in logarithmic scale, with a proper choice of box size region}{fig:two-dim-dataset-good-size-range}
+
+Then we can fit a linear function to the sampled points in the range $[2^{-4}, 2^{-2}]$, and the slope of the linear function will be the box-counting dimension of the dataset.
+In this case, the slope is $2.24$, so the box-counting dimension of the dataset is $2.24$.
 
 The drawbacks and further improvements for this method may include:
 
 \begin{enumerate}
+    \item For real datasets, the fractal dimension value heavily depends on the region of box size we choose to evaluate.
+    This difference can be larger than the difference between different datasets, as is shown in \cref{sec:non-linear-system-numerical-example}.
+    Also, the best region for calculating the fractal dimension may differ for different datasets, so it is unfair to choose a singe region for all datasets.
+    Although a method of comparing datasets independent of this region is proposed in \cref{sec:non-linear-system-numerical-example}, a systematic way of choosing this region and getting a single value to compare different datasets is still missing.
     \item The fractal dimension only deals with the space-filling property of a set, but not the size of the covered region.
     For example, if we rescale a fractal into a smaller size, the fractal dimension will not change, but the region it covers will be smaller.
     That also holds for the box-counting dimension of dataset trajectories.
     With a set of dataset trajectories that covers a small region very well but does not contain any information outside the small region, the box-counting dimension might be larger, but the dataset is not so rich.
+    It might be possible to include the constant $\log D$ in \cref{eq:box-counting-dimension-log} into consideration, but it is not clear how to do it.
     \item The box-counting dimension can only be a metric for evaluating the richness of a dataset, but does not provide any information about how well the dataset can be used for making predictions or fitting a model.
     The quantitative relation between the box-counting dimension and the quality of prediction or fitted model is still unknown.
 \end{enumerate}
 
-They are left for future work.
+These points are left for future investigation.
 
 
 \section{Numerical Example}\label{sec:non-linear-system-numerical-example}
 
-\begin{align}
+In this section, we present a numerical example of using the weighting method in \cref{sec:weighting-method} to make predictions for a non-linear system, and using the fractal dimension method in \cref{sec:fractal-dimension-method} to evaluate the richness of the dataset.
+As can be seen from the example, the dataset that is better evaluated by the fractal dimension method can make better predictions using the weighting method, with a proper choice of hyperparameters.
+
+For this section, we use the following continuous non-linear system:
+
+\begin{align} \label{eq:continuous-non-linear-system}
     x = \begin{bmatrix}
         \xelone \\
         \xeltwo
@@ -291,3 +348,71 @@ They are left for future work.
         u - 0.5 \sin(\xelone) - 0.5 \xelone \left(\cos(\xeltwo^2)\right)^2
     \end{bmatrix}
 \end{align}
+
+We use a numerical integrator to simulate the system for a sample time $\SI{0.03}{\second}$.
+Within each time step, the control input $u$ is kept constant.
+We assume the system state is observable.
+The system is equipped with state/output constraint $\Yset = \Xset = \left\{x \;|\; -\pi \leq \xelone \leq \pi,\, -0.5 \leq \xeltwo \leq 0.5 \right\}$, and input constraint $\Uset = \left\{u \;|\; -1 \leq u \leq 1 \right\}$.
+
+So we have a discrete time invariant non-linear system $\left(\Xset,\Uset,\Yset,f,g\right)$, where $\Xset$, $\Uset$, $\Yset$ are defined above, $f$ being the map from current state and constant control input of system \cref{eq:continuous-non-linear-system} to next state after $\SI{0.03}{\second}$, and $g\left(x, u\right) = x$.
+
+Since we assume the system state is observable, we can choose $l=1$ and use only the output as the initial condition, instead of the extended initial condition $\xi_t$.
+The prediction method can still be applied, with the initial input part of mosaic-Hankel matrix $\Up$ being empty and the future input part $\Uf$ being changed to $\Uf = \hankel{L}{\subseq{\ud}{l-1}{N-2}}$.
+And \cref{eq:weighted-indirect-method-w-solution} will be reformulated as:
+
+\begin{subequations}
+    \label{eq:weighted-indirect-method-w-state-solution}
+    \begin{align}
+        \alpha &= \Wt \transpose{\hankeluxone}\inv{\left(\hankeluxone \Wt \transpose{\hankeluxone}\right)} \begin{bmatrix}
+            \subseq{u}{t}{T+L-1} \\
+            y_{t} \\
+            1
+        \end{bmatrix} \label{eq:weighted-indirect-method-w-satte-solution-alpha} \\
+        \subseq{y}{t+1}{t+L} &= \Yf \alpha \label{eq:weighted-indirect-method-w-state-solution-prediction}
+\end{align}
+\end{subequations}
+
+Note that we define the system dynamic as $x_{t} = f\left(x_{t-1}, u_{t-1}\right)$, $y_t = g\left(x_t, u_t\right)$, so we view $y_t = x_t$ as the initial condition, and $\subseq{y}{t+1}{t+L}$ as predicted future outputs.
+As a new notation, we use variables with check $\check{(-)}$ to denote the real system states or outputs, if the proposed input sequence $\subseq{u}{t}{t+L-1}$ is applied to the real system.
+For example, in this specific case, if we further simulate the system for $L$ steps applying $\subseq{u}{t}{t+L-1}$, we will get the state/output sequence $\checkx_j$ and $\checky_j$, $t+1 \leq j \leq t+L$.
+
+For the hyperparameters of the weighting method, we choose $Q = \begin{bmatrix} \frac{1}{4 \pi^2} & 0 \\ 0 & 1 \end{bmatrix}$, to compensate for different size of $\xelone$ and $\xeltwo$; and $w(x) = e^{-\sqrt{x}}$.
+Also, we set the weight of $\Wt(i,i)$ to zero if there are enough sub-trajectories that are close enough to current initial condition $y_t$.
+We set the prediction horizon $L = 3$.
+
+For the datasets to be compared, we grid the state space with 10 points in the first dimension and 4 points in the second dimension, and pick the resulting 40 points as the initial conditions.
+For each initial condition, we simulate the system for 300 steps with each input uniformly sampled from $\Uset$.
+So we have 40 dataset trajectories, each of them having 300 input-output pairs.
+
+This forms the largest dataset, which we call $\dataset_5$.
+We also form smaller datasets $\dataset_1$ to $\dataset_4$ by picking the first 50, 100, 150, 20, 250 input-output pairs from each dataset trajectory, respectively.
+
+To evaluate the quality of prediction yield by different datasets, we define the following cost for a given dataset $\dataset$, tested on a certain initial condition $y_t$ and proposed input sequence $\subseq{u}{t}{t+L-1}$:
+
+\begin{equation}\label{eq:prediction-cost-single-point}
+    cost\left(\dataset; y_t, \subseq{u}{t}{t+L-1}\right) = \sum_{j=t+1}^{t+L} \mnormsq{\left(\checky_j - y_j\right)}{Q}
+\end{equation}
+
+where $Q$ is the same weighting matrix as used in the weighting method, $y_j$ and $\checky_j$ are the predicted and real output at time step $j$, respectively.
+
+To evaluate the quality of prediction at different initial conditions and input sequences, we also grid the state and input space $\Xset \times \Uset$ with 10 points on each dimension, resulting in 1000 different initial condition and input pairs.
+For each pair $x_{t,i}$ and $u_{t,i}$, we start from $x_{t,i}$ and repeat $u_{t,i}$ $L$ times as the proposed input sequence $\subseq{u}{t}{t+L-1}$, then calculate the cost \cref{eq:prediction-cost-single-point} for each dataset $\dataset_1$ to $\dataset_5$.
+Then for each dataset, we have 1000 cost values, and we can calculate the mean and maximum of them.
+
+Before calculating the box-counting dimension of the datasets, we normalize the datasets with the bound of the constraint set $\Yset \times \Uset$.
+
+Also, we present two box-dimension values for each dataset, one evaluated using the whole dataset, and one evaluated using only the input-output pairs within the constraint set $\Yset \times \Uset$.
+
+TODO: present the result of error and single box-counting dimension and discussion
+
+As mentioned in \cref{sec:fractal-dimension-method}, the box-counting dimension of a dataset heavily depends on the region of box size we choose to evaluate.
+To overcome this drawback, we propose a method of comparing datasets without choosing a specific box size region for each of them.
+
+The idea is, we can choose a proper range of box size, and grid it into several points.
+Then we take each point and calculate the box-counting dimension of the dataset using a size range around that point.
+By this method we can approximately get the relationship between the box-counting dimension and the box size region, and compare different datasets using this relationship.
+
+We still use the logarithmic scale.
+In this specific example,
+
+

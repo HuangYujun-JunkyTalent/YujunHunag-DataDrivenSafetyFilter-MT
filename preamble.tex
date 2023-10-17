@@ -12,6 +12,7 @@
 \usepackage{enumitem}
 \usepackage{parskip}
 \usepackage{caption}
+\usepackage{siunitx}
 % \usepackage[retainorgcmds]{IEEEtrantools}
 
 \setlist{nosep} % set itemized list style
@@ -97,6 +98,9 @@
 \newcommand\starx{{x^*}}
 \newcommand\staru{{u^*}}
 \newcommand\stary{{y^*}}
+\newcommand\checku{\check{u}}
+\newcommand\checky{\check{y}}
+\newcommand\checkx{\check{x}}
 
 \newcommand\tildexi{\tilde{\xi}}
 \newcommand\hatxi{\hat{\xi}}
@@ -122,6 +126,8 @@
 
 \newcommand\uObj{u^{\text{obj}}}
 
+\newcommand\dataset{\mathcal{D}}
+
 \newcommand\lamalpha{\lambda_\alpha}
 \newcommand\lamsigma{\lambda_\sigma}
 
@@ -141,6 +147,13 @@
 \newcommand\hankeluyone{
 	\begin{bmatrix}
 		\Up \\
+		\Uf \\
+		\Yp \\
+		\transpose{\ones{\NH}}
+	\end{bmatrix}
+}
+\newcommand\hankeluxone{
+	\begin{bmatrix}
 		\Uf \\
 		\Yp \\
 		\transpose{\ones{\NH}}

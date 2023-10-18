@@ -125,10 +125,11 @@ We also need some discussion about the formulation:
 We can prove that the formulation \cref{eq:robust-ddsf-direct} can provide qualitative guarantees for the system.
 
 \begin{theorem}[Qualitative Guarantees for Direct Formulation]\label{thm:robust-ddsf-direct}
-    Given an LTI system with noise as defined in \cref{def:lit-output-noise}, which is also controllable; a dataset trajectory $\datasetSequence{\tildey}{N}$ and $\datasetSequence{u}{N}$ of the system, where $\datasetSequence{u}{N}$ is persistently exciting with order $L=2n$; and the prediction horizon $L$ in \cref{eq:robust-ddsf-direct} satisfies $L \geq 2n$; an n-step receding horizon scheme.
+    Given a controllable LTI system with noise as defined in \cref{def:lit-output-noise} along with equilibrium $\us$ and $\ys$ in the interior of $\Uset$ and $\Yset$; a dataset trajectory $\datasetSequence{\tildey}{N}$ and $\datasetSequence{u}{N}$ of the system, where $\datasetSequence{u}{N}$ is persistently exciting with order $L=2n$; and the prediction horizon $L$ in \cref{eq:robust-ddsf-direct} satisfies $L \geq 2n$; an n-step receding horizon scheme.
     And suppose the objective input satisfies that, maximum deviation from objective input is bounded, that is: $\norm{\subseq{\baru}{0}{n-1} - \subseq{\uObj}{0}{n-1}}_{\subseq{R}{0}{n-1}} \leq \barD$ for some positive constant $\barD$, for any feasible input sequence candidate $\subseq{\baru}{0}{n-1}$.
 
-    Then, with proper choice of regularizing constants $\lamalpha$ and $\lamsigma$, there exist a constant $\varepsmax$, when the noise bound satisfies $\barvareps \leq \varepsmax$, recursive feasibility and closed-loop constraint satisfaction can be guaranteed for the formulation \cref{eq:robust-ddsf-direct}.
+    Then, with proper choice of regularizing constants $\lamalpha$ and $\lamsigma$, there exist a constant $\varepsmax$ and a cost bound $\barV$, when the noise bound satisfies $\barvareps \leq \varepsmax$, and the optimal cost at time step $t$ is smaller than $\barV$; then recursive feasibility and closed-loop constraint satisfaction can be guaranteed after this time step for the formulation \cref{eq:robust-ddsf-direct}.
+    Also the optimal cost at time step $t+n$ will also be smaller than $\barV$.
 \end{theorem}
 
 We leave the proof of \cref{thm:robust-ddsf-direct} to \cref{apps:prf-roubust-direct}.
@@ -184,7 +185,7 @@ As can be seen from \cref{tab:robust-direct-tightening}, the constraint tighteni
 Remember that our output constraint is $\Yset = \left[-10, 10\right]$, so with a slightly larger noise bound, constraint \cref{eq:nominal-ddsf-output} will be trivially infeasible since $a_{4, 19} \geq 10$.
 This is also the reason that we need to choose a very small noise bound $\barvareps = 0.0001$ in this example.
 
-By applying an open-loop objective control input of a sine wave with amplitude $15$, we observe the closed-loop input and output as shonw in \cref{fig:robust-direct-unwanted-interference}.
+By applying an open-loop objective control input of a sine wave with amplitude $3$, we observe the closed-loop input and output as shown in \cref{fig:robust-direct-unwanted-interference}.
 
 \includefig{robust-direct-unwanted-interference.png}{1.0}{Closed-loop input and output with direct method and safe objective input}{fig:robust-direct-unwanted-interference}
 
@@ -283,8 +284,8 @@ We also need some discussion about the formulation:
 We can prove that the formulation \cref{eq:robust-ddsf-indirect} can also provide qualitative guarantees for the system, but with slightly different assumptions from the direct formulation stated in \cref{thm:robust-ddsf-direct}.
 
 \begin{theorem}[Qualitative Guarantees for Indirect Formulation]\label{thm:robust-ddsf-indirect}
-    Given an LTI system with noise as defined in \cref{def:lit-output-noise}, which is also controllable; a dataset trajectory $\datasetSequence{\tildey}{N}$ and $\datasetSequence{u}{N}$ of the system, where $\datasetSequence{u}{N}$ is persistently exciting with order $L=2n$; and the prediction horizon $L$ in \cref{eq:robust-ddsf-indirect} satisfies $L \geq 2n$; an n-step receding horizon scheme.
-    And suppose the system constant satisfies: $n=l \times p$.
+    Given a controllable LTI system with noise as defined in \cref{def:lit-output-noise} along with equilibrium $\us$ and $\us$ in the interior of $\Uset$ and $\Yset$; a dataset trajectory $\datasetSequence{\tildey}{N}$ and $\datasetSequence{u}{N}$ of the system, where $\datasetSequence{u}{N}$ is persistently exciting with order $L=2n$; and the prediction horizon $L$ in \cref{eq:robust-ddsf-indirect} satisfies $L \geq 2n$; an n-step receding horizon scheme.
+    And suppose the system constant satisfies: $n=l \times p$, and the input, output constants $\Uset$ and $\Yset$ are both finite.
 
     Then, with a certain choice of constraint tightening constants $\sequence{c}{k}{1}{\ceil{\frac{L}{n}}}$, there exists a constant $\varepsmax$, when the noise bound satisfies $\barvareps \leq \varepsmax$, recursive feasibility and closed-loop constraint satisfaction can be guaranteed for the formulation \cref{eq:robust-ddsf-indirect}.
 \end{theorem}
@@ -361,7 +362,7 @@ We can see from \cref{fig:robust-indirect-simo} that the closed-loop input and o
 The problem of how to choose the constraint tightening constants properly is left for future research.
 In practice, we can always start from a conservative constraint tightening scheme, and then gradually decrease the tightening until the input interference is small enough and the constraints are still satisfied.
 
-Also, it's well noticing that the number of optimization variables in the indirect formulation \cref{eq:robust-ddsf-indirect} has nothing to do with the size of dataset trajectory, and is only related to the prediction horizon $L$.
-This is a big advantage of the indirect formulation, since it makes the problem scalable to large dataset trajectory.
+Also, it's worth noticing that the number of optimization variables in the indirect formulation \cref{eq:robust-ddsf-indirect} has nothing to do with the size of dataset trajectory, and is only related to the prediction horizon $L$.
+This is a big advantage of the indirect formulation, since it makes the problem scalable to large dataset.
 Also, due to less optimization variables, the indirect formulation is usually faster to solve than the direct formulation.
 In the example above, the direct formulation takes about $1.3$ seconds to solve, while the indirect formulation only takes about $0.01$ seconds to solve.

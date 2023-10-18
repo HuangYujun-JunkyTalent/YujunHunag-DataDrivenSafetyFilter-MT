@@ -31,6 +31,7 @@
 	T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 
+\renewcommand{\theparagraph}{\S\roman{paragraph}}
 % \renewcommand{\labelitemi}{\normalfont\bfseries\textendash}
 
 \def\imagedir{img}
@@ -85,6 +86,10 @@
 }
 
 \newcommand\defeq{\vcentcolon=}
+% \newcommand\leqreason[1]{\displaystyle_{\leq}^{\text{\cref{#1}}}}
+\newcommand\leqreason[1]{\stackrel{\text{\cref{#1}}}{\leq}}
+\newcommand\reason[1]{\text{By \cref{#1}}}
+% \newcommand\leqreason[1]{\displaystyle_{\leq}^{#1}}
 
 \newcommand\tildex{\tilde{x}}
 \newcommand\tildeu{\tilde{u}}
@@ -107,10 +112,16 @@
 \newcommand\barxi{\bar{\xi}}
 \newcommand\starxi{{\xi^*}}
 
+\newcommand\hatalpha{\hat{\alpha}}
+\newcommand\hatsigma{\hat{\sigma}}
+
 \newcommand\barvareps{\bar{\varepsilon}}
-\newcommand\varepsmax{\varepsilon_{\text{max}}}
+\newcommand\varepsmax{{\varepsilon_{\text{max}}}}
 
 \newcommand\barD{\bar{D}}
+\newcommand\barV{\bar{V}}
+\newcommand\Jof[1]{J\left( #1 \right)}
+\newcommand\optJof[1]{J^*\left( #1 \right)}
 
 \newcommand\us{{u^s}}
 \newcommand\ys{{y^s}}
@@ -118,6 +129,7 @@
 
 \newcommand\ud{{u^d}}
 \newcommand\yd{{y^d}}
+\newcommand\varepsd{{\varepsilon^d}}
 
 \newcommand\NH{{N_H}}
 
@@ -125,24 +137,54 @@
 \newcommand\xeltwo{{x^{\scriptscriptstyle{(2)}}}}
 
 \newcommand\uObj{u^{\text{obj}}}
+\newcommand\uObjn{\subseq{\uObj}{0}{n-1}}
 
 \newcommand\dataset{\mathcal{D}}
 
 \newcommand\lamalpha{\lambda_\alpha}
 \newcommand\lamsigma{\lambda_\sigma}
 
+\newcommand\Phidagger{\Phi_{\dagger}}
+\newcommand\Hux{{H_{ux}}}
+\newcommand\Huxpinv{H_{ux}^{\dagger}}
+\newcommand\cpe{c_{pe}}
+\newcommand\Gammauy{{\Gamma_{uy}}}
+\newcommand\rhoinf[1]{\rho_{\infty, #1}}
+\newcommand\rhotwo[1]{\rho_{2, #1}}
+
 \newcommand\Up{{U_p}}
 \newcommand\Uf{{U_f}}
 \newcommand\Yp{{Y_p}}
 \newcommand\tildeYp{{\tilde{Y}_p}}
+\newcommand\Xp{{X_p}}
+\newcommand\Epsilonp{{\mathcal{E}_p}}
 \newcommand\Yf{Y_f}
 \newcommand\tildeYf{{\tilde{Y}_f}}
+\newcommand\Xf{{X_f}}
+\newcommand\Epsilonf{{\mathcal{E}_f}}
 \newcommand\hankeluy{
 	\begin{bmatrix}
 		\Up \\
 		\Uf \\
 		\Yp \\
 	\end{bmatrix}
+}
+\newcommand\Huy{
+	\transpose{\begin{bmatrix}
+		\transpose{\Up} & \transpose{\Uf} & \transpose{\Yp}
+	\end{bmatrix}}
+}
+\newcommand\hankeluepsilon{
+	\begin{bmatrix}
+		\mathbb{0} \\
+		\mathbb{0} \\
+		\Epsilonp \\
+	\end{bmatrix}
+}
+\newcommand\Hepsilon{
+	\transpose{\begin{bmatrix}
+		\mathbb{0} & \mathbb{0} & \transpose{\Epsilonp}
+	\end{bmatrix}}
 }
 \newcommand\hankeluyone{
 	\begin{bmatrix}
@@ -155,7 +197,7 @@
 \newcommand\hankeluxone{
 	\begin{bmatrix}
 		\Uf \\
-		\Yp \\
+		\Xp \\
 		\transpose{\ones{\NH}}
 	\end{bmatrix}
 }
@@ -165,6 +207,11 @@
 		\Uf \\
 		\tildeYp \\
 	\end{bmatrix}
+}
+\newcommand\Hutildey{
+	\transpose{\begin{bmatrix}
+		\transpose{\Up} & \transpose{\Uf} & \transpose{\tildeYp}
+	\end{bmatrix}}
 }
 \newcommand\hankelutildeyone{
 	\begin{bmatrix}
@@ -183,8 +230,9 @@
 \newcommand\twonorm[1]{\norm{#1}_2}
 \newcommand\onenorm[1]{\norm{#1}_1}
 
-\newcommand\transpose[1]{#1^{\top}}
+\newcommand\transpose[1]{{#1^{\top}}}
 \newcommand\inv[1]{#1^{-1}}
+\newcommand\pinv[1]{#1^{\dagger}}
 
 \newcommand\mnormsq[2]{\transpose{#1} #2 #1}
 

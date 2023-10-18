@@ -74,20 +74,20 @@ This formulation also provides closed-loop guarantees similar to the state-based
     Due to initial constraint \cref{eq:model-based-safety-filter-initial} and dynamic constraint \cref{eq:model-based-safety-filter-dynamics}, the initial state of the system $x_t$ is the same as the optimal solution $\starx_0(t)$.
     Then due to dynamic constraint \cref{eq:model-based-safety-filter-dynamics}, after $\staru_0$ is applied to the real system, the output will be $\stary_0(t)$, which satisfies the constraint $\Yset$ due to \cref{eq:model-based-safety-filter-output}.
 
-    At time step $t+1$, we define the candidate solution $\baru(t+1)$, $\barx(t+1)$, and $\bary(t+1)$ as follows:
+    At time step $t+1$, we define the candidate solution $\hatu(t+1)$, $\hatx(t+1)$, and $\haty(t+1)$ as follows:
     {
     \setlength{\abovedisplayskip}{3pt}
     \setlength{\belowdisplayskip}{3pt}
     % \setlength{\abovedisplayshortskip}{0pt}
     % \setlength{\belowdisplayshortskip}{0pt}
     \begin{align*}
-        \subseq{\baru}{-n}{L-2}(t+1) = \subseq{\staru}{-n+1}{L-1}(t), \quad \baru_{L-1}(t+1) = \us \\
-        \subseq{\barx}{-n}{L-2}(t+1) = \subseq{\starx}{-n+1}{L-1}(t), \quad \barx_{L-1}(t+1) = \xs \\
-        \subseq{\bary}{-n}{L-2}(t+1) = \subseq{\stary}{-n+1}{L-1}(t), \quad \bary_{L-1}(t+1) = \ys
+        \subseq{\hatu}{-n}{L-2}(t+1) = \subseq{\staru}{-n+1}{L-1}(t), \quad \hatu_{L-1}(t+1) = \us \\
+        \subseq{\hatx}{-n}{L-2}(t+1) = \subseq{\starx}{-n+1}{L-1}(t), \quad \hatx_{L-1}(t+1) = \xs \\
+        \subseq{\haty}{-n}{L-2}(t+1) = \subseq{\stary}{-n+1}{L-1}(t), \quad \haty_{L-1}(t+1) = \ys
     \end{align*}
     }
     Where $\xs$ is the equilibrium state implicitly defined by $\us$ and $\ys$.
-    Due to terminal constraint \cref{eq:model-based-safety-filter-terminal}, we have $\barx_{L-2}(t+1) = \xs$, also because the optimal solution $\staru(t)$, $\starx(t)$, and $\stary(t)$ satisfy the dynamic constraint \cref{eq:model-based-safety-filter-dynamics}, we can conclude that $\subseq{\baru}{-n}{L-1}(t+1)$, $\subseq{\barx}{-n}{L-1}(+1)$, and $\subseq{\bary}{-n}{L-1}$ is a trajectory of the system, thus satisfies the dynamic constraint \cref{eq:model-based-safety-filter-dynamics}.
+    Due to terminal constraint \cref{eq:model-based-safety-filter-terminal}, we have $\hatx_{L-2}(t+1) = \xs$, also because the optimal solution $\staru(t)$, $\starx(t)$, and $\stary(t)$ satisfy the dynamic constraint \cref{eq:model-based-safety-filter-dynamics}, we can conclude that $\subseq{\hatu}{-n}{L-1}(t+1)$, $\subseq{\hatx}{-n}{L-1}(+1)$, and $\subseq{\haty}{-n}{L-1}$ is a trajectory of the system, thus satisfies the dynamic constraint \cref{eq:model-based-safety-filter-dynamics}.
 
     It's also easy to verify that \crefrange{eq:model-based-safety-filter-initial}{eq:model-based-safety-filter-terminal} are also satisfied by the candidate solution.
 

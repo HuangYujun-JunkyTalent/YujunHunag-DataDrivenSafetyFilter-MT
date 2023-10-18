@@ -1,7 +1,4 @@
 \chapter{Data-Driven Predictive Method for Non-linear Systems}\label{chap:non-linear-system}
-TODO: Introduce the weighting method, fractal dimension method, and multi-dataset linear affine system method.
-Lose the advantage of independent of dataset size.
-Include the proof of multi-dataset linear affine system method if possible.
 
 In this chapter, we briefly discuss how to extend the data-driven prediction method to non-linear systems.
 To avoid unnecessary complexity, we only consider noise-free systems in this chapter.
@@ -356,7 +353,7 @@ The system is equipped with state/output constraint $\Yset = \Xset = \left\{x \;
 
 So we have a discrete time invariant non-linear system $\left(\Xset,\Uset,\Yset,f,g\right)$, where $\Xset$, $\Uset$, $\Yset$ are defined above, $f$ being the map from current state and constant control input of system \cref{eq:continuous-non-linear-system} to next state after $\SI{0.03}{\second}$, and $g\left(x, u\right) = x$.
 
-Since we assume the system state is observable, we can choose $l=1$ and use only the output as the initial condition, instead of the extended initial condition $\xi_t$.
+Since we assume the system state is observable, we can directly deal with the system state without worrying about the output.
 The prediction method can still be applied, with the initial input part of mosaic-Hankel matrix $\Up$ being empty and the future input part $\Uf$ being changed to $\Uf = \hankel{L}{\subseq{\ud}{l-1}{N-2}}$.
 And \cref{eq:weighted-indirect-method-w-solution} will be reformulated as:
 
@@ -365,32 +362,33 @@ And \cref{eq:weighted-indirect-method-w-solution} will be reformulated as:
     \begin{align}
         \alpha &= \Wt \transpose{\hankeluxone}\inv{\left(\hankeluxone \Wt \transpose{\hankeluxone}\right)} \begin{bmatrix}
             \subseq{u}{t}{T+L-1} \\
-            y_{t} \\
+            x_{t} \\
             1
         \end{bmatrix} \label{eq:weighted-indirect-method-w-satte-solution-alpha} \\
-        \subseq{y}{t+1}{t+L} &= \Yf \alpha \label{eq:weighted-indirect-method-w-state-solution-prediction}
+        \subseq{x}{t+1}{t+L} &= \Xf \alpha \label{eq:weighted-indirect-method-w-state-solution-prediction}
 \end{align}
 \end{subequations}
 
-Note that we define the system dynamic as $x_{t} = f\left(x_{t-1}, u_{t-1}\right)$, $y_t = g\left(x_t, u_t\right)$, so we view $y_t = x_t$ as the initial condition, and $\subseq{y}{t+1}{t+L}$ as predicted future outputs.
+where $\Xp = \hankel{1}{\subseq{x^d}{0}{N-L-1}}$ and $\Xf = \hankel{L}{\subseq{x^d}{1}{N-1}}$, being the initial state part and future state part of the dataset system state mosaic-Hankel matrix, respectively.
+
 As a new notation, we use variables with check $\check{(-)}$ to denote the real system states or outputs, if the proposed input sequence $\subseq{u}{t}{t+L-1}$ is applied to the real system.
 For example, in this specific case, if we further simulate the system for $L$ steps applying $\subseq{u}{t}{t+L-1}$, we will get the state/output sequence $\checkx_j$ and $\checky_j$, $t+1 \leq j \leq t+L$.
 
 For the hyperparameters of the weighting method, we choose $Q = \begin{bmatrix} \frac{1}{4 \pi^2} & 0 \\ 0 & 1 \end{bmatrix}$, to compensate for different size of $\xelone$ and $\xeltwo$; and $w(x) = e^{-\sqrt{x}}$.
-Also, we set the weight of $\Wt(i,i)$ to zero if there are enough sub-trajectories that are close enough to current initial condition $y_t$.
-We set the prediction horizon $L = 3$.
+Also, we set the weight of $\Wt(i,i)$ to zero if there are enough sub-trajectories that are close enough to current initial condition $x_t$.
+The prediction horizon is set to $L = 3$.
 
 For the datasets to be compared, we grid the state space with 10 points in the first dimension and 4 points in the second dimension, and pick the resulting 40 points as the initial conditions.
 For each initial condition, we simulate the system for 300 steps with each input uniformly sampled from $\Uset$.
 So we have 40 dataset trajectories, each of them having 300 input-output pairs.
 
-This forms the largest dataset, which we call $\dataset_5$.
-We also form smaller datasets $\dataset_1$ to $\dataset_4$ by picking the first 50, 100, 150, 20, 250 input-output pairs from each dataset trajectory, respectively.
+This forms the largest dataset, which we call $\dataset_6$.
+We also form smaller datasets $\dataset_1$ to $\dataset_5$ by picking the first 50, 100, 150, 200, 250 input-output pairs from each dataset trajectory, respectively.
 
 To evaluate the quality of prediction yield by different datasets, we define the following cost for a given dataset $\dataset$, tested on a certain initial condition $y_t$ and proposed input sequence $\subseq{u}{t}{t+L-1}$:
 
 \begin{equation}\label{eq:prediction-cost-single-point}
-    cost\left(\dataset; y_t, \subseq{u}{t}{t+L-1}\right) = \sum_{j=t+1}^{t+L} \mnormsq{\left(\checky_j - y_j\right)}{Q}
+    cost\left(\dataset; x_t, \subseq{u}{t}{t+L-1}\right) = \sum_{j=t+1}^{t+L} \mnormsq{\left(\checkx_j - x_j\right)}{Q}
 \end{equation}
 
 where $Q$ is the same weighting matrix as used in the weighting method, $y_j$ and $\checky_j$ are the predicted and real output at time step $j$, respectively.
@@ -399,20 +397,52 @@ To evaluate the quality of prediction at different initial conditions and input 
 For each pair $x_{t,i}$ and $u_{t,i}$, we start from $x_{t,i}$ and repeat $u_{t,i}$ $L$ times as the proposed input sequence $\subseq{u}{t}{t+L-1}$, then calculate the cost \cref{eq:prediction-cost-single-point} for each dataset $\dataset_1$ to $\dataset_5$.
 Then for each dataset, we have 1000 cost values, and we can calculate the mean and maximum of them.
 
-Before calculating the box-counting dimension of the datasets, we normalize the datasets with the bound of the constraint set $\Yset \times \Uset$.
+Before calculating the box-counting dimension of the datasets, we normalize the datasets with the bound of the constraint set $\Xset \times \Uset$.
 
-Also, we present two box-dimension values for each dataset, one evaluated using the whole dataset, and one evaluated using only the input-output pairs within the constraint set $\Yset \times \Uset$.
+Also, we present two box-dimension values for each dataset, one evaluated using the whole dataset, and one evaluated using only the input-output pairs within the constraint set $\Xset \times \Uset$.
 
 TODO: present the result of error and single box-counting dimension and discussion
+
+{\renewcommand{\arraystretch}{1.3}%
+\begin{center}
+\captionof{table}{Mean, Maximum Cost and Box-counting Dimension \label{tab:cost-and-dim}}
+\begin{tabular}{ >{\raggedleft}p{0.3\linewidth}|c|c|c|c|c|c }
+    Dataset & $\dataset_1$ & $\dataset_2$ & $\dataset_3$ & $\dataset_4$ & $\dataset_5$ & $\dataset_6$ \\
+    \hline
+    Length of single trajectory in dataset & 50 & 100 & 150 & 200 & 250 & 300 \\
+    \hline
+    Mean cost (\num{e-4})& \num{316.85} & \num{9.49} & \num{5.82} & \num{5.62} & \num{5.29} & \num{5.05} \\
+    \hline
+    Maximum cost (\num{e-2})& \num{762.84} & \num{2.81} & \num{1.22} & \num{1.20} & \num{1.22} & \num{1.10} \\
+\end{tabular}
+\end{center}
+}
 
 As mentioned in \cref{sec:fractal-dimension-method}, the box-counting dimension of a dataset heavily depends on the region of box size we choose to evaluate.
 To overcome this drawback, we propose a method of comparing datasets without choosing a specific box size region for each of them.
 
 The idea is, we can choose a proper range of box size, and grid it into several points.
 Then we take each point and calculate the box-counting dimension of the dataset using a size range around that point.
+From this process we can get a vector of box-counting dimension values for a dataset, each of them relating to a box size range centered around a certain box size.
 By this method we can approximately get the relationship between the box-counting dimension and the box size region, and compare different datasets using this relationship.
 
 We still use the logarithmic scale.
-In this specific example,
+For the specific example, when evaluating the complete dataset, we choose the box size range $[2^{-0}, 2^{-5.0}]$, and grid the range into 50 different points.
+For each point, for example $s = -3.0$, we take the size range $[2^{-3.0-0.5}, 2^{-3.0+0.5}]$ to evaluate the box-counting dimension of the dataset.
+Then we have \cref{fig:two-dim-example-varying-range-all}, showing the box-counting dimension of six datasets with different range center point.
 
+\includefig{two-dim-example-varying-range-all.png}{0.7}{The relationship between center box-size range (in logarithmic scale) and fitted box-counting dimension of complete dataset}{fig:two-dim-example-varying-range-all}
 
+As we can see from \cref{fig:two-dim-example-varying-range-all}, the box-counting dimension varies a lot with the center point of the box size range, and this variance can be larger than the difference between different datasets.
+However, \cref{fig:two-dim-example-varying-range-all} can also be used to compare different datasets independent of the box size range.
+We can see that in general, the box-counting dimension of the dataset increases as the length of single dataset trajectory increases.
+This can be observed from the fact, for example, the curve corresponds to $\dataset_3$, which is of length 150, is almost always below the curve corresponds to $\dataset_4$, which is of length 200.
+In this specific case, the only outlier is the curve corresponds to $\dataset_2$, which is of length 100, but the corresponding curve lies under that of $\dataset_1$, which is of length 50.
+
+We also present \cref{fig:two-dim-example-varying-range-constrained}, which shows the box-counting dimension of six datasets evaluated using only the input-output pairs within the constraint set $\Xset \times \Uset$.
+
+\includefig{two-dim-example-varying-range-constrained.png}{0.7}{The relationship between center box-size range (in logarithmic scale) and fitted box-counting dimension of dataset within cnostraint}{fig:two-dim-example-varying-range-constrained}
+
+In this case, it is clearer that the box-counting dimension of the dataset increases as the length of single dataset trajectory increases, as the curves are almost ordered by the length of single dataset trajectory.
+
+From this example, especially from \cref{tab:cost-and-dim} and \cref{fig:two-dim-example-varying-range-constrained}, we can see that the with properly chosen hyperparameters, the prediction method proposed in \cref{sec:weighting-method} can make better predictions with a dataset that is better evaluated by the fractal dimension method proposed in \cref{sec:fractal-dimension-method}.

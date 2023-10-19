@@ -21,24 +21,18 @@
 \chapter*{Abstract}
  \addcontentsline{toc}{chapter}{Abstract}
 
-Predictive safety filters can keep the system safe under arbitrary given control input, by predicting future states of the system and applying a safe input that is close to the given input.
-Generally, making predictions requires a model of the system, which requires much knowledge about the system and a complicated system identification process.
-In this thesis, we investigate the design, analysis, and application of a novel data-driven predictive safety filter.
-The proposed data-driven safety filter requires no knowledge of dynamics of the system, only some rich enough dataset trajectories are needed.
+Predictive safety filters are modular frameworks that can ensure safety of the system in terms of constraint satisfaction, under arbitrary inputs.
+In this thesis, we investigate the design, analysis, and application of a series of novel data-driven predictive safety filters.
+The proposed data-driven safety filters require no knowledge of system dynamics, only some rich enough dataset trajectories are needed.
 
-For noise-free Linear Time Invariant (LTI) system, the data-driven safety filter is equivalent to the model-based safety filter.
-In this case, recursive feasibility and constraint satisfaction in close loop can be guaranteed following the same proof as the model-based safety filter.
+We show the equivalence between the data-driven safety filter and the model-based predictive safety filter for noise-free linear time invariant (LTI) systems, and proposed two different robust data-driven safety filters for noisy LTI systems with qualitative guarantees.
+The performance of the robust data-driven safety filters are illustrated with a numerical example.
 
-The filter is also robust against bounded output noise.
-Qualitative guarantees can be given, namely recursive feasibility and constraint satisfaction in close loop hold when bound of output noise is small enough.
+We also propose a data-driven method of making predictions for non-linear systems, and a method based on fractal dimension to evaluate the richness of datasets.
+The effectiveness of this prediction and evaluation method is illustrated with a numerical example.
 
-For general non-linear system, the safety filter can also perform well in practice.
-We propose a method of evaluating the quality of the dataset, as well as a method of improving the prediction performance by selecting and putting different weights on trajectory slices of the dataset.
-These methods are tested on a simple non-linear system, it can be seen that with the proposed methods, better dataset yields better prediction performance.
-
-The data-driven safety filter is also tested on the kinematic and dynamic model of Chronos vehicle.
-We propose a scheme of dataset collection and test for the vehicle, which can be used to generate a rich enough dataset for the safety filter.
-It can be seen that the safety filter can keep the vehicle within the given safe constraints, while keeping the actual input as close as possible to the desired input.
+The data-driven safety filter is proved useful for the simulation of a miniature radio-controlled (RC) vehicle.
+We propose different designs of terminal ingredient for the vehicle, and a scheme of dataset collection and test for general systems.
 
  \cleardoublepage
 

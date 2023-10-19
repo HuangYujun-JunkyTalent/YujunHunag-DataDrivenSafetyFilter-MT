@@ -19,12 +19,12 @@ This result has also been extended to linear time invariant affine systems in \c
 
 Based on this fundamental lemma, the prediction of future outputs of a system can be achieved without the need of a model.
 This idea enlightened \emph{Data-enabled predictive control (DeePC)} in \cite{coulsonDataenabledPredictiveControl2019}, which is a data-driven predictive controller that directly use a dataset trajectory to predict future trajectory of the system.
-In \cite{coulsonDataenabledPredictiveControl2019}, the authors also proposed a scheme of dealing with noise in both dataset trajectory and online observations: regularizing the auxiliary variables in the predictive controller.
+A scheme of dealing with noise in both dataset trajectory and online observations is also proposed in \cite{coulsonDataenabledPredictiveControl2019}: regularizing the auxiliary variables in the predictive controller.
 
 This data-driven predictive controller has been proved effective in many fields.
-In \cite{elokdaDataQuad2021}, the authors used DeePC to control a quadrotor, and the results show that the quadrotor can successfully track a reference point.
+In \cite{elokdaDataQuad2021}, DeePC is applied to a quadrotor, and the results show that the quadrotor can successfully track a reference point.
 A sensitive analysis of hyperparameters in DeePC is also provided in \cite{elokdaDataQuad2021}, as well as suggestions of choosing these hyperparameters based on the empirical results.
-In \cite{mullerDataDrivenQCR2022}, the authors used DeePC to model and control the noisy unknown dynamics of a quasi continuum manipulator.
+DeePC is also used to model and control the noisy unknown dynamics of a quasi continuum manipulator in \cite{mullerDataDrivenQCR2022}.
 The results show that DeePC can successfully deal with the noise and model discrepancy in the system, resulting in a dramatically reduced tracking error.
 It is worth noticing that although the DeePC is originally designed for LTI systems, in \cite{elokdaDataQuad2021} and \cite{mullerDataDrivenQCR2022}, it is successfully applied to non-linear systems.
 
@@ -33,18 +33,18 @@ The direct method, as the name suggests, deals with the data trajectory directly
 It has been shown in \cite{dorflerBridgingDirectIndirect2023} that the regularized direct approach can be viewed as a convex relaxation of the indirect approach, and based on empirical results, the authors suggest indirect method in the case of variance errors such as output noise, and direct method in the case of bias errors such as model discrepancy.
 In \cite{mattssonRegularizationDeePC}, different regularizers are proposed and compared, both in the context of DeePC and purely prediction problems.
 The results reconfirm the conclusion in \cite{dorflerBridgingDirectIndirect2023}, that the indirect method outperforms direct method in the case of variance error.
-In \cite{vanwingerdenInstrumentVar2022}, the authors discuss the relationship between direct DeePC, DeePC with instrumental variables, and the subspace identification method.
+In \cite{vanwingerdenInstrumentVar2022}, the relationship between direct DeePC, DeePC with instrumental variables, and the subspace identification method is discussed.
 It is shown that the proposed DeePC with instrumental variables is equivalent to the subspace identification method.
 
 Similar to the model predictive control (MPC), DeePC also faces the challenge of closed-loop guarantees, including recursive feasibility, constraint satisfaction and closed-loop stability.
-In \cite{berberichDataDrivenRobust2021} and \cite{berberichStabilityInnerRobust2022IEEE}, the authors proved that DeePC with mild modifications has qualitative guarantees, namely with small enough noise bound, recursive feasibility and asymptotic stability hold in closed-loop.
+In \cite{berberichDataDrivenRobust2021} and \cite{berberichStabilityInnerRobust2022IEEE}, qualitative guarantees have been proved for DeePC with mild modifications, namely with small enough noise bound, recursive feasibility and asymptotic stability hold in closed-loop.
 The main drawback of these results is that no output constraints are considered.
 
-In \cite{berberichRobustConstraintSatisfaction2020}, the authors proposed a constraint tightening scheme to ensure output constraints satisfaction in DeePC.
+In \cite{berberichRobustConstraintSatisfaction2020}, a constraint tightening scheme is proposed to ensure output constraints satisfaction in DeePC.
 This scheme has the advantage of having rigorous guarantees, but the drawback of being conservative due to a generous estimation of prediction error.
 
 There are also works for DeePC on non-linear systems.
-In \cite{berberichLinearTrackingMPCData2022}, the authors provide a data-driven predictive controller for non-linear systems, which can be used to track a reference trajectory.
+In \cite{berberichLinearTrackingMPCData2022}, a data-driven predictive controller for non-linear systems is proposed, which can be used to track a reference trajectory.
 Recent online dataset is used to ensure that the system is linearized around current state.
 Simulation results show that the proposed controller can successfully track a reference trajectory.
 
@@ -53,20 +53,24 @@ This scheme uses an auxiliary variable to take any possible error realization in
 Bound of open loop cost can be established, but the closed-loop guarantees and performance are yet to be discussed.
 
 With the success and in-depth discussions of data-driven predictive control, it is natural to ask whether it is possible to design a data-driven predictive safety filter, which can be used to ensure safety of the system under arbitrary control inputs, and only requires dataset trajectories for off-line design.
-Recently, in \cite{bajelaniDataDrivenSafetyFilter2023}, the authors proposed a data-driven safety filter for noise-free linear time invariant (LTI) systems.
+Simultaneously to this Thesis, a data-driven safety filter for noise-free linear time invariant (LTI) systems is proposed in \cite{bajelaniDataDrivenSafetyFilter2023}.
 But an extensive discussion of robust properties, applicability, and comparison of different formulations is yet to be done.
 This thesis aims to fill this gap.
 
 We first give a brief introduction of the background, motivation and preliminaries in \cref{chap:introduction}.
+
 Then we introduce the nominal data-driven safety filter in \cref{chap:nominal-ddsf}, and show that it is equivalent to the model-based safety filter for noise-free LTI system.
 As a result, guarantees including recursive feasibility and constraints satisfaction can be naturally established.
-In \cref{chap:robust-ddsf-lti}, we incorporate the robust methods into data-driven safety filter, and provide comparison and analysis of different formulations, including the direct and indirect methods.
-Numerical results are given to show that the proposed data-driven safety filter can successfully keep the system safe under arbitrary control inputs.
-Comparison between direct and indirect methods show that indirect method is better for the safety filter, since it better decouples the prediction and input interfere.
-In \cref{chap:non-linear-system}, we propose a data-driven prediction scheme for non-linear system, as well as a method of evaluating the quality of a certain dataset of trajectories.
+
+In \cref{chap:robust-ddsf-lti}, we incorporate the robust methods into data-driven safety filter, propose two different formulations including the direct and indirect methods.
+Numerical results also show that the proposed data-driven safety filter can successfully keep the system safe under arbitrary control inputs.
+Comparison between direct and indirect methods using a numerical example shows that indirect method is better for the safety filter, since it better decouples the prediction and input interfere.
+
+In \cref{chap:non-linear-system}, we propose a data-driven prediction scheme for non-linear system, as well as a method based on fractal dimension to evaluate the quality of a certain dataset of trajectories.
 Numerical example using a simple non-linear system is given to show that with the proposed data-driven prediction scheme, datasets with better quality yield better prediction performance.
-Finally, in \cref{chap:test-chronos}, we test the proposed data-driven safety filter on Chronos, an RC model vehicle, and show that the safety filter can successfully keep the system safe under arbitrary control inputs.
-% We also propose a scheme of dataset collection for general systems, and show that this scheme can be used to collect a rich enough dataset for Chronos.
+
+Finally, in \cref{chap:test-chronos}, we test the proposed data-driven safety filter on Chronos \cref{carronChronosCRSDesign2022}, an RC model vehicle, and show that the safety filter can successfully keep the system safe under arbitrary control inputs.
+We also propose and compare different terminal ingredient designs for the RC vehicle, as well as a scheme of dataset collection for general systems.
 
 
 \section{Preliminaries}\label{sec:preliminaries}
@@ -100,11 +104,15 @@ With a little abuse of notation, we also use $\subseq{x}{i}{j}$ to denote the co
 \end{bmatrix}}$.
 Also, we simply use $x$ to denote a sequence $\sequence{x}{k}{i}{j}$ if the index range $i$ and $j$ are clear from the context.
 
+We always use plain variables with subscripts to denote online observation and closed loop response, and use variables with a bar on top to denote the variables of optimization problems.
+When it is necessary, we also use brackets to denote the time step of the optimization problem, for example $\barx(t)$ is the optimization variable of the system state at time step $t$.
+Also, we denote the optimal solution by $(-)^*$, for example $u^*(t)$ represents the optimal solution at time step $t$, and candidate solution by a hat on top, for example $\hatx(t+1)$ represents the candidate solution for time step $t+1$.
+
 Without further notice, we always deal with discrete time invariant systems.
 A general discrete time invariant system can be defined as:
 
 \begin{definition}[Discrete Time Invariant Dynamic System]\label{def:dynamic-system}
-    A dynamic system is defined by $\left(\Xset, \Uset, \Yset, f, g\right)$, where:
+    A dynamic system is defined by $\left(\Xset, \Uset, \Yset, \\ f, g\right)$, where:
 
     $\Xset \subseteq \Real^n$ is the state constraint; $\Uset \subseteq \Real^m$ is the input constraint; $\Yset \subseteq \Real^p$ is the output constraint; $f: \Real^n \times \Real^m \rightarrow \Real^n$ is the state transition function; $g: \Real^n \times \Real^m \rightarrow \Real^p$ is the output function.
 
@@ -140,10 +148,10 @@ into an infinite trajectory of the system, and keep the constraints satisfied.
     For example, the trajectory needs to be at least of length $l$ in the case of LTI system.
 
     But a shorter trajectory that is not long enough to determine the state of the system can still be safe, according to \cref{def:safe-traj}.
-    In this case, the fact that \emph{observed a safe trajectory} does not imply that \emph{the system is safe}.
+    In this case, the fact that \emph{a safe trajectory is observed} does not imply that \emph{the system is safe}.
 \end{remark}
 
-Since we are dealing with data-driven methods, and the output $y_k$ of the system usually contains everything we can observe and care about for the system, for the rest of the Thesis, without further notice, we always assume $\Xset = \Real^n$
+Since we are dealing with data-driven methods, and the output $y_k$ of the system usually contains everything we can observe and care about for the system, for the rest of the Thesis, without further notice, we always assume $\Xset = \Real^n$.
 That is, there is no state constraint for the system.
 
 As common in system theory, a dynamic system is linear if both the state transition function $f$ and output function $g$ are linear.
@@ -180,7 +188,7 @@ We define the following invariants of a certain LTI system behavior $\mathscr{B}
 \begin{definition}[Order and Lag of LTI System]\label{def:order-lag}
     For a controllable LTI system behavior $\mathscr{B}$ with a minimal realization $A$, $B$, $C$, $D$, we define the order $n$ of the system as the dimension of the state of the system, under this minimal realization.
 
-    We define the lag of the system as the minimal integer $l$, that makes the observability matrix $\mathcal{O}_l = \transpose{\begin{bmatrix} \transpose{C} & \transpose{(C A)} & \ldots & \transpose{(C A^{l-1})} \end{bmatrix}}$ of full rank.
+    We define the lag of the system as the minimal integer $l$, that makes the observability matrix $\Phi_l = \transpose{\begin{bmatrix} \transpose{C} & \transpose{(C A)} & \ldots & \transpose{(C A^{l-1})} \end{bmatrix}}$ of full rank.
 \end{definition}
 
 \begin{remark}\label{remark:order-lag}
@@ -284,11 +292,7 @@ With a dynamic system $\left(\Xset, \Uset, \Yset, f, g\right)$, the predictive s
 \end{align}
 \end{subequations}
 
-Within the scope of this thesis, we always use plain variables with subscripts to denote online observation and closed loop response, and use variables with a bar on top to denote the variables of optimization problems.
-When it is necessary, we also use brackets to denote the time step of the optimization problem, for example $\barx(t)$ is the optimization variable of the system state at time step $t$.
-Also, we denote the optimal solution by $(-)^*$, for example $u^*(t)$ represents the optimal solution at time step $t$, and candidate solution by a hat on top, for example $\hatx(t+1)$ represents the candidate solution for time step $t+1$.
-
-Where $L$ is the prediction horizon, $x_t$ is the current state of the system, $\uObj$ is current control input supposed by the learning based controller, $R$ is the weighting matrix used to examine the distance between the actual input and the desired input.
+where $L$ is the prediction horizon, $x_t$ is the current state of the system, $\uObj$ is current control input supposed by the learning based controller, $R$ is the weighting matrix used to examine the distance between the actual input and the desired input.
 
 $\Sset_f$ is a safe terminal set of the system, we refer to an in-detail discuss in Assumption 4.2 in \cite{wabersichPredictiveSafetyFilter2021a}.
 Intuitively, it is a set of states, that there exists a safe feedback controller, which can keep the system within constraints for all future time steps if the system starts from this set.

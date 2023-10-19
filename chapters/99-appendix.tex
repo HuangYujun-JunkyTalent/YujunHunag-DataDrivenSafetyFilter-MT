@@ -31,7 +31,9 @@ Then the recursive feasibility and recursive cost value bound follows.
 
 Finally we will show the closed-loop constraint satsifaction.
 
-\section{Construction of Candidate Solution}\label{prf:robust-ddsf-direct-candidate-solution}
+\section*{Construction of Candidate Solution}
+\refstepcounter{section}
+\label{prf:robust-ddsf-direct-candidate-solution}
 
 We use a similar construction as in \cite{berberichDataDrivenRobust2021}.
 Denote the state/output, if the optimal control input sequence $\subseq{\staru}{0}{L-1}$ is applied, to be $\subseq{\checkx}{0}{L-1}$ and $\subseq{\checky}{0}{L-1}$.
@@ -99,7 +101,9 @@ And we define the auxiliary variables:
 
 As stated in \cite{berberichDataDrivenRobust2021}, this candidate solution satisfies the constraints \cref{eq:robust-ddsf-direct-dynamic,eq:robust-ddsf-direct-initial,eq:robust-ddsf-direct-terminal,eq:robust-ddsf-direct-sigma}.
 
-\section{Bound of Cost Value}\label{prf:robust-ddsf-direct-cost-bound}
+\section*{Bound of Cost Value}
+\refstepcounter{section}
+\label{prf:robust-ddsf-direct-cost-bound}
 
 As stated in (19) in \cite{berberichDataDrivenRobust2021}, we have:
 
@@ -156,7 +160,9 @@ $C_{12}(\barvareps)$ and $c_{13}(\barvareps)$ are functions of $\barvareps$, and
 Then we can conclude that, there exist $\varepsmax_1$, if $\barvareps \leq \varepsmax_1$, along with a proper choice of $\barV$, we have $\barD + C_{12}(\barvareps) + c_{13}(\barvareps) \barV \leq \barV$.
 Then we can conclude the candidate solution at time step $t+n$ has a cost value less than $\barV$.
 
-\section{Feasibility of Candidate Solution}\label{prf:robust-ddsf-direct-candidate-feasibility}
+\section*{Feasibility of Candidate Solution}
+\refstepcounter{section}
+\label{prf:robust-ddsf-direct-candidate-feasibility}
 
 As stated in \cref{prf:robust-ddsf-direct-candidate-solution}, the candidate solution satisfies the constraints \cref{eq:robust-ddsf-direct-dynamic,eq:robust-ddsf-direct-initial,eq:robust-ddsf-direct-terminal,eq:robust-ddsf-direct-sigma}.
 We only need to verify the input constraint \cref{eq:robust-ddsf-direct-input} and the output constraint \cref{eq:robust-ddsf-direct-output}.
@@ -172,11 +178,13 @@ Similar analysis applies to the output constraint \cref{eq:robust-ddsf-direct-ou
 
 So we can conclude that there exist $\varepsmax_2$, if $\barvareps \leq \varepsmax_2$, the candidate solution at time step $t+n$ is feasible.
 
-\section{Closed-loop Constraint Satisfaction}
+\section*{Closed-loop Constraint Satisfaction}
+\refstepcounter{section}
+\label{prf:robust-ddsf-direct-closed-loop-constraint}
 
 Finally, by the usage of constraint tightening scheme in \cite{berberichRobustConstraintSatisfaction2020}, and the fact that \cref{eq:prf-robust-ddsf-direct-candidate-solution-inf-bound} still holds, we can conclude that the real output of the system $\subseq{\checky}{0}{n-1}(t)$ stays in the constraint set $\Yset$.
 
-Combining all the results from \cref{prf:robust-ddsf-direct-candidate-feasibility,prf:robust-ddsf-direct-candidate-solution,prf:robust-ddsf-direct-cost-bound}, we have proved that there exist $\varepsmax = \min\left(\varepsmax_1, \varepsmax_2\right)$, if $\barvareps \leq \varepsmax$, the candidate solution at time step $t+n$ is feasible, and has a cost value less than $\barV$.
+Combining all the results from \cref{prf:robust-ddsf-direct-candidate-feasibility,prf:robust-ddsf-direct-candidate-solution,prf:robust-ddsf-direct-cost-bound,prf:robust-ddsf-direct-closed-loop-constraint}, we have proved that there exist $\varepsmax = \min\left(\varepsmax_1, \varepsmax_2\right)$, if $\barvareps \leq \varepsmax$, the candidate solution at time step $t+n$ is feasible, and has a cost value less than $\barV$.
 So recursive feasibility holds, and closed-loop constraint satisfaction holds.
 
  \cleardoublepage
@@ -197,7 +205,8 @@ This also proves closed-loop constraint satisfaction, since we do a qualitative 
 Finally, we provide a candidate solution at time step $t+n$, with the optimal solution at time step $t$, and show that this candidate solution is feasible.
 This proves the recursive feasibility.
 
-\section{Bound of $\onenorm{\alpha}$}\label{prf:robust-ddsf-indirect-alpha-bound}
+\section*{Bound of $\onenorm{\alpha}$}
+\refstepcounter{section}\label{prf:robust-ddsf-indirect-alpha-bound}
 
 As stated after \cref{eq:robust-ddsf-indirect}, we have:
 
@@ -252,7 +261,8 @@ Since we can make $\barvareps$ arbitrarily small, we can make $\twonorm{\Hepsilo
 
 In conclusion, there exist $\varepsmax_1$ and a constant $A$, so that if $\barvareps \leq \varepsmax_1$, we can apply \cref{lemma:bound-perturbed-pinv} and have a bound on $\Hutildey$, then $\onenorm{\alpha} \leq A$ holds, as stated before.
 
-\section{Bound of Prediction Error}\label{prf:robust-ddsf-indirect-prediction-error-bound}
+\section*{Bound of Prediction Error}
+\refstepcounter{section}\label{prf:robust-ddsf-indirect-prediction-error-bound}
 
 By the definition of $\alpha$ and \cref{eq:robust-ddsf-indirect-dynamic,eq:robust-ddsf-indirect-initial,eq:robust-ddsf-indirect-terminal}, we have:
 
@@ -311,7 +321,8 @@ Then for our choice of constraint tightening constants $\sequence{c}{k}{1}{\ceil
 Note that we apply $\subseq{\staru}{0}{n-1}$ to the real system, that means the real system output for next $n$ time steps will be $\subseq{y}{t}{t+n-1} = \subseq{\checky}{0}{n-1}$.
 Combine it with the prediction error bound and constraint \cref{eq:robust-ddsf-indirect-output}, we can conclude that the real system output will stay in the constraint set $\Yset$.
 
-\section{Construction of Candidate Solution}\label{prf:robust-ddsf-indirect-candidate-solution}
+\section*{Construction of Candidate Solution}
+\refstepcounter{section}\label{prf:robust-ddsf-indirect-candidate-solution}
 
 We use a similar construction as in \cref{apps:prf-roubust-direct}.
 Namely, we choose:

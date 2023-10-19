@@ -401,8 +401,6 @@ Before calculating the box-counting dimension of the datasets, we normalize the 
 
 Also, we present two box-dimension values for each dataset, one evaluated using the whole dataset, and one evaluated using only the input-output pairs within the constraint set $\Xset \times \Uset$.
 
-TODO: present the result of error and single box-counting dimension and discussion
-
 {\renewcommand{\arraystretch}{1.3}%
 \begin{center}
 \captionof{table}{Mean, Maximum Cost and Box-counting Dimension \label{tab:cost-and-dim}}
@@ -414,9 +412,16 @@ TODO: present the result of error and single box-counting dimension and discussi
     Mean cost (\num{e-4})& \num{316.85} & \num{9.49} & \num{5.82} & \num{5.62} & \num{5.29} & \num{5.05} \\
     \hline
     Maximum cost (\num{e-2})& \num{762.84} & \num{2.81} & \num{1.22} & \num{1.20} & \num{1.22} & \num{1.10} \\
+    \hline
+    Box-counting dimension (whole dataset) & 2.18 & 2.05 & 2.20 & 2.30 & 2.32 & 2.34 \\
+    \hline
+    Box-counting dimension (within constraint) & 2.09 & 2.27 & 2.39 & 2.47 & 2.45 & 2.47 \\
 \end{tabular}
 \end{center}
 }
+
+As we can see from \cref{tab:cost-and-dim}, the box-counting dimension of the dataset increases as the length of single dataset trajectory increases, and the prediction cost decreases.
+There are also some exceptions for the maximum cost, but it is plausible that more data will deteriorate the quality of prediction on certain initial conditions and input sequences, since dataset far away from the current initial condition and input sequence will contribute negatively to the prediction quality.
 
 As mentioned in \cref{sec:fractal-dimension-method}, the box-counting dimension of a dataset heavily depends on the region of box size we choose to evaluate.
 To overcome this drawback, we propose a method of comparing datasets without choosing a specific box size region for each of them.

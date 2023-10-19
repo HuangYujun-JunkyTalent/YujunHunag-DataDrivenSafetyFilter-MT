@@ -1,5 +1,4 @@
 \chapter{Robust Data-Driven Safety Filter}\label{chap:robust-ddsf-lti}
-TODO: Contains robust data-driven safety filter formulation and proof of qualitative guarantees.
 
 In this chapter, we will discuss and compare different formulations of robust data-driven safety filters for LTI system with bounded output noise.
 We will first introduce the direct formulation of the robust data-driven safety filter with rigorous constraint tightening scheme, and illustrate its limitations using a single-input-single-output (SISO) LTI system.
@@ -129,7 +128,7 @@ We can prove that the formulation \cref{eq:robust-ddsf-direct} can provide quali
     And suppose the objective input satisfies that, maximum deviation from objective input is bounded, that is: $\norm{\subseq{\baru}{0}{n-1} - \subseq{\uObj}{0}{n-1}}_{\subseq{R}{0}{n-1}} \leq \barD$ for some positive constant $\barD$, for any feasible input sequence candidate $\subseq{\baru}{0}{n-1}$.
 
     Then, with proper choice of regularizing constants $\lamalpha$ and $\lamsigma$, there exist a constant $\varepsmax$ and a cost bound $\barV$, when the noise bound satisfies $\barvareps \leq \varepsmax$, and the optimal cost at time step $t$ is smaller than $\barV$; then recursive feasibility and closed-loop constraint satisfaction can be guaranteed after this time step for the formulation \cref{eq:robust-ddsf-direct}.
-    Also the optimal cost at time step $t+n$ will also be smaller than $\barV$.
+    The optimal cost at time step $t+n$ will also be smaller than $\barV$.
 \end{theorem}
 
 We leave the proof of \cref{thm:robust-ddsf-direct} to \cref{apps:prf-roubust-direct}.

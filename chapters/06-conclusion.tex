@@ -1,1 +1,21 @@
 \chapter{Conclusion and Future Work}\label{chap:conclusion}
+
+In this Thesis, we proposed a data-driven predictive safety filter.
+The filter for noise-free LTI systems are designed in \cref{chap:nominal-ddsf}, and it is proved that it is equivalent to the model-based predictive safety filter.
+
+For noisy LTI systems, we proposed two different robust data-driven predictive safety filters in \cref{chap:robust-ddsf-lti}, namely the direct and indirect robust data-driven predictive safety filters.
+They both have similar qualitative guarantees, but numerical results show that the indirect robust data-driven predictive safety filter is less conservative than the direct robust data-driven predictive safety filter and yields better performance.
+
+In \cref{chap:non-linear-system}, we proposed a data-driven method to make predictions for nonlinear systems.
+We also proposed a method based on fractal dimension to estimate the richness of datasets of nonlinear systems.
+By a numerical example of two-dimensional nonlinear system, we showed that with properly chosen hyperparameters, the data-driven prediction is more accurate when the dataset is richer according to the fractal dimension metric.
+There are many directions for further research in this area.
+For example, the weighting scheme can depend on the extended state.
+It will also be interesting to find a systematic way of optimizing the weighting scheme, probably by using machine learning techniques.
+It is also possible to incorporate the weighting method into the direct method.
+
+In \cref{chap:test-chronos}, we applied the indirect robust data-driven predictive safety filter to an RC vehicle.
+We showed that with the simplified kinematic model, the filter is able to keep the vehicle within track boundaries, even with practical level of noise.
+Different forms of terminal constraints for the vehicle model are also proposed and compared.
+For the dynamic model, with the prediction method introduced in \cref{chap:non-linear-system} and noise-free observation, the filter is also able to keep the vehicle within track boundaries.
+It is still not clear how to systematically evaluate the overall performance of a safety filter, and a rigorous analysis of the influence of hyperparameters for the vehicle model is also needed.

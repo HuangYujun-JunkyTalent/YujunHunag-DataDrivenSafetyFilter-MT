@@ -24,7 +24,7 @@ This global coordinate model does not guarantee such a good equilibrium.
 In contrast, the track-relative coordinates introduced in \cite{tearlePredictiveSafetyFilterRacing2021} is more suitable for the data-driven predictive safety filter.
 We can also design different equilibrium for track-relative coordinates, as will be introduced in \cref{sec:result-kinematic-model}.
 
-As can be seen in \cref{fig:track-relative-coordinates}, the track-relative coordinates are defined for a certain piece of track, with $\elat$ being the deviation of vehicle from the centerline, and $\mu$ being the difference of heading angle from the tangent of the centerline.
+As can be seen in \cref{fig:track-relative-coordinates}, the track-relative coordinates are defined for a certain piece of track, with $\elat$ being the deviation of vehicle from the centerline, and $\mu$ being the difference of heading angle from the tangent of the centerline, $l$ being the progress of vehicle along the centerline.
 
 \includefig{error-dynamics.pdf}{0.5}{Track-relative coordinates}{fig:track-relative-coordinates}
 
@@ -53,7 +53,7 @@ The dynamic model in track-relative coordinates is given by (6), (7) and (11) in
 \end{gather}
 \end{subequations}
 
-where $x$ is the state, $u$ is the input, $m$, $l_f$ and $l_r$ are the mass, front and rear length of the vehicle, respectively, $c$ is the curvature of the track.
+where $x$ is the state, $u$ is the input, $m$, $l_f$ and $l_r$ are the mass, distance from the vehicle to front and rear axes, respectively, $c$ is the curvature of the track.
 
 \subsection{Simulation Setup}\label{subsec:simulation-setup}
 

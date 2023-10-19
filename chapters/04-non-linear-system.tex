@@ -8,7 +8,7 @@ Then we introduce a metric for evaluating the quality of a dataset in \cref{sec:
 Finally, we use a numerical example in \cref{sec:non-linear-system-numerical-example} to show that dataset that is better evaluated by the metric can make better predictions using the method we propose.
 
 In this section, we still use $l$ to denote the number of input-output pairs used for implicitly determining the internal state of the system, and use $L$ to denote the prediction horizon.
-But in the case of non-linear case, $l$ is just supposed to be long enough to determine the internal state, but lacks a formal definition as in the case of linear systems.
+But in the case of non-linear systems, $l$ is just supposed to be long enough to determine the internal state, but lacks a formal definition as in the case of linear systems.
 
 
 \section{Weighting Method for Non-linear Systems in Data-driven Prediction Methods}\label{sec:weighting-method}
@@ -19,7 +19,7 @@ There's also attempt to extend the data-driven control method to general non-lin
 Intuitively, this method in \cite{berberichLinearTrackingMPCData2022} is trying to make a linear affine approximation of the non-linear system around current state, by constructing the Hankel matrix using the last $N$ online observations.
 
 But this method has many drawbacks.
-It relies on the assumption that online observations are informative enough to approximate the local dynamics of the system, but in practice, the system can fairly be operating consistently in a certain manner, making the online observations not informative enough.
+It relies on the assumption that online observations are informative enough to approximate the local dynamics of the system, but in practice, the system can be operating consistently in a certain manner, making the online observations not informative enough.
 Also, it has very few adjustments that can be done for different systems, but in practice, different systems can behave very differently, and the method should be able to adapt to them.
 
 In this section, we take the intuition of making local linear affine approximation of non-linear systems, and propose a method of making predictions for non-linear systems using dataset trajectories.
@@ -115,7 +115,7 @@ As stated in \cite{dorflerBridgingDirectIndirect2023}, in the LTI system case th
         \Yp
     \end{bmatrix} \alpha = \begin{bmatrix}
         \subseq{u}{t-l}{t-1} \\
-        \subseq{u}{t}{T+L-1} \\
+        \subseq{u}{t}{t+L-1} \\
         \subseq{y}{t-l}{t-1}
     \end{bmatrix} \label{eq:original-indirect-method-constraint} \\
     & \subseq{y}{t}{t+L-1} = \Yf \alpha \label{eq:original-indirect-method-prediction}
@@ -140,8 +140,6 @@ Note that in non-linear case, the matrix $\begin{bmatrix}
     \Yp
 \end{bmatrix}$ is almost always of full row rank, so the constraint \cref{eq:original-indirect-method-constraint} can always be satisfied by some $\alpha$.
 
-For the second question, we can use the result from \cite{martinelliDataDrivenAffine2022}, which states that we just need to add an extra constraint to the optimization problem: $\transpose{\ones{\NH}} \alpha = 1$.
-
 For the first question, we propose a method of weighting different sub-trajectories in the mosaic-Hankel matrix, to put more weight onto sub-trajectories that are closer to the current extended initial condition $\xi_t$, in order to make better approximation of the local dynamics of the system.
 
 For the i-th sub-trajectory (column) of the mosaic-Hankel matrix $\subseq{\ud}{i}{i+L+l-1}$ and $\subseq{\yd}{i}{i+L+l-1}$, we can define a distance to the current extended initial condition $\xi_t$ as: $d\left(\mnormsq{\left(\xi_t - \xi_i\right)}{Q}\right)$, where $\xi_i = \begin{bmatrix}\subseq{u}{i}{i+l-1} \\ \subseq{y}{i}{i+l-1}\end{bmatrix}$ is the extended initial condition of the sub-trajectory (the i-th column of $\Up$ and $\Yp$); $Q$ is a positive definite matrix used to weight the distance; $d$ is a non-decreasing function.
@@ -149,7 +147,9 @@ For the i-th sub-trajectory (column) of the mosaic-Hankel matrix $\subseq{\ud}{i
 Then, with this distance defined for each sub-trajectory, we can define a diagonal distance matrix $\Dt$ as: $\Dt(i,i) = d\left(\mnormsq{\left(\xi_t - \xi_i\right)}{Q}\right)$, and use this matrix to weight the sub-trajectories in the mosaic-Hankel matrix.
 The subscript $t$ is used to emphasize its dependence on the current extended initial condition $\xi_t$.
 
-Then we formulate the problem as:
+For the second question, we can use the result from \cite{martinelliDataDrivenAffine2022}, which states that we just need to add an extra constraint to the optimization problem: $\transpose{\ones{\NH}} \alpha = 1$.
+
+With these modifications, we formulate the problem as:
 
 \begin{subequations}
 \label{eq:weighted-indirect-method}
@@ -234,7 +234,7 @@ In this section, we introduce a metric for evaluating the richness of a dataset 
 
 The intuition is, for a dataset to be rich enough, it should be able to cover all possible input-output pairs of the system.
 In another word, we want to evaluate the ability of some curves to cover a certain volume in the higher dimensional space.
-To evaluate this \emph{space-filling property}, we can refer to the idea of fractal dimension and space-filling curves, as introduced in \cite{saganSpaceFillingCurves1994} and the box-counting dimension introduced in \cite{kennethAlternativeDefinitionsDimension2003}.
+To evaluate this \emph{space-filling property}, we can refer to the idea of fractal dimension and space-filling curves, as introduced in \cite{saganSpaceFillingCurves1994}, and the box-counting dimension introduced in \cite{kennethAlternativeDefinitionsDimension2003}.
 % Here we give a brief introduction to the box-counting dimension.
 
 % \subsection{Introduction to Box-counting Dimension}\label{subsec:box-counting-dimension}
@@ -263,15 +263,15 @@ So we use a similar method to determine the dimension of a fractal.
 Intuitively, the box-counting dimension can be seen as a metric of how well a set can cover the ambient space.
 So we can borrow this idea to evaluate how well the dataset trajectories cover the input-output space $\Yset \times \Uset$.
 
-In practice, we only have access to a finite number of dataset input-output points $\ud_i$ and $\yd_i$, $i = 1, \ldots, N_1+N_2+\dots+N_K$, each of them belonging to a certain dataset trajectory.
+In practice, we only have access to a finite number of dataset input-output points $\ud_i$ and $\yd_i$, $i = 1, 2, \ldots, N_1+N_2+\dots+N_K$, each of them belonging to a certain dataset trajectory.
 We can also try to sample a number of different box sizes $\epsilon$, and count the number of boxes needed to cover all the input-ouput points.
 
-Also, we face the choice of evaluating the box-counting dimension only using input-output pairs within the constraint set $\Yset \times \Uset$ or using the whole dataset.
+Also, we face the choice of evaluating the box-counting dimension only using input-output pairs within the constraint set $\Uset \times \Yset$ or using the whole dataset.
 The former choice might be able to pick the most important part of the dataset, while the latter can give a more comprehensive evaluation of the dataset.
 These two choices are also compared in the numerical example in \cref{sec:non-linear-system-numerical-example}.
 
 For illustration, we choose a dataset from the numerical example in \cref{sec:non-linear-system-numerical-example}, which consists of 40 dataset trajectories, each of them having 50 input-output pairs.
-As mentioned before, we take one pair of input-output as one point in the input-output space $\Yset \times \Uset$.
+As mentioned before, we take one pair of input-output as one point in the input-output space $\Uset \times \Yset$.
 In this case, the input-output space is three-dimensional: $\Real^1 \times \Real^2$.
 For visualization, we only plot the output part of the trajectory, as seen in \cref{fig:two-dim-dataset-example}.
 The preprocessing of the dataset can be found in \cref{sec:non-linear-system-numerical-example}.
@@ -289,7 +289,7 @@ Then we can plot the number of boxes needed to cover the dataset trajectories, a
 \includefig{two-dim-dataset-large-size-range.png}{0.6}{Number of boxes needed to cover the dataset trajectories and box size, drawn in logarithmic scale}{fig:two-dim-dataset-large-size-range}
 
 In the figure, x-axis is the logarithm of reciprocal of box size, and y-axis is the logarithm of the number of boxes needed to cover the dataset trajectories.
-The blue dots represent the sampled points.
+The green dots represent the sampled points.
 
 We can see that, when the box size is not small enough, in \cref{fig:two-dim-dataset-large-size-range} when the size is larger than $2^{-2}$, we can not observe the linear behavior as described in \cref{eq:box-counting-dimension-log}.
 This is plausible, as \cref{eq:box-counting-dimension-log} is only a good approximation if the box size is small, even in the case of smooth manifold or actual fractals.
@@ -303,7 +303,7 @@ Within this region, $\log_2\left(N(\epsilon)\right)$ and $\log_2\left(\frac{1}{\
 
 \includefig{two-dim-dataset-good-size-range.png}{0.7}{Number of boxes needed to cover the dataset trajectories and box size, drawn in logarithmic scale, with a proper choice of box size region}{fig:two-dim-dataset-good-size-range}
 
-Then we can fit a linear function to the sampled points in the range $[2^{-4}, 2^{-2}]$, and the slope of the linear function will be the box-counting dimension of the dataset.
+Then we can fit a linear function to the sampled points in the range $[2^{-3.3}, 2^{-2.2}]$, and the slope of the linear function will be the box-counting dimension of the dataset.
 In this case, the slope is $2.24$, so the box-counting dimension of the dataset is $2.24$.
 
 The drawbacks and further improvements for this method may include:
@@ -318,7 +318,7 @@ The drawbacks and further improvements for this method may include:
     That also holds for the box-counting dimension of dataset trajectories.
     With a set of dataset trajectories that covers a small region very well but does not contain any information outside the small region, the box-counting dimension might be larger, but the dataset is not so rich.
     It might be possible to include the constant $\log D$ in \cref{eq:box-counting-dimension-log} into consideration, but it is not clear how to do it.
-    \item The box-counting dimension can only be a metric for evaluating the richness of a dataset, but does not provide any information about how well the dataset can be used for making predictions or fitting a model.
+    \item The box-counting dimension can only be a metric for evaluating the richness of a dataset, but does not provide any quantitative information about how well the dataset can be used for making predictions or fitting a model.
     The quantitative relation between the box-counting dimension and the quality of prediction or fitted model is still unknown.
 \end{enumerate}
 
@@ -346,7 +346,7 @@ For this section, we use the following continuous non-linear system:
     \end{bmatrix}
 \end{align}
 
-We use a numerical integrator to simulate the system for a sample time $\SI{0.03}{\second}$.
+We use a numerical integrator \cite{gardner2022sundials} to simulate the system for a sample time $\SI{0.03}{\second}$.
 Within each time step, the control input $u$ is kept constant.
 We assume the system state is observable.
 The system is equipped with state/output constraint $\Yset = \Xset = \left\{x \;|\; -\pi \leq \xelone \leq \pi,\, -0.5 \leq \xeltwo \leq 0.5 \right\}$, and input constraint $\Uset = \left\{u \;|\; -1 \leq u \leq 1 \right\}$.
@@ -369,7 +369,7 @@ And \cref{eq:weighted-indirect-method-w-solution} will be reformulated as:
 \end{align}
 \end{subequations}
 
-where $\Xp = \hankel{1}{\subseq{x^d}{0}{N-L-1}}$ and $\Xf = \hankel{L}{\subseq{x^d}{1}{N-1}}$, being the initial state part and future state part of the dataset system state mosaic-Hankel matrix, respectively.
+where $\Xp = \hankel{1}{\subseq{x^d}{0}{N-L-1}}$ and $\Xf = \hankel{L}{\subseq{x^d}{1}{N-1}}$, being the initial state part and future state part of the state mosaic-Hankel matrix, respectively.
 
 As a new notation, we use variables with check $\check{(-)}$ to denote the real system states or outputs, if the proposed input sequence $\subseq{u}{t}{t+L-1}$ is applied to the real system.
 For example, in this specific case, if we further simulate the system for $L$ steps applying $\subseq{u}{t}{t+L-1}$, we will get the state/output sequence $\checkx_j$ and $\checky_j$, $t+1 \leq j \leq t+L$.

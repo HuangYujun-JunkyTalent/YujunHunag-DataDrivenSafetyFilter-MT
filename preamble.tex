@@ -10,6 +10,7 @@
 \usepackage{bbold}
 \usepackage{lipsum}
 \usepackage{enumitem}
+% \usepackage[indent=1.0em, skip=0ex plus 0.2ex minus 0.1ex]{parskip}
 \usepackage{parskip}
 \usepackage{caption}
 \usepackage{siunitx}
@@ -20,7 +21,7 @@
 								 % {german}/english: language of headings, etc.
 								 % {st}/bt/mt: {semester}/bachelor/master thesis
 \usepackage{hyperref}
-\usepackage[capitalise]{cleveref} % load cleverref as the last package!
+\usepackage[capitalise, compress]{cleveref} % load cleverref as the last package!
 \usepackage{crossreftools} % but load crossreftools after cleverref!
 
 % \crefname{opt}{optimization problem}{optimization problems}
@@ -49,6 +50,8 @@
 % redefine the reference styles
 \crefname{equation}{}{}
 \Crefname{equation}{}{}
+\Crefname{assumption}{Assumption}{Assumptions}
+\crefname{assumption}{Assumption}{Assumptions}
 % \crefname{definition}{Definition}{Definitions}
 % \crefname{lemma}{Lemma}{Lemmas}
 % \crefname{theorem}{Theorem}{Theorems}
@@ -75,6 +78,8 @@
 	% \crtprovidecurrentlabel{\crtextractcref{reference}{#2}}
 	% \crtprovidecurrentlabelname{#3}
 }
+
+\crefrangelabelformat{equation}{(#3#1#4--#5\crefstripprefix{#1}#2#6)}
 
 \newcommand\includefig[4]{
 	\begin{figure}[ht]
@@ -250,6 +255,7 @@
 \newcommand\RealMat[2]{\Real^{#1 \times #2}}
 
 \newcommand\listinI[2]{\mathbb{I}_{\left[ #1, #2 \right]}}
+\newcommand\listinIinf[1]{\mathbb{I}_{\left[ #1, \infty \right)}}
 \newcommand\sequence[4]{\left\{#1_#2\right\}_{#2=#3}^{#4}}
 \newcommand\subseq[3]{#1_{\left[ #2, #3 \right]}}
 \newcommand\hankel[2]{H_{#1}\left( #2 \right)}
@@ -261,3 +267,7 @@
 \newcommand\vx{{v_x}}
 \newcommand\vy{{v_y}}
 
+\newcommand\ltimatrices{\left(A, B, C, D\right)}
+
+\newcommand\textstop{\text{.}}
+\newcommand\textperiod{\text{,}}

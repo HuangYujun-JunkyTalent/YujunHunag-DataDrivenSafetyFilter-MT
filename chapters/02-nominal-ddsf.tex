@@ -196,7 +196,7 @@ However, it is generally difficult to find the set of all safe trajectories of l
 It is easier and possible to find an \emph{Input-output Invariant Set} of the system instead, borrowing the extended state $\zeta_t$ as defined in \cref{def:extedned-state}.
 
 \begin{definition}[Input-output invariant set]\label{def:input-output-invariant-set}
-    For a dynamic system $(\Xset = \RealVec{n}, \Uset, \Yset, f, g)$, where a trajectory of length $n$ is enough to define the state of the system, an input-output invariant set for k-step receding horizon scheme is a set $\Ssetkf \in \Uset^n \times \Yset^n$, where there exists a safe controller $\pi_f: \Ssetkf \to \Uset^k$, such that: for all $\zeta_t = \extendedstateinline{t-n}{t-1} \in \Ssetkf$, if the control input sequence $\subseq{u}{n}{n+k-1} = \pi_f(\zeta_t)$ is applied to the system, then it holds that $\zeta_{t+k} = \extendedstateinline{t-n+k}{t-1+k} \in \Ssetkf$.
+    For a dynamic system $(\Xset = \RealVec{n}, \Uset, \Yset, f, g)$, where a trajectory of length $n$ is enough to define the state of the system, an input-output invariant set for k-step receding horizon scheme is a set $\Ssetkf \in \Uset^n \times \Yset^n$, where there exists a safe controller $\pi_f: \Ssetkf \to \Uset^k$, such that: for all $\zeta_t = \extendedstateinline{t-n}{t-1} \in \Ssetkf$, if the control input sequence $\subseq{u}{t}{t+k-1} = \pi_f(\zeta_t)$ is applied to the system, then it holds that $\zeta_{t+k} = \extendedstateinline{t+k-n}{t+k-1} \in \Ssetkf$.
 \end{definition}
 
 Intuitively, it says that if the system stays in the set $\Ssetkf$ for the past $n$ steps, then we have a safe controller $\pi_f$ that can keep the system in the set $\Ssetkf$ after the next $k$ steps.

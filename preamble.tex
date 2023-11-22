@@ -44,6 +44,7 @@
 	\newtheorem{theorem}{Theorem}
 	\newtheorem{lemma}{Lemma}
 	\newtheorem{proposition}{Proposition}
+	\newtheorem{corollary}{Corollary}
 \theoremstyle{remark}
 	\newtheorem{remark}{Remark}
 
@@ -249,6 +250,7 @@
 \newcommand\Uset{\mathcal{U}}
 \newcommand\Yset{\mathcal{Y}}
 \newcommand\Sset{\mathcal{S}}
+\newcommand\Ssetkf{\mathcal{S}^{(k)}_f}
 \newcommand\Epset{\mathcal{\Epsilon}}
 
 \newcommand\RealVec[1]{\Real^{#1}}
@@ -271,3 +273,11 @@
 
 \newcommand\textstop{\text{.}}
 \newcommand\textperiod{\text{,}}
+
+\newcommand\extendedstateinline[2]{\transpose{\begin{bmatrix}
+	\transpose{\subseq{u}{#1}{#2}} & \transpose{\subseq{y}{#1}{#2}}
+\end{bmatrix}}}
+
+\newcommand\noisyextendedstateinline[2]{\transpose{\begin{bmatrix}
+	\transpose{\subseq{u}{#1}{#2}} & \transpose{\subseq{\tildey}{#1}{#2}}
+\end{bmatrix}}}

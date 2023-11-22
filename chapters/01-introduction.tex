@@ -113,12 +113,17 @@ The basic notations used in this thesis are list in \cref{tab:notations}.
     $\Real^{m \times n}$ & Set of $m$-by-$n$ real matrices \\
     \hline
     $\ones{n}$ & All one vector of length $n$ \\
+    \hline
+    $\Xset \times \Yset$ & Cartesian product of sets $\Xset$ and $\Yset$ \\
+    \hline
+    $\Xset^N$ & Cartesian product of $N$ copies of $\Xset$ \\
 \end{tabular}
 \end{center}
 }
 
 With a little abuse of notation, we use $x$ to denote a sequence $\sequence{x}{k}{i}{j}$ if the index range $i$ and $j$ are clear from the context.
 This usually occurs when we are defining the variables of an optimization problem, and the index range is clear from the objective and constraints of it.
+We also accept the fact $\RealVec{n} \times \RealVec{m} = \RealVec{n+m}$, and similarly $\Xset \times \Yset \subseteq \RealVec{n+m}$ if $\Xset \subseteq \RealVec{n}$ and $\Yset \subseteq \RealVec{m}$.
 
 In this thesis we extensively discuss optimization problems.
 We use variables without accents to denote online observation and closed loop response.
@@ -268,6 +273,14 @@ Then we can define the order and lag of LTI systems with same behavior.
     Also, the lag $l$ is the minimal number of input-output pairs needed to uniquely determine the state of the system \cite{markovskyBehavioralSystemsTheory2021}.
 \end{remark}
 
+It follows from \cref{remark:order-lag} that we can uniquely determine the state of an observable LTI system with a dataset trajectory of length $l$ or larger.
+We can then define the \emph{Extended State} for an observable LTI system.
+
+\begin{definition}[Extended state]\label{def:extedned-state}
+    We call a trajectory of length larger than $l$ the extended state of an observable LTI system.
+    The notation $\zeta_t = \extendedstateinline{t-n}{t-1}$ and $\xi_t = \extendedstateinline{t-l}{t-1}$ will be used to denote these extended states with specific length.
+\end{definition}
+
 With the above definitions and assumptions, we can try to deal with the problem of data-driven prediction:
 how can we make predictions of future outputs of the system, if we only have a dataset trajectory, online observation, and proposed control inputs?
 To tackle this problem, we need to introduce more concepts.
@@ -276,7 +289,6 @@ The \emph{Hankel matrix} of certain depth constructed with a sequence of vectors
 
 \begin{definition}[Hankel matrix]\label{def:hankel-matrix}
     For a sequence of vectors $\sequence{x}{k}{i}{j}$, with $x_k \in \Real^n$, the Hankel matrix of depth $L$ is defined as:
-
     \begin{equation*}
         \hankel{L}{\sequence{x}{k}{i}{j}} = \begin{bmatrix}
             x_i & x_{i+1} & \ldots & x_{j-L+1} \\
@@ -335,7 +347,6 @@ The intuition is that, if a pair $\left(\us, \ys\right)$ satisfies \cref{def:inp
 Which means the system can stay at the input-output equilibrium forever.
 Also, there will be an induced equilibrium state $\xs$, which is uniquely determined by $\left(\us, \ys\right)$, as discussed in \cref{remark:order-lag}.
 It also satisfies $\xs = A \xs + B \us$ and $\ys = C \xs + D \us$ as a consequence of \cref{def:traj-dynamical-system,def:input-output-equilibrium}, so $\xs$ can be obtained given $\us$ and $\ys$ by solving the following equation:
-
 \begin{equation}\label{eq:equilibrium-state}
     \begin{bmatrix}
         \xs \\
@@ -349,8 +360,13 @@ It also satisfies $\xs = A \xs + B \us$ and $\ys = C \xs + D \us$ as a consequen
     \end{bmatrix} \textstop
 \end{equation}
 
+\begin{definition}[Safe equilibrium]\label{def:safe-input-output-equilibrium}
+    We call an input-output equilibrium $\left(\us, \ys\right)$ of an LTI system safe, if $\us \in \Uset$ and $\ys \in \Yset$ hold.
+    This pair also implicitly induces a safe equilibrium state $\xs$.
+\end{definition}
+
 \begin{remark}\label{remark:safe-equilibrium}
-    According to \cref{def:safe-traj}, if $\left(\us, \ys\right)$ is an input-output equilibrium of the system, and $\us \in \Uset$, $\ys \in \Yset$ hold, then $\constantSequence{\us}{0}{L-1}$ and $\constantSequence{\ys}{0}{L-1}$ is also a safe trajectory for the system with any length $L$.
+    According to \cref{def:safe-traj}, if $\left(\us, \ys\right)$ is a safe input-output equilibrium of the system, then $\constantSequence{\us}{0}{L-1}$ and $\constantSequence{\ys}{0}{L-1}$ is also a safe trajectory for the system with any length $L$.
 \end{remark}
 
 In practice, we always need to deal with noisy data and noisy system dynamics.
@@ -376,7 +392,6 @@ A safety filter is attached to the system, which takes input from the learning b
 \end{figure}
 
 With a dynamic system $\left(\Xset = \RealVec{n}, \Uset, \Yset, f, g(x,u) = x\right)$, the predictive safety filter solves the following optimization problem:
-
 \begin{subequations}
 \label{eq:state-based-safety-filter} 
 \begin{align}
@@ -393,12 +408,11 @@ With a dynamic system $\left(\Xset = \RealVec{n}, \Uset, \Yset, f, g(x,u) = x\ri
     \bar{x}_k \in \Xset, \quad k \in \left[0, L-1\right] \textperiod \label{eq:state-based-safety-filter-output}
 \end{align}
 \end{subequations}
-
 where $L$ is the prediction horizon, $x_t$ is the current state of the system, $\uObj(t)$ is current control input supposed by the learning based controller$\pi_l$, $R$ is the weighting matrix used to examine the distance between the actual input and the desired input.
 
 $\Sset_f$ is a safe terminal set of the system, modified from Assumption 4.2 in \cite{wabersichPredictiveSafetyFilter2021a}.
 
-\begin{definition}[Safe terminal state set]\label{def:safe-terminal-state}
+\begin{definition}[Safe terminal set]\label{def:safe-terminal-state}
     $\Sset_f \subseteq \Yset$ is a safe terminal set of the system $(\Xset = \RealVec{n}, \Uset, \Yset \subseteq \RealVec{n}, f, g(x,u) = x)$, if the following holds: there exists a safe terminal controller $\pi_f: \Sset_f \to \Uset$, which makes $f(x, \pi_f(x)) \in \Sset_f$ hold for all $x \in \Sset_f$. 
 \end{definition}
 
@@ -409,7 +423,7 @@ This means at each time step the optimization problem is solved, and only the fi
 Then the optimization problem is solved again at the next time step, with the new state of the system and the new desired input.
 For the robustness of data-driven predictive controllers and safety filters, we need to introduce a slightly different \emph{multi-step receding horizon} scheme, as discussed in \cite{berberichDataDrivenRobust2021}.
 
-\begin{definition}[Multi-step receiding horizon scheme]
+\begin{definition}[Multi-step receiding horizon scheme]\label{def:multi-step-receding-horizon}
     For a predictive controller or safety filter, we say it is working under k-step receding horizon scheme, if at certain time step $t$, the optimization problem is solved with online observation and possibly some additional inputs, and only the first $k$ input of the optimal solution $\sequence{\staru}{i}{0}{k-1}(t)$ is applied to the system.
     Then at time step $t+k$, the optimization problem is solved again with the new online observations and additional inputs.
 \end{definition}

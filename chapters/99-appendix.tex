@@ -1,9 +1,8 @@
 \chapter{Proof of Qualitative Guarantees for Indirect Method}\label{apps:prf-roubust-direct}
 
 We provide a proof of \cref{thm:robust-ddsf-direct}, taking a similar approach in \cite{berberichDataDrivenRobust2021} and \cite{berberichRobustConstraintSatisfaction2020}.
-As introduced before, plain variables denote real system input/output/state without noise, $\tilde{(-)}$ denote variables with noise, $\bar{(-)}$ denote optimization variables, $\hat{(-)}$ denote candidate solutions to optimization problems, $(-)^*$ denote optimal solutions to optimization problems, and $\check{(-)}$ denote real system state/output without noise if the proposed control input sequence is applied.
 
-We also take notations and definitions from \cite{berberichDataDrivenRobust2021} and \cite{berberichRobustConstraintSatisfaction2020}, including: $\Phi$ as the observability matrix of the system and $\Phidagger$ as its pseudo inverse; $\Hux$, $\cpe$, $\Gammauy$ as defined in (7), (8), (12) in \cite{berberichRobustConstraintSatisfaction2020}, respectively; $\rhoinf{k}$ and $\rhotwo{k}$ as defined before (20) in \cite{berberichDataDrivenRobust2021}.
+We take notations and definitions from \cite{berberichDataDrivenRobust2021} and \cite{berberichRobustConstraintSatisfaction2020}, including: $\Phi$ as the observability matrix of the system and $\Phidagger$ as its pseudo inverse; $\Hux$, $\cpe$, $\Gammauy$ as defined in (7), (8), (12) in \cite{berberichRobustConstraintSatisfaction2020}, respectively; $\rhoinf{k}$ and $\rhotwo{k}$ as defined before (20) in \cite{berberichDataDrivenRobust2021}.
 It's worth noticing that the $\rho_k$ defined in (7) in \cite{berberichRobustConstraintSatisfaction2020}, is equivalent to $\rhoinf{k}$ defined in \cite{berberichDataDrivenRobust2021}.
 Also, in \cite{berberichRobustConstraintSatisfaction2020} a different definition for $\cpe$ is used, but we do not use it here.
 
@@ -20,16 +19,14 @@ For simplicity, if the index is not relevant, we will use $\hankel{d}{\varepsd}$
 The proof is organized as follows:
 
 First we provide a candidate solution at time step $t+n$, with the optimal solution at time step $t$.
-Note that this solution is not proved to be feasible yet.
 
-Then by this solution we show that there exist $\varepsmax_1$ and $\barV$, so that if $\barvareps \leq \varepsmax_1$ and optimal cost $\optJof{\uObjn(t), \tildexi_t} \leq \barV$, then the candidate solution at time step $t+n$ has a cost value less than $\barV$, and the optimal cost at time step $t+n$ will also be less than $\barV$.
+Then we show that there exist $\varepsmax_1$ and $\barV$, so that if $\barvareps \leq \varepsmax_1$ and optimal cost $\optJof{\uObjn(t), \tildexi_t} $ $\leq \barV$, candidate solution constructed is feasible.
+This proves recursive feasibility.
 
-Then we can prove that exist $\varepsmax_2$, so that if $\barvareps \leq \varepsmax_2$, this solution will be feasible.
-We need to use the assumption that the optimal cost is smaller than $\barV$ here, that's why the feasibility is proved here.
+Then we show that there exist $\varepsmax_2$, so that if $\barvareps \leq \varepsmax_2$, the constructed solution has a cost value less than $\barV$, so the optimal cost at time step $t+n$ will also be less than $\barV$.
+This proves the recursive bound of optimal cost value.
 
-Then the recursive feasibility and recursive cost value bound follows.
-
-Finally we will show the closed-loop constraint satsifaction.
+Finally, we show the closed-loop constraint satisifaction.
 
 \section*{Construction of Candidate Solution}
 \refstepcounter{section}
@@ -38,28 +35,22 @@ Finally we will show the closed-loop constraint satsifaction.
 We use a similar construction as in \cite{berberichDataDrivenRobust2021}.
 Denote the state/output, if the optimal control input sequence $\subseq{\staru}{0}{L-1}$ is applied, to be $\subseq{\checkx}{0}{L-1}$ and $\subseq{\checky}{0}{L-1}$.
 As shown in \cite{berberichDataDrivenRobust2021}, we have:
-
 \begin{equation*}
-    \stary_k(t) - \checky_k = \hankel{1}{\varepsd} \alpha^*(t) - \sigma^*_k(t) + C A \Phidagger \left(\hankel{n}{\varepsd} \alpha^*(t) - \subseq{\varepsd}{t-n}{t-1} - \subseq{\sigma^*}{-n}{-1}\right)
+    \stary_k(t) - \checky_k = \hankel{1}{\varepsd} \alpha^*(t) - \sigma^*_k(t) + C A \Phidagger \left(\hankel{n}{\varepsd} \alpha^*(t) - \subseq{\varepsd}{t-n}{t-1} - \subseq{\sigma^*}{-n}{-1}\right) \textstop
 \end{equation*}
 
 From which we can have the bound:
-
 \begin{equation}\label{eq:prf-robust-ddsf-direct-candidate-solution-inf-bound}
-    \infnorm{\stary_k(t) - \checky_k} \leq \barvareps \onenorm{\alpha^*(t)} + \infnorm{\sigma^*_k(t)} + \rhoinf{n+k} \left(\barvareps\left(\onenorm{\alpha^*(t)}+1\right) + \infnorm{\subseq{\sigma^*}{-n}{-1}(t)}\right)
+    \infnorm{\stary_k(t) - \checky_k} \leq \barvareps \onenorm{\alpha^*(t)} + \infnorm{\sigma^*_k(t)} + \rhoinf{n+k} \left(\barvareps\left(\onenorm{\alpha^*(t)}+1\right) + \infnorm{\subseq{\sigma^*}{-n}{-1}(t)}\right) \textperiod
 \end{equation}
-
 and:
-
 \begin{multline}\label{eq:prf-robust-ddsf-direct-candidate-solution-two-bound}
     \twonorm{\stary_k(t) - \checky_k}^2 \leq 8 c_5 \barvareps^2 \twonorm{\alpha^*(t)}^2 + 2 \twonorm{\sigma^*_k(t)}^2 \\
-    + \rhotwo{n+k} \left(16 \barvareps^2 \left(c_5 \twonorm{\alpha^*(t)}^2+p\right) + 4 \twonorm{\subseq{\sigma^*}{-n}{-1}(t)}\right)
+    + \rhotwo{n+k} \left(16 \barvareps^2 \left(c_5 \twonorm{\alpha^*(t)}^2+p\right) + 4 \twonorm{\subseq{\sigma^*}{-n}{-1}(t)}\right) \textperiod
 \end{multline}
-
 as in \cite{berberichDataDrivenRobust2021}, where $c_5$ is defined in (18) in \cite{berberichDataDrivenRobust2021}.
 
 Then we define:
-
 {
 \setlength{\abovedisplayskip}{3pt}
 \setlength{\belowdisplayskip}{3pt}
@@ -68,22 +59,20 @@ Then we define:
 \begin{subequations}
 \label{eq:prf-robust-ddsf-direct-candidate-defined}
 \begin{align*}
-    \subseq{\hatu}{-n}{-1}(t+n) &= \subseq{\staru}{0}{n-1}(t) \\
-    \subseq{\haty}{-n}{-1}(t+n) &= \subseq{\tildey}{t}{t+n-1} = \subseq{\checky}{0}{n-1} + \subseq{\varepsilon}{t}{t+n-1} \\
-    \subseq{\hatu}{0}{L-2n-1}(t+n) &= \subseq{\staru}{n}{L-n-1}(t) \\
-    \subseq{\haty}{0}{L-2n-1}(t+n) &= \subseq{\checky}{n}{L-n-1}(t) \\
+    \subseq{\hatu}{-n}{-1}(t+n) &= \subseq{\staru}{0}{n-1}(t) \textperiod \\
+    \subseq{\haty}{-n}{-1}(t+n) &= \subseq{\tildey}{t}{t+n-1} = \subseq{\checky}{0}{n-1} + \subseq{\varepsilon}{t}{t+n-1} \textperiod \\
+    \subseq{\hatu}{0}{L-2n-1}(t+n) &= \subseq{\staru}{n}{L-n-1}(t) \textperiod \\
+    \subseq{\haty}{0}{L-2n-1}(t+n) &= \subseq{\checky}{n}{L-n-1}(t) \textperiod \\
     & \\
-    \subseq{\hatu}{L-n}{L-1}(t+n) &= \vRepeatVec{\us}{n} \\
-    \subseq{\haty}{L-n}{L-1}(t+n) &= \vRepeatVec{\ys}{n} \\
+    \subseq{\hatu}{L-n}{L-1}(t+n) &= \vRepeatVec{\us}{n} \textperiod \\
+    \subseq{\haty}{L-n}{L-1}(t+n) &= \vRepeatVec{\ys}{n} \textstop\\
 \end{align*}
 \end{subequations}
 }
-
 And fill the missing part $\subseq{\hatu}{L-2n}{L-n-1}$ with a sequence of inputs that can drive the system from $\checkx_{L-n-1}$ to $\xs$.
 Note that this is always possible since the system is controllable.
 
 And we define the auxiliary variables:
-
 {
 \setlength{\abovedisplayskip}{3pt}
 \setlength{\belowdisplayskip}{3pt}
@@ -93,46 +82,60 @@ And we define the auxiliary variables:
     \hatalpha(t+n) &= \Huxpinv \begin{bmatrix}
         \subseq{\hatu}{-n}{L-1}(t+n) \\
         x_t
-    \end{bmatrix} \\ 
-    \subseq{\hatsigma}{-n}{-1}(t+n) &= \hankel{n}{\varepsd} \hatalpha + \subseq{\varepsilon}{t}{t+n-1} \\
-    \subseq{\hatsigma}{0}{L-1}(t+n) &= \hankel{L}{\varepsd} \hatalpha \\
+    \end{bmatrix} \textperiod \\ 
+    \subseq{\hatsigma}{-n}{-1}(t+n) &= \hankel{n}{\varepsd} \hatalpha + \subseq{\varepsilon}{t}{t+n-1} \textperiod \\
+    \subseq{\hatsigma}{0}{L-1}(t+n) &= \hankel{L}{\varepsd} \hatalpha \textstop \\
 \end{align*}
 }
-
 As stated in \cite{berberichDataDrivenRobust2021}, this candidate solution satisfies the constraints \cref{eq:robust-ddsf-direct-dynamic,eq:robust-ddsf-direct-initial,eq:robust-ddsf-direct-terminal,eq:robust-ddsf-direct-sigma}.
+
+
+\section*{Feasibility of Candidate Solution}
+\refstepcounter{section}
+\label{prf:robust-ddsf-direct-candidate-feasibility}
+
+As stated in \cref{prf:robust-ddsf-direct-candidate-solution}, the candidate solution satisfies the constraints \cref{eq:robust-ddsf-direct-dynamic,eq:robust-ddsf-direct-initial,eq:robust-ddsf-direct-terminal,eq:robust-ddsf-direct-sigma}.
+We only need to verify the input constraint \cref{eq:robust-ddsf-direct-input} and the output constraint \cref{eq:robust-ddsf-direct-output}.
+
+For the input constraint, by \cref{eq:prf-robust-ddsf-direct-candidate-defined}, we can conclude that $\subseq{\hatu}{-n}{L-2n-1}(t+n) = \subseq{\staru}{0}{L-n-1}(t)$, which satisfies the input constraint \cref{eq:robust-ddsf-direct-input}.
+Also $\subseq{\hatu}{L-n}{L-1}(t+n) = \vRepeatVec{\us}{n}$ satisfies the input constraint \cref{eq:robust-ddsf-direct-input}.
+
+From the bound of optimal cost $\optJof{\uObjn(t), \xi_t} \leq \barV$, we can have: $\barvareps \twonorm{\alpha^*(t)} \leq \frac{\barV}{\lamalpha}$.
+Then combining \cref{eq:robust-ddsf-direct-sigma,eq:prf-robust-ddsf-direct-last-u-bound}, we can see that $\subseq{\hatu}{L-2n}{L-n-1}$ can be arbitrarily small by choosing $\barvareps$ to be small enough.
+Then by the assumption that $\us=0$ is in the interior of $\Uset$, we can conclude that $\subseq{\hatu}{L-2n}{L-n-1}(t+n)$ satisfies the input constraint \cref{eq:robust-ddsf-direct-input} if $\barvareps$ is small enough.
+
+Similar analysis applies to the output constraint \cref{eq:robust-ddsf-direct-output}.
+
+So we can conclude that there exist $\varepsmax_1$, if $\barvareps \leq \varepsmax_1$, the candidate solution at time step $t+n$ is feasible.
+
 
 \section*{Bound of Cost Value}
 \refstepcounter{section}
 \label{prf:robust-ddsf-direct-cost-bound}
 
 As stated in (19) in \cite{berberichDataDrivenRobust2021}, we have:
-
 \begin{equation}\label{eq:prf-robust-ddsf-direct-sigma-bound}
-    \twonorm{\hatsigma(t+n)}^2 \leq 2 n p \barvareps^2 + c_5 (L+2n) \barvareps^2 \twonorm{\hatalpha(t+n)}^2
+    \twonorm{\hatsigma(t+n)}^2 \leq 2 n p \barvareps^2 + c_5 (L+2n) \barvareps^2 \twonorm{\hatalpha(t+n)}^2 \textstop
 \end{equation}
 
 By definition of $\hatalpha(t+n)$, $\cpe$, and $\hatu(t+n)$, we have:
-
 \begin{multline}\label{eq:prf-robust-ddsf-direct-alpha-bound}
     \twonorm{\hatalpha(t+n)}^2 \leq \cpe \twonorm{\begin{bmatrix}
         \subseq{\hatu}{-n}{L-1}(t+n) \\
         x_t
     \end{bmatrix}}^2 \\
-    = \cpe \twonorm{x_t}^2 + \cpe \twonorm{\subseq{\staru}{0}{L-n-1}(t)}^2 + \cpe \twonorm{\subseq{\hatu}{L-2n}{L-n-1}(t+n)}^2
+    = \cpe \twonorm{x_t}^2 + \cpe \twonorm{\subseq{\staru}{0}{L-n-1}(t)}^2 + \cpe \twonorm{\subseq{\hatu}{L-2n}{L-n-1}(t+n)}^2 \textstop
 \end{multline}
 
 From (38) in \cite{berberichDataDrivenRobust2021}, we have:
-
 \begin{equation}\label{eq:prf-robust-ddsf-direct-last-u-bound}
-    \twonorm{\subseq{\hatu}{L-2n}{L-n-1}(t+n)}^2 \leq C_1 \barvareps^2 \twonorm{\alpha^*(t)}^2 + C_2 \twonorm{\sigma^*(t)}^2 + C_3 \barvareps^2
+    \twonorm{\subseq{\hatu}{L-2n}{L-n-1}(t+n)}^2 \leq C_1 \barvareps^2 \twonorm{\alpha^*(t)}^2 + C_2 \twonorm{\sigma^*(t)}^2 + C_3 \barvareps^2 \textperiod
 \end{equation}
-
 with some constants $C_1$, $C_2$, and $C_3$.
 
-Also from the assumption we have $\norm{\subseq{\hatu}{0}{n-1}(t+n) - \subseq{\uObj}{0}{n-1}(t+n)}_{\subseq{R}{0}{n-1}}^2 \leq \barD$
+Also, from the assumption we have $\norm{\subseq{\hatu}{0}{n-1}(t+n) - \subseq{\uObj}{0}{n-1}(t+n)}_{\subseq{R}{0}{n-1}}^2 \leq \barD$.
 
 Then we can conclude the bound of cost on the candidate solution:
-
 \begin{align}\label{eq:prf-robust-ddsf-direct-candidate-cost-bound}
     \MoveEqLeft \Jof{\hatalpha(t+n), \hatsigma(t+n), \hatu(t+n), \haty(t+n); \uObjn(t+n), \tildexi_{t+n}} \nonumber \\
     & \leq \barD + \lamalpha \barvareps \twonorm{\hatalpha(t+n)}^2 + \lamsigma \twonorm{\hatsigma(t+n)}^2 \nonumber \\
@@ -151,32 +154,14 @@ Then we can conclude the bound of cost on the candidate solution:
     \reason{eq:robust-ddsf-direct-cost}
     & \leq \barD + \lamalpha\left(C_6 \barvareps + C_7 \barvareps^3\right) + \lamsigma\left(C_8 \barvareps^2 + C_7 \barvareps^4\right) \nonumber \\
     & \qquad + \left(C_9 \barvareps^3 + C_{10} \barvareps^2 + C_{11} \barvareps\right) \optJof{\uObjn(t), \tildexi_t} \nonumber \\
-    & \leq \barD + C_{12}(\barvareps) + c_{13}(\barvareps) \optJof{\uObjn(t), \tildexi_t}
+    & \leq \barD + C_{12}(\barvareps) + c_{13}(\barvareps) \optJof{\uObjn(t), \tildexi_t} \textperiod
 \end{align}
-
 with $C_4$ to $C_{11}$ being properly chosen constants.
 $C_{12}(\barvareps)$ and $c_{13}(\barvareps)$ are functions of $\barvareps$, and they can be chosen to be arbitrarily small by choosing $\barvareps$ to be small enough.
 
-Then we can conclude that, there exist $\varepsmax_1$, if $\barvareps \leq \varepsmax_1$, along with a proper choice of $\barV$, we have $\barD + C_{12}(\barvareps) + c_{13}(\barvareps) \barV \leq \barV$.
+Then we can conclude that, there exist $\varepsmax_2$, if $\barvareps \leq \varepsmax_2$, along with a proper choice of $\barV$, we have $\barD + C_{12}(\barvareps) + c_{13}(\barvareps) \barV \leq \barV$.
 Then we can conclude the candidate solution at time step $t+n$ has a cost value less than $\barV$.
 
-\section*{Feasibility of Candidate Solution}
-\refstepcounter{section}
-\label{prf:robust-ddsf-direct-candidate-feasibility}
-
-As stated in \cref{prf:robust-ddsf-direct-candidate-solution}, the candidate solution satisfies the constraints \cref{eq:robust-ddsf-direct-dynamic,eq:robust-ddsf-direct-initial,eq:robust-ddsf-direct-terminal,eq:robust-ddsf-direct-sigma}.
-We only need to verify the input constraint \cref{eq:robust-ddsf-direct-input} and the output constraint \cref{eq:robust-ddsf-direct-output}.
-
-For the input constraint, by \cref{eq:prf-robust-ddsf-direct-candidate-defined}, we can conclude that $\subseq{\hatu}{-n}{L-2n-1}(t+n) = \subseq{\staru}{0}{L-n-1}(t)$, which satisfies the input constraint \cref{eq:robust-ddsf-direct-input}.
-Also $\subseq{\hatu}{L-n}{L-1}(t+n) = \vRepeatVec{\us}{n}$ satisfies the input constraint \cref{eq:robust-ddsf-direct-input}.
-
-From the bound of optimal cost $\optJof{\uObjn(t), \xi_t} \leq \barV$, we can have: $\barvareps \twonorm{\alpha^*(t)} \leq \frac{\barV}{\lamalpha}$.
-Then combining \cref{eq:robust-ddsf-direct-sigma,eq:prf-robust-ddsf-direct-last-u-bound}, we can see that $\subseq{\hatu}{L-2n}{L-n-1}$ can be arbitrarily small by choosing $\barvareps$ to be small enough.
-Then by the assumption that $\us=0$ is in the interior of $\Uset$, we can conclude that $\subseq{\hatu}{L-2n}{L-n-1}(t+n)$ satisfies the input constraint \cref{eq:robust-ddsf-direct-input} if $\barvareps$ is small enough.
-
-Similar analysis applies to the output constraint \cref{eq:robust-ddsf-direct-output}.
-
-So we can conclude that there exist $\varepsmax_2$, if $\barvareps \leq \varepsmax_2$, the candidate solution at time step $t+n$ is feasible.
 
 \section*{Closed-loop Constraint Satisfaction}
 \refstepcounter{section}
@@ -187,7 +172,7 @@ Finally, by the usage of constraint tightening scheme in \cite{berberichRobustCo
 Combining all the results from \cref{prf:robust-ddsf-direct-candidate-feasibility,prf:robust-ddsf-direct-candidate-solution,prf:robust-ddsf-direct-cost-bound,prf:robust-ddsf-direct-closed-loop-constraint}, we have proved that there exist $\varepsmax = \min\left(\varepsmax_1, \varepsmax_2\right)$, if $\barvareps \leq \varepsmax$, the candidate solution at time step $t+n$ is feasible, and has a cost value less than $\barV$.
 So recursive feasibility holds, and closed-loop constraint satisfaction holds.
 
- \cleardoublepage
+\cleardoublepage
 
 
 \chapter{Proof of Qualitative Guarantees for Direct Method}\label{apps:prf-roubust-indirect}
@@ -209,7 +194,6 @@ This proves the recursive feasibility.
 \refstepcounter{section}\label{prf:robust-ddsf-indirect-alpha-bound}
 
 As stated after \cref{eq:robust-ddsf-indirect}, we have:
-
 \begin{equation}
     \alpha = \begin{bmatrix}
         \hankel{L+l}{u^d} \\
@@ -221,34 +205,31 @@ As stated after \cref{eq:robust-ddsf-indirect}, we have:
     \end{bmatrix} = \pinv{\hankelutildey} \begin{bmatrix}
         \subseq{\baru}{-l}{L-1} \\
         \subseq{\bary}{-l}{-1} \\
-    \end{bmatrix}
+    \end{bmatrix} \textstop
 \end{equation}
-
 Since we assume $\Uset$ and $\Yset$ are bounded, we only need a bound on $\onenorm{\pinv{(\Hutildey)}}$ to bound $\onenorm{\alpha}$.
 Also, since all matrix norms are equivalent, and we have a fixed size matrix $\Hutildey$, we can use any matrix norm to bound.
 
 Notice that $\Hutildey = \Huy + \Hepsilon$, and $\Huy$ is independent of the noise, so what we want to achieve is: find a bound on the pseudo inverse of a matrix $\Hutildey$, which is a constant matrix $\Huy$ perturbed by a matrix with noise $\Hepsilon$.
 
-Here we refer to Lemma 3.1 in \cite{wedinPerturbationTheoryPseudoinverses1973} for an analysis of the bound of pseudo inverse of a matrix perturbed by a matrix with noise:
+Here we refer to Lemma 3.1 in \cite{wedinPerturbationTheoryPseudoinverses1973} for an analysis of the bound of pseudo inverse of a matrix perturbed by a matrix with noise.
 
 \begin{lemma}[Bound of Perturbed Pseudo Inverse in \cite{wedinPerturbationTheoryPseudoinverses1973}]\label{lemma:bound-perturbed-pinv}
     If matrix $A$ and $T$ satisfies: $\rank(A) = \rank(A+T)$ and $\twonorm{T} \leq \frac{1}{\twonorm{\pinv{A}}}$, then we have: 
     \begin{equation}\label{eq:bound-perturbed-pinv}
-        \twonorm{\pinv{(A+T)}} \leq \frac{\twonorm{\pinv{A}}}{\twonorm{\pinv{A}} - \twonorm{T}}
+        \twonorm{\pinv{(A+T)}} \leq \frac{\twonorm{\pinv{A}}}{\twonorm{\pinv{A}} - \twonorm{T}} \textstop
     \end{equation}
 \end{lemma}
 
 We check the two conditions of \cref{lemma:bound-perturbed-pinv}.
 Firstly, by the assumption that the system is observable and $n=l \times m$, we have that the matrix $\Phi_l$ is square and of full rank, where $\Phi_l$ is the observability matrix of the system with $l$ time steps: $\Phi_l = \transpose{\begin{bmatrix}\transpose{C} & \transpose{(CA)} & \dots & \transpose{(CA^{l-1})}\end{bmatrix}}$.
 Also, we have:
-
 \begin{equation}
     \hankeluy = \begin{bmatrix}
         \mathbb{I} & \mathbb{0} \\
         * & \Phi_l
-    \end{bmatrix} \Hux
+    \end{bmatrix} \Hux \textperiod
 \end{equation}
-
 due to the system dynamics.
 So till now we can conclude that $\rank(\Huy) = \rank(\Hux)$.
 
@@ -265,7 +246,6 @@ In conclusion, there exist $\varepsmax_1$ and a constant $A$, so that if $\barva
 \refstepcounter{section}\label{prf:robust-ddsf-indirect-prediction-error-bound}
 
 By the definition of $\alpha$ and \cref{eq:robust-ddsf-indirect-dynamic,eq:robust-ddsf-indirect-initial,eq:robust-ddsf-indirect-terminal}, we have:
-
 \begin{equation}
     \begin{bmatrix}
         \Up \\
@@ -277,11 +257,9 @@ By the definition of $\alpha$ and \cref{eq:robust-ddsf-indirect-dynamic,eq:robus
         \subseq{\staru}{0}{L-1}(t) \\
         \subseq{y}{t-l}{t-1} + \subseq{\varepsilon}{t-l}{t-1} \\
         \subseq{\stary}{0}{L-1}(t) + \sigma(t)\\
-    \end{bmatrix}
+    \end{bmatrix} \textstop
 \end{equation}
-
 And we can rewrite it into:
-
 \begin{equation}\label{eq:prf-indirect-prediction-error-matrix-form}
     \begin{bmatrix}
         \Up \\
@@ -293,26 +271,21 @@ And we can rewrite it into:
         \subseq{\staru}{0}{L-1}(t) \\
         \subseq{y}{t-l}{t-1} + \subseq{\varepsilon}{t-l}{t-1} - \Epsilonp \alpha\\
         \subseq{\stary}{0}{L-1}(t) + \sigma(t) - \Epsilonf \alpha\\
-    \end{bmatrix}
+    \end{bmatrix} \textstop
 \end{equation}
-
 So by \cref{lemma:fundamental-lemma}, $\subseq{\stary}{0}{L-1}(t) +\sigma(t) - \Epsilonf \alpha$ is the future trajectory of the system with extended initial condition $\subseq{u}{t-l}{t-1}$ and $\subseq{y}{t-l}{t-1} + \subseq{\varepsilon}{t-l}{t-1} - \Epsilonp \alpha$, with future input $\subseq{\staru}{0}{L-1}(t)$ applied.
 
 We also note that $\subseq{\checky}{0}{L-1}(t)$ is the future trajectory of the system with extended initial condition $\subseq{u}{t-l}{t-1}$ and $\subseq{y}{t-l}{t-1}$, with future input $\subseq{\staru}{0}{L-1}(t)$ applied.
 
 So by linearity of the system, we can conclude that $\subseq{\stary}{0}{L-1}(t) - \subseq{\checky}{0}{L-1}$ composes of two parts, one being $\sigma(t) + \Epsilonf \alpha$ and another one being the output of the system, with zero initial input condition, $\subseq{\varepsilon}{t-l}{t-1} - \Epsilonp \alpha$ as initial output condition, and zero future inputs.
 This can be concluded as:
-
 \begin{equation}\label{eq:prf-indirect-prediction-error-single-form}
-    \stary_k(t) - \checky_k(t) = \sigma_k(t) + \hankel{1}{\varepsilon^d} \alpha + C A^{l+k} \pinv{\Phi_l} \left(\subseq{\varepsilon}{t-l}{t-1} - \Epsilonp \alpha\right)
+    \stary_k(t) - \checky_k(t) = \sigma_k(t) + \hankel{1}{\varepsilon^d} \alpha + C A^{l+k} \pinv{\Phi_l} \left(\subseq{\varepsilon}{t-l}{t-1} - \Epsilonp \alpha\right) \textstop
 \end{equation}
-
 Then we take infinity norm on both sides, take the upper bound of system constants, and have:
-
 \begin{equation}\label{eq:prf-indirect-prediction-bound}
-    \infnorm{\stary_k(t) - \checky_k(t)} \leq \infnorm{\sigma_k(t)} + \barvareps \onenorm{\alpha}  + \rhoinf{L}^{\max} \left(\barvareps + \barvareps \onenorm{\alpha(t)}\right)
+    \infnorm{\stary_k(t) - \checky_k(t)} \leq \infnorm{\sigma_k(t)} + \barvareps \onenorm{\alpha}  + \rhoinf{L}^{\max} \left(\barvareps + \barvareps \onenorm{\alpha(t)}\right) \textstop
 \end{equation}
-
 Then from \cref{eq:robust-ddsf-indirect-sigma}, bound of $\alpha$ and \cref{eq:prf-indirect-prediction-bound}, we can see that by taking $\barvareps$ to be small enough, $\infnorm{\sigma(t)}$ will be arbitrarily small, and $\infnorm{\stary(t) - \checky(t)}$ will also be arbitrarily small.
 
 Formally, for any $\delta > 0$, there exist $\barvareps_\delta$, so that $\infnorm{\stary(t) - \checky(t)} \leq \delta$ holds.
@@ -326,7 +299,6 @@ Combine it with the prediction error bound and constraint \cref{eq:robust-ddsf-i
 
 We use a similar construction as in \cref{apps:prf-roubust-direct}.
 Namely, we choose:
-
 {
 \setlength{\abovedisplayskip}{3pt}
 \setlength{\belowdisplayskip}{3pt}
@@ -335,33 +307,29 @@ Namely, we choose:
 \begin{subequations}
 \label{eq:prf-indirect-candidate-defined}
 \begin{align*}
-    \subseq{\hatu}{-l}{-1}(t+n) &= \subseq{\staru}{n-l}{n-1}(t) \\
-    \subseq{\haty}{-L}{-1}(t+n) &= \subseq{\tildey}{t+n-l}{t+n-1} = \subseq{\checky}{n-l}{n-1}(t) + \subseq{\varepsilon}{t}{t+n-1} \\
-    \subseq{\hatu}{0}{L-2n-1}(t+n) &= \subseq{\staru}{n}{L-n-1}(t) \\
-    \subseq{\haty}{0}{L-2n-1}(t+n) &= \subseq{\checky}{n}{L-n-1}(t) \\
+    \subseq{\hatu}{-l}{-1}(t+n) &= \subseq{\staru}{n-l}{n-1}(t) \textperiod \\
+    \subseq{\haty}{-L}{-1}(t+n) &= \subseq{\tildey}{t+n-l}{t+n-1} = \subseq{\checky}{n-l}{n-1}(t) + \subseq{\varepsilon}{t}{t+n-1} \textperiod \\
+    \subseq{\hatu}{0}{L-2n-1}(t+n) &= \subseq{\staru}{n}{L-n-1}(t) \textperiod \\
+    \subseq{\haty}{0}{L-2n-1}(t+n) &= \subseq{\checky}{n}{L-n-1}(t) \textperiod \\
     & \\
-    \subseq{\hatu}{L-n}{L-1}(t+n) &= \vRepeatVec{\us}{n} \\
-    \subseq{\haty}{L-n}{L-1}(t+n) &= \vRepeatVec{\ys}{n} \\
+    \subseq{\hatu}{L-n}{L-1}(t+n) &= \vRepeatVec{\us}{n} \textperiod \\
+    \subseq{\haty}{L-n}{L-1}(t+n) &= \vRepeatVec{\ys}{n} \textperiod \\
 \end{align*}
 \end{subequations}
 }
-
-And fill the missing part $\subseq{\hatu}{L-2n}{L-n-1}$ with a sequence of inputs that can drive the system from $\checkx_{L-n-1}$ to $\xs$.
+and fill the missing part $\subseq{\hatu}{L-2n}{L-n-1}$ with a sequence of inputs that can drive the system from $\checkx_{L-n-1}$ to $\xs$.
 Note that by this definition, $\subseq{\haty}{0}{L-1}(t+n)$ will be the outputs of the system, with extended initial condition $\subseq{\hatu}{-l}{-1}(t+n)$ and $\subseq{\checky}{n-l}{n-1}(t)$, with future inputs $\subseq{\hatu}{0}{L-1}(t+n)$.
 
 By definition, we have:
-
 \begin{equation}\label{eq:prf-indirect-candidate-alpha}
     \hatalpha(t+n) = \pinv{\hankelutildey} \begin{bmatrix}
         \subseq{\hatu}{-l}{L-1}(t+n) \\
         \subseq{\haty}{-l}{-1}(t+n)
-    \end{bmatrix}
+    \end{bmatrix} \textstop
 \end{equation}
-
 And we have:
-
 \begin{equation*}
-    \tildeYf \hatalpha(t+n) = \Epsilonf \hatalpha(t+n) + \Yf \hatalpha(t+n) \\
+    \tildeYf \hatalpha(t+n) = \Epsilonf \hatalpha(t+n) + \Yf \hatalpha(t+n) \textstop \\
 \end{equation*}
 
 As from \cref{eq:prf-indirect-prediction-error-matrix-form}, $\Yf \hatalpha(t+n)$ is the future trajectory of the system, with extended initial condition $\subseq{\hatu}{-l}{-1}(t+n)$ and $\subseq{\checky}{n-l}{n-1}(t) + \subseq{\varepsilon}{t+n-l}{t+n-1} - \Epsilonp \hatalpha(t+n)$, with future inputs $\subseq{\hatu}{0}{L-1}(t+n)$.
@@ -370,26 +338,20 @@ Combine it with the definition of $\subseq{\haty}{0}{L-1}(t+n)$, we can have tha
 We denote this sequence of output as $\subseq{y^-}{0}{L-1}$.
 
 So from \cref{eq:robust-ddsf-indirect-sigma}, we can find the value of $\hatsigma(t+n)$:
-
 \begin{align}\label{eq:prf-indirect-candidate-sigma}
     \hatsigma(t+n) &= \tildeYf \hatalpha(t+n) - \subseq{\haty}{0}{L-1}(t+n) \nonumber \\
     &= \Epsilonf \hatalpha(t+n) + \Yf \hatalpha(t+n) - \subseq{\haty}{0}{L-1}(t+n) \nonumber \\
-    &= \Epsilonf \hatalpha(t+n) + \subseq{y^-}{0}{L-1}
+    &= \Epsilonf \hatalpha(t+n) + \subseq{y^-}{0}{L-1} \textstop
 \end{align}
-
 And by definition of $\subseq{y^-}{0}{L-1}$, we have:
-
 \begin{equation}\label{eq:prf-indirect-candidate-sigma-single}
-    \hatsigma_k(t+n) = \hankel{1}{\varepsilon^d} \hatalpha(t+n) + C A^{l+k} \pinv{\Phi_l} \left(\subseq{\varepsilon}{t+n-l}{t+n-1} - \Epsilonp \hatalpha(t+n)\right)
+    \hatsigma_k(t+n) = \hankel{1}{\varepsilon^d} \hatalpha(t+n) + C A^{l+k} \pinv{\Phi_l} \left(\subseq{\varepsilon}{t+n-l}{t+n-1} - \Epsilonp \hatalpha(t+n)\right) \textstop
 \end{equation}
-
 By taking infinity norm on both sides and taking the upper bound of system constants, we have:
-
 \begin{align}\label{eq:prf-indirect-candidate-sigma-bound}
     \infnorm{\hatsigma(t+n)} &\leq \barvareps \onenorm{\hatalpha(t+n)} + \rhoinf{L}^{\max} \left(\barvareps + \barvareps \onenorm{\hatalpha(t+n)}\right) \nonumber \\
-    &= \bar{\varepsilon}\left( \left(1+\rho_{L}^{\max}\right)\norm{\alpha}_1 + \rho_{L}^{\max} \right)
+    &= \bar{\varepsilon}\left( \left(1+\rho_{L}^{\max}\right)\norm{\alpha}_1 + \rho_{L}^{\max} \right) \textstop
 \end{align}
-
 Compare with \cref{eq:robust-ddsf-direct-sigma}, we can see the constraint \cref{eq:robust-ddsf-indirect-sigma} is satisfied.
 
 For now, we have constructed a candidate solution at time step $t+n$, which satisfies \cref{eq:robust-ddsf-indirect-dynamic,eq:robust-ddsf-indirect-initial,eq:robust-ddsf-indirect-sigma,eq:robust-ddsf-indirect-terminal}.
@@ -398,14 +360,12 @@ We only need to check the input constraint \cref{eq:robust-ddsf-indirect-input} 
 For the input constraint, since our prediction error can be arbitrarily small, similar analysis as in \cref{prf:robust-ddsf-direct-candidate-feasibility} applies.
 
 For the output constraint, we have:
-
 \begin{align}\label{eq:prf-indirect-candidate-output-bound}
     \infnorm{\haty_k(t+n)} 
     &\leq \infnorm{\stary_{k+n}(t)} + \infnorm{\stary_{k+n}(t) - \checky_{k+n}(t)} \nonumber \\
     &\leq y_{\max} - \sum_{i=1}^{\ceil{\frac{k+n}{n}}} c_i + c_{\ceil{\frac{k+n}{n}}} \nonumber \\
-    &\leq y_{\max} - \sum_{i=1}^{\ceil{\frac{k}{n}}} c_i
+    &\leq y_{\max} - \sum_{i=1}^{\ceil{\frac{k}{n}}} c_i \textperiod
 \end{align}
-
 for all $k \in \listinI{0}{L-2n-1}$, if $\barvareps \leq \varepsmax_2$ as discussed in \cref{prf:robust-ddsf-indirect-prediction-error-bound}.
 So the output constraint \cref{eq:robust-ddsf-indirect-output} is satisfied for all $k \in \listinI{0}{L-2n-1}$.
 

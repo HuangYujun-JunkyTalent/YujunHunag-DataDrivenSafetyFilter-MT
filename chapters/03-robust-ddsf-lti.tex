@@ -145,9 +145,11 @@ We can prove that the formulation \cref{eq:robust-ddsf-direct} can provide quali
     Consider a controllable LTI system with bounded output noise, along with n-step receding horizon scheme.
     And suppose \cref{asm:dataset-L-2n-rich,asm:horizon-2-n,asm:objective-input-bound,asm:equilibrium-interior} are satisfied.
     With proper choice of regularizing constants $\lamalpha$ and $\lamsigma$, there exist a constant $\varepsmax$ and a cost bound $\barV$, that make following statements true:
-    when $\barvareps \leq \varepsmax$, and the optimal cost at time step $t_0$ is smaller than $\barV$; recursive feasibility and closed-loop constraint satisfaction can be guaranteed after $t_0$ with the formulation \cref{eq:robust-ddsf-direct}.
+    when $\barvareps \leq \varepsmax$, and the optimal cost at time step $t_0$ is no larger than $\barV$, recursive feasibility and closed-loop constraint satisfaction can be guaranteed after $t_0$ with the formulation \cref{eq:robust-ddsf-direct} and the optimal cost for all time steps $t \geq t_0$ will be no larger than $\barV$.
 \end{theorem}
 
+Note that in addition to recursive feasibility and closed-loop constraint satisfaction, we also specify a recursive upperbound on the optimal cost.
+This is needed to ensure the guarantees are indeed recursive, namely can be ensured for all time steps after $t_0$.
 We leave the proof of \cref{thm:robust-ddsf-direct} to \cref{apps:prf-roubust-direct}.
 
 This guarantee is called \emph{qualitative}, since it does not provide any quantitative information about the choice of regularizing constants $\lamalpha$ and $\lamsigma$, maximum noise bound $\varepsmax$ and cost bound $\barV$.

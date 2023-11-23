@@ -21,6 +21,7 @@
 								 % {german}/english: language of headings, etc.
 								 % {st}/bt/mt: {semester}/bachelor/master thesis
 \usepackage{hyperref}
+\usepackage[section]{placeins}
 \usepackage[capitalise, compress]{cleveref} % load cleverref as the last package!
 \usepackage{crossreftools} % but load crossreftools after cleverref!
 
@@ -283,3 +284,5 @@
 \newcommand\noisyextendedstateinline[2]{\transpose{\begin{bmatrix}
 	\transpose{\subseq{u}{#1}{#2}} & \transpose{\subseq{\tildey}{#1}{#2}}
 \end{bmatrix}}}
+
+\newcommand\distfun{h}

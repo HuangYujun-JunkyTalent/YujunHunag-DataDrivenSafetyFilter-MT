@@ -1,33 +1,35 @@
 \chapter{Data-Driven Predictive Method for Non-linear Systems}\label{chap:non-linear-system}
 
-In this chapter, we briefly discuss how to extend the data-driven prediction method to non-linear systems.
-To avoid unnecessary complexity, we only consider noise-free systems in this chapter.
+In this chapter, we briefly discuss how to extend the data-driven prediction method to non-linear systems, and how to evaluate the richness of datasets.
+To avoid unnecessary complexity, we only consider noise-free systems.
 
 First we introduce a method of effectively using one or more dataset trajectories of a non-linear system to make predictions in \cref{sec:weighting-method}.
 Then we introduce a metric for evaluating the quality of a dataset in \cref{sec:fractal-dimension-method}.
-Finally, we use a numerical example in \cref{sec:non-linear-system-numerical-example} to show that dataset that is better evaluated by the metric can make better predictions using the method we propose.
+Finally, we use a numerical example in \cref{sec:non-linear-system-numerical-example} to show that the proposed prediction method yields more precise prediction than the indirect method, and richer datasets attain higher scores by the proposed metric.
 
 In this section, we still use $l$ to denote the number of input-output pairs used for implicitly determining the internal state of the system, and use $L$ to denote the prediction horizon.
-But in the case of non-linear systems, $l$ is just supposed to be long enough to determine the internal state, but lacks a formal definition as in the case of linear systems.
+In the case of non-linear systems, $l$ is just supposed to be long enough to determine the internal state, but lacks a formal definition which is available in the case of linear systems.
 
 
 \section{Weighting Method for Non-linear Systems in Data-driven Prediction Methods}\label{sec:weighting-method}
 
 As introduced in \cref{sec:motivation-and-background}, although originally designed for linear systems, experiments show that the data-driven control method can be applied to non-linear systems, such as quadrotors in \cite{elokdaDataQuad2021} and quasi-continuum manipulators in \cite{mullerDataDrivenQCR2022}.
 
-There's also attempt to extend the data-driven control method to general non-linear systems, such as \cite{berberichLinearTrackingMPCData2022}.
-Intuitively, this method in \cite{berberichLinearTrackingMPCData2022} is trying to make a linear affine approximation of the non-linear system around current state, by constructing the Hankel matrix using the last $N$ online observations.
+There's also attempt to extend the data-driven control method to general non-linear systems and obtain theoretical guarantees, such as \cite{berberichLinearTrackingMPCData2022}.
+Intuitively, this method in \cite{berberichLinearTrackingMPCData2022} is trying to make an affine approximation of the non-linear system around current state, by constructing the Hankel matrix using the last $N$ online observations.
 
 But this method has many drawbacks.
-It relies on the assumption that online observations are informative enough to approximate the local dynamics of the system, but in practice, the system can be operating consistently in a certain manner, making the online observations not informative enough.
-Also, it has very few adjustments that can be done for different systems, but in practice, different systems can behave very differently, and the method should be able to adapt to them.
+It relies on the assumption that online observations are informative enough to approximate the local dynamics of the system, but in practice, the system can be operating consistently in a certain manner, for example be kept very near the equilibrium, making the online observations not informative enough.
+Also, we face the dilemma of choosing the proper length of online observations.
+For shorter length, the approximation will be more local, but the dataset will be less informative.
+For longer length, the dataset will be more informative, but may contain input-output pairs that are far away from the current state, deteriorating the local approximation.
+% For example, a certain system can have dynamics that varies a lot in different regions of the state space, and the proper length of online observations for local approximation can vary a lot.
 
-In this section, we take the intuition of making local linear affine approximation of non-linear systems, and propose a method of making predictions for non-linear systems using dataset trajectories.
+In this section, we take the intuition of making local affine approximation of non-linear systems, and propose a method to make predictions for non-linear systems using rich enough dataset that carries all the information about the system.
 
-As stated in \cref{sec:motivation-and-background}, each column of the Hankel matrix of a long sequence, with depth $L$, is a subsequence of length $L$.
-And all columns of the Hankel matrix cover all such subsequences.
-Now consider the Hankel matrix of a dataset trajectory $\datasetSequence{u}{N}$ and $\datasetSequence{y}{N}$, with depth $l+L$, which reads:
-
+% As stated in \cref{sec:motivation-and-background}, each column of the Hankel matrix with depth $L$, is a subsequence of length $L$ for the long trajectory.
+% All columns of the Hankel matrix cover all such subsequences.
+Consider the Hankel matrix with length $L+l$ for a dataset trajectory:
 \begin{equation*}
     \begin{bmatrix}
         \hankel{L+l}{\ud} \\
@@ -41,13 +43,13 @@ Now consider the Hankel matrix of a dataset trajectory $\datasetSequence{u}{N}$ 
         \yd_1 & \yd_2 & \ldots & \yd_{N-L-l+1} \\
         \vdots & \vdots & \ddots & \vdots \\
         \yd_{L+l-1} & \yd_{L+l} & \ldots & \yd_{N-1}
-    \end{bmatrix}
+    \end{bmatrix} \textstop
 \end{equation*}
 
 We can see that each column of the Hankel matrix is a sub-trajectory of length $L+l$.
-And all columns of the Hankel matrix cover all such sub-trajectories that can be extracted from the dataset trajectory.
+All columns of the Hankel matrix cover all such sub-trajectories that can be extracted from the dataset trajectory.
 By multiplying the Hankel matrix with a vector $\alpha$, we are essentially taking a linear combination of all such sub-trajectories.
-For linear system, such a combination will in turn be a trajectory of the system, and if the dataset trajectory is rich enough (as defined by the persistently exciting of the input sequence), all such linear combinations can cover all possible trajectories of the system.
+For linear systems, such a combination will in turn be a trajectory of the system, and if the dataset trajectory is rich enough (as defined by the \cref{def:persistently-exciting}), all such linear combinations can cover all possible trajectories of the system.
 
 To simplify further discussion, as in \cite{dorflerBridgingDirectIndirect2023}, we use the following notations:
 \begin{align*}
@@ -56,25 +58,25 @@ To simplify further discussion, as in \cite{dorflerBridgingDirectIndirect2023}, 
         \ud_1 & \ud_2 & \ldots & \ud_{N-L-l+1} \\
         \vdots & \vdots & \ddots & \vdots \\
         \ud_{l-1} & \ud_{l} & \ldots & \ud_{N-L-1}
-    \end{bmatrix} \\
+    \end{bmatrix} \textperiod \\
     \Uf = \hankel{L}{\subseq{\ud}{l}{N-1}} = \begin{bmatrix}
         \ud_l & \ud_{l+1} & \ldots & \ud_{N-L} \\
         \ud_{l+1} & \ud_{l+2} & \ldots & \ud_{N-L+1} \\
         \vdots & \vdots & \ddots & \vdots \\
         \ud_{l+L-1} & \ud_{l+L} & \ldots & \ud_{N-1}
-    \end{bmatrix} \\
+    \end{bmatrix} \textperiod \\
     \Yp = \hankel{l}{\subseq{\yd}{0}{N-L-1}} = \begin{bmatrix}
         \yd_0 & \yd_1 & \ldots & \yd_{N-L-l} \\
         \yd_1 & \yd_2 & \ldots & \yd_{N-L-l+1} \\
         \vdots & \vdots & \ddots & \vdots \\
         \yd_{l-1} & \yd_{l} & \ldots & \yd_{N-L-1}
-    \end{bmatrix} \\
+    \end{bmatrix} \textperiod \\
     \Yf = \hankel{L}{\subseq{\yd}{l}{N-1}} = \begin{bmatrix}
         \yd_l & \yd_{l+1} & \ldots & \yd_{N-L} \\
         \yd_{l+1} & \yd_{l+2} & \ldots & \yd_{N-L+1} \\
         \vdots & \vdots & \ddots & \vdots \\
         \yd_{l+L-1} & \yd_{l+L} & \ldots & \yd_{N-1}
-    \end{bmatrix}
+    \end{bmatrix} \textstop
 \end{align*}
 
 That is, separate the first $l$ rows of the Hankel matrix and the last $L$ rows of the Hankel matrix.
@@ -95,15 +97,14 @@ And we can also separate the first $l$ rows and the last $L$ rows of the mosaic-
 We also denote the width of the mosaic-Hankel matrix (number of sub-trajectories) as $\NH$.
 
 Now we can formulate the problem of making predictions for non-linear systems using dataset trajectories as:
-\emph{Given $K$ dataset trajectories $\sequence{\ud^{\scriptscriptstyle{(i)}}}{t}{0}{{N_i}}$, $\sequence{\yd^{\scriptscriptstyle{(i)}}}{t}{0}{{N_i}}$, $i = 1, \ldots, K$, the extended initial condition $\xi_t = \begin{bmatrix}\subseq{u}{t-l}{t-1} \\ \subseq{y}{t-l}{t-1}\end{bmatrix}$, and a sequence of future inputs $\subseq{u}{t}{t+L-1}$ How to make good prediction of future outputs $\subseq{y}{t}{t+L-1}$ of the system?}
+\emph{Given $K$ dataset trajectories $\sequence{\ud^{\scriptscriptstyle{(i)}}}{t}{0}{{N_i}}$, $\sequence{\yd^{\scriptscriptstyle{(i)}}}{t}{0}{{N_i}}$, $i = 1, \ldots, K$, the extended initial condition $\xi_t = \begin{bmatrix}\subseq{u}{t-l}{t-1} \\ \subseq{y}{t-l}{t-1}\end{bmatrix}$, and a sequence of future inputs $\subseq{u}{t}{t+L-1}$, how to make good prediction of future outputs $\subseq{y}{t}{t+L-1}$ of the system?}
 
 For now, we suppose that we have a \emph{rich enough} dataset that in principle can cover all possible predictions we want to make about the system, and the only question is how to make good use of the dataset to make predictions.
-In \cref{sec:fractal-dimension-method}, we will discuss a metric for evaluating the richness of a dataset.
+In \cref{sec:fractal-dimension-method}, we will discuss a metric for evaluating the richness of datasets.
 
 Taking the intuition from the case of linear systems, we can try to find a good vector $\alpha$, which is used for taking linear combinations of all sub-trajectories of length $L+l$ that can be extracted from the dataset trajectories, to approximate the trajectory $\subseq{u}{t-l}{t+L-1}$ and $\subseq{y}{t-l}{t+L-1}$.
 
-As stated in \cite{dorflerBridgingDirectIndirect2023}, in the LTI system case the problem is formulated as:
-
+As stated in \cite{dorflerBridgingDirectIndirect2023}, in the LTI system case the problem to find such a vector $\alpha$ can be formulated as:
 \begin{subequations}
 \label{eq:original-indirect-method}
 \begin{align}
@@ -117,23 +118,24 @@ As stated in \cite{dorflerBridgingDirectIndirect2023}, in the LTI system case th
         \subseq{u}{t-l}{t-1} \\
         \subseq{u}{t}{t+L-1} \\
         \subseq{y}{t-l}{t-1}
-    \end{bmatrix} \label{eq:original-indirect-method-constraint} \\
-    & \subseq{y}{t}{t+L-1} = \Yf \alpha \label{eq:original-indirect-method-prediction}
+    \end{bmatrix} \textperiod \label{eq:original-indirect-method-constraint}
 \end{align}
 \end{subequations}
+and the prediction is made by:
+\begin{equation}\label{eq:original-indirect-method-prediction}
+    \subseq{y}{t}{t+L-1} = \Yf \alpha \textstop
+\end{equation}
 
 The cost \cref{eq:original-indirect-method-cost} is used to make the vector $\alpha$ as small as possible, to deal with possible noise in the dataset.
 The constraint \cref{eq:original-indirect-method-constraint} is used to make sure that the extended initial condition $\xi_t$ and proposed future input sequence $\subseq{u}{t}{t+L-1}$ are well fitted by the vector $\alpha$.
 And if the system is LTI, and the dataset is rich enough as defined in \cite{vanwaardeMultiple2020}, there will always exist a vector $\alpha$ that satisfies the constraint \cref{eq:original-indirect-method-constraint}.
 And the prediction is made by \cref{eq:original-indirect-method-prediction}.
 
-However, in the non-linear case, we need to approximate the system with a \emph{local linear affine} system, which requires the answer to two questions:
-
+However, in the non-linear case, we need to approximate the system with a \emph{local affine} system, which requires the answer to two questions:
 \begin{enumerate}
     \item How to find a better way of choosing $\alpha$, so that it can pick sub-trajectories (columns) from the mosaic-Hankel matrix, that are more relevant to the \emph{local} dynamics of the system, near current extended initial condition $\xi_t$?
-    \item How to make the prediction based on an \emph{LTI affine system}, not an LTI system?
+    \item How to make the prediction based on an \emph{affine system}, not an LTI system?
 \end{enumerate}
-
 Note that in non-linear case, the matrix $\begin{bmatrix}
     \Up \\
     \Uf \\
@@ -142,15 +144,14 @@ Note that in non-linear case, the matrix $\begin{bmatrix}
 
 For the first question, we propose a method of weighting different sub-trajectories in the mosaic-Hankel matrix, to put more weight onto sub-trajectories that are closer to the current extended initial condition $\xi_t$, in order to make better approximation of the local dynamics of the system.
 
-For the i-th sub-trajectory (column) of the mosaic-Hankel matrix $\subseq{\ud}{i}{i+L+l-1}$ and $\subseq{\yd}{i}{i+L+l-1}$, we can define a distance to the current extended initial condition $\xi_t$ as: $d\left(\mnormsq{\left(\xi_t - \xi_i\right)}{Q}\right)$, where $\xi_i = \begin{bmatrix}\subseq{u}{i}{i+l-1} \\ \subseq{y}{i}{i+l-1}\end{bmatrix}$ is the extended initial condition of the sub-trajectory (the i-th column of $\Up$ and $\Yp$); $Q$ is a positive definite matrix used to weight the distance; $d$ is a non-decreasing function.
+For the i-th sub-trajectory (column) of the mosaic-Hankel matrix $\subseq{\ud}{i}{i+L+l-1}$ and $\subseq{\yd}{i}{i+L+l-1}$, we can define a distance to the current extended initial condition $\xi_t$ as: $\distfun\left(\mnormsq{\left(\xi_t - \xi_i\right)}{Q}\right)$, where $\xi_i = \begin{bmatrix}\subseq{u}{i}{i+l-1} \\ \subseq{y}{i}{i+l-1}\end{bmatrix}$ is the extended initial condition of the sub-trajectory (the i-th column of $\Up$ and $\Yp$); $Q$ is a positive definite matrix used to weight the distance; $\distfun$ is a non-decreasing function.
 
-Then, with this distance defined for each sub-trajectory, we can define a diagonal distance matrix $\Dt$ as: $\Dt(i,i) = d\left(\mnormsq{\left(\xi_t - \xi_i\right)}{Q}\right)$, and use this matrix to weight the sub-trajectories in the mosaic-Hankel matrix.
+Then, with this distance defined for each sub-trajectory, we can define a diagonal distance matrix $\Dt$ as: $\Dt(i,i) = \distfun\left(\mnormsq{\left(\xi_t - \xi_i\right)}{Q}\right)$, and use this matrix to weight the sub-trajectories in the mosaic-Hankel matrix.
 The subscript $t$ is used to emphasize its dependence on the current extended initial condition $\xi_t$.
 
 For the second question, we can use the result from \cite{martinelliDataDrivenAffine2022}, which states that we just need to add an extra constraint to the optimization problem: $\transpose{\ones{\NH}} \alpha = 1$.
 
-With these modifications, we formulate the problem as:
-
+With these modifications, we formulate the problem of finding optimal $\alpha$ as:
 \begin{subequations}
 \label{eq:weighted-indirect-method}
 \begin{align}
@@ -165,42 +166,39 @@ With these modifications, we formulate the problem as:
         \subseq{u}{t}{T+L-1} \\
         \subseq{y}{t-l}{t-1}
     \end{bmatrix} \label{eq:weighted-indirect-method-hankel} \\
-    & \transpose{\ones{\NH}} \alpha = 1 \label{eq:weighted-indirect-method-affine} \\
-    & \subseq{y}{t}{t+L-1} = \Yf \alpha \label{eq:weighted-indirect-method-prediction}
+    & \transpose{\ones{\NH}} \alpha = 1 \label{eq:weighted-indirect-method-affine}  \textperiod \\
 \end{align}
 \end{subequations}
+and the prediction is made by:
+\begin{equation}\label{eq:weighted-indirect-method-prediction}
+    \subseq{y}{t}{t+L-1} = \Yf \alpha \textstop
+\end{equation}
 
 The cost \cref{eq:weighted-indirect-method-cost} is designed to force the choice of $\alpha$ wisely, so that we put more weight to sub-trajectories that are close to the current extended initial condition $\xi_t$.
 
 This optimization problem \cref{eq:weighted-indirect-method} can be solved in closed form, with the optimal $\alpha$ being:
-
 \begin{equation}\label{eq:weighted-indirect-method-solution}
     \alpha = \inv{\Dt}\transpose{\hankeluyone}\inv{\left(\hankeluyone \inv{\Dt} \transpose{\hankeluyone}\right)} \begin{bmatrix}
         \subseq{u}{t-l}{t-1} \\
         \subseq{u}{t}{t+L-1} \\
         \subseq{y}{t-l}{t-1} \\
         1
-    \end{bmatrix}
+    \end{bmatrix} \textstop
 \end{equation}
 
-\begin{remark}\label{remark:weiting-proposed-input}
-    It might be tempting to also include the proposed input sequence $\subseq{u}{t}{t+L-1}$ into the weighting of sub-trajectories, and indeed it can be a good idea for the problem of making predictions only.
-
-    However, since the prediction will be used for a predictive controller or safety filter, and the proposed input sequence $\subseq{u}{t}{t+L-1}$ will in these cases be formulated as optimization variables, including them into the weighting method will make the optimization problem non-convex, and thus hard to solve.
-
-    In contrast, the extended initial condition $\xi_t$ is usually given as parameters to the optimization problem, and thus can be used for the weighting method without making the optimization problem non-convex.
-\end{remark}
+We also want to obtain the possibility to discard some sub-trajectories that are far away from current extended initial condition $\xi_t$, as they might not be relevant to the local dynamics of the system.
+To achieve this, we can set the corresponding entry $\Dt(i,i) = \infty$ in the distance matrix $\Dt$, so that $\alpha_i$ will become zero.
+However, this creates a problem of dealing with $\infty$.
+The issue can be solved by the following method.
 
 We can see that the solution only depends on the inverse of the distance matrix $\Dt$.
 So we can further define a diagonal weighting matrix $\Wt$, where: $\Wt(i,i) = w\left(\mnormsq{\left(\xi_i - \xi_t\right)}{Q}\right)$, where $w$ is a non-increasing function.
 And replace $\inv{\Dt}$ by $\Wt$ in the solution \cref{eq:weighted-indirect-method-solution}.
-
 Intuitively, $\Wt(i,i)$ represents the weight of the i-th sub-trajectory, and the weight is higher if the sub-trajectory is closer to the current extended initial condition $\xi_t$.
-This method has the advantage that, we can set the weight of sub-trajectories that are far away from the current extended initial condition $\xi_t$ to zero, that is let $\Wt(i,i)=0$, so that they will not be used for making predictions.
+Using this method, we can set the weight of sub-trajectories that are far away from the current extended initial condition $\xi_t$ to zero, that is let $\Wt(i,i)=0$, this will in turn results in $\alpha_i = 0$.
 This is roughly equivalent to setting $\Dt(i,i)=\infty$, but avoids the problem of dealing with $\infty$.
 
-Then the solution can be rewritten as:
-
+Then the optimal $\alpha$ can be rewritten as:
 \begin{subequations}
 \label{eq:weighted-indirect-method-w-solution}
 \begin{align}
@@ -209,14 +207,53 @@ Then the solution can be rewritten as:
         \subseq{u}{t}{T+L-1} \\
         \subseq{y}{t-l}{t-1} \\
         1
-    \end{bmatrix} \label{eq:weighted-indirect-method-w-solution-alpha} \\
-    \subseq{y}{t}{t+L-1} &= \Yf \alpha \label{eq:weighted-indirect-method-w-solution-prediction}
+    \end{bmatrix} \label{eq:weighted-indirect-method-w-solution-alpha} \textperiod
+    % \subseq{y}{t}{t+L-1} &= \Yf \alpha \label{eq:weighted-indirect-method-w-solution-prediction}
 \end{align}
 \end{subequations}
+and the prediction is still made by \cref{eq:weighted-indirect-method-prediction}.
+
+We can reformulate the indirect formualation of robust data-driven predictive safety filter \cref{eq:robust-ddsf-indirect} using this weighting method, as:
+\begin{subequations}
+    \label{eq:robust-ddsf-weighting}
+    \begin{align}
+        \min_{\substack{\sigma \\ \subseq{\baru}{0}{L-1}, \subseq{\bary}{0}{L-1}}} \quad & \norm{\subseq{\baru}{0}{n-1} - \subseq{\uObj}{0}{n-1}(t)}_{\subseq{R}{0}{n-1}}^2 + \lambda_\sigma \norm{\sigma}_2^2 \label{eq:robust-ddsf-weighting-cost} \\
+        \textrm{s.t.} \quad & 
+        \subseq{\bary}{0}{L-1} + \sigma 
+        = \Yf \Wt \transpose{\hankeluyone}\inv{\left(\hankeluyone \Wt \transpose{\hankeluyone}\right)} \begin{bmatrix}
+            \subseq{u}{t-l}{t-1} \\
+            \subseq{\baru}{0}{L-1} \\
+            \subseq{y}{t-l}{t-1} \\
+            1
+        \end{bmatrix} \label{eq:robust-ddsf-weighting-dynamic} \\
+        & 
+        \begin{bmatrix}
+            \subseq{\baru}{L-n}{L-1} \\
+            \subseq{\bary}{L-n}{L-1} \\
+        \end{bmatrix} = 
+        \begin{bmatrix}
+            \vRepeatVec{\us}{n} \\
+            \vRepeatVec{\ys}{n} \\
+        \end{bmatrix} \label{eq:robust-ddsf-weighting-terminal} \\
+        &
+        \bar{u}_k \in \Uset, \quad k \in \listinI{0}{L-1} \label{eq:robust-ddsf-weighting-input} \\
+        &
+        \norm{\bar{y}_k}_\infty + a_k \leq y_{\max}, \quad k \in \listinI{0}{L-1} \textperiod \label{eq:robust-ddsf-weighting-output}
+    \end{align}
+\end{subequations}
+where we omit the constraint \cref{eq:robust-ddsf-indirect-sigma}, since it will not be implemented, and we do not discuss the theoretical properties of \cref{eq:robust-ddsf-weighting}.
+There is no initial state constraint, since the extended initial condition $\xi_t$ is already included in the constraint \cref{eq:robust-ddsf-weighting-dynamic}.
+Also, it's worth noticing that in \cref{eq:robust-ddsf-weighting}, only $\sequence{\baru}{k}{0}{L-1}$, $\sequence{\bary}{k}{0}{L-1}$ and $\sigma$ are optimization variables, and the constraint \cref{eq:robust-ddsf-weighting-dynamic} is still linear.
+The calculation of the weighting matrix $\Wt$ is operated outside the optimization problem.
+
+% It might be tempting to also include the proposed input sequence $\subseq{u}{t}{t+L-1}$ into the weighting of sub-trajectories, and indeed it can be a good idea for the problem of making predictions only.
+This explains why we only use the extended initial condition $\xi_t$ for the weighting method, but does not include the proposed input sequence $\subseq{u}{t}{t+L-1}$ and $\Uf$.
+Including them into the weighting method will make $\Wt$ depend on optimization variables, making \cref{eq:robust-ddsf-weighting-dynamic} non-linear, and the optimization problem non-convex, thus hard to solve.
+
+% In contrast, the extended initial condition $\xi_t$ is usually given as parameters to the optimization problem, and thus can be used for the weighting method without making the optimization problem non-convex.
 
 Lots of possibilities are open for this weighting method.
 We just enumerate some of them here.
-
 \begin{enumerate}
     \item The weighting matrix $Q$ and weighting function $w$ can be chosen for different extended initial state $\xi_t$.
     \item There might be a better way to choose these hyperparameters $Q$ and $w$.
@@ -224,7 +261,6 @@ We just enumerate some of them here.
     In this way it will be possible to use machine learning methods, such as neural networks, to learn the optimal weighting matrix $Q$ and approximate the weighting function $w$.
     \item It is also possible to incorporate the weighting method into the direct method, by using the matrix $\Dt$ to regularize the variable $\alpha$ in formulations like \cref{eq:robust-ddsf-direct}.
 \end{enumerate}
-
 These possibilities are left for future work.
 
 
@@ -232,7 +268,8 @@ These possibilities are left for future work.
 
 In this section, we introduce a metric for evaluating the richness of a dataset for non-linear system, where the dataset consists of several dataset trajectories as introduced in \cref{sec:weighting-method}.
 
-The intuition is, for a dataset to be rich enough, it should be able to cover all possible input-output pairs of the system.
+The intuition is the following.
+For a dataset to be rich enough, the trajectories should be able to cover all possible input-output pairs of the system.
 In another word, we want to evaluate the ability of some curves to cover a certain volume in the higher dimensional space.
 To evaluate this \emph{space-filling property}, we can refer to the idea of fractal dimension and space-filling curves, as introduced in \cite{saganSpaceFillingCurves1994}, and the box-counting dimension introduced in \cite{kennethAlternativeDefinitionsDimension2003}.
 % Here we give a brief introduction to the box-counting dimension.
@@ -242,21 +279,17 @@ To evaluate this \emph{space-filling property}, we can refer to the idea of frac
 % The box-counting dimension is a method of estimating the fractal dimension of a set $S$.
 % For simplicity, we assume that $S$ is a subset of $\Real^d$.
 For fractals, the box-counting dimension is defined as:
-
 \begin{equation}
     \label{eq:box-counting-dimension-limit}
-    d \defeq \lim_{\epsilon \to 0} \frac{\log N(\epsilon)}{\log \frac{1}{\epsilon}}
+    d \defeq \lim_{\epsilon \to 0} \frac{\log N(\epsilon)}{\log \frac{1}{\epsilon}} \textperiod
 \end{equation}
-
 where $N(\epsilon)$ is the number of boxes of size $\epsilon$ needed to cover the fractal.
 
 The intuition is, if $\epsilon$ is small enough, the number of boxes of size $\epsilon$ to cover a smooth manifold of dimension $d$ will be $N(\epsilon) \approx C \left(\frac{1}{\epsilon}\right)^d$, so taking the logarithm of both sides will yield:
-
 \begin{equation}
     \label{eq:box-counting-dimension-log}
-    \log \left(N(\epsilon)\right) \approx \log C + d \log \left(\frac{1}{\epsilon}\right)
+    \log \left(N(\epsilon)\right) \approx \log C + d \log \left(\frac{1}{\epsilon}\right) \textperiod
 \end{equation}
-
 and dividing by $\log \frac{1}{\epsilon}$ will give $d$, as $\epsilon \to 0$.
 So we use a similar method to determine the dimension of a fractal.
 
@@ -264,13 +297,13 @@ Intuitively, the box-counting dimension can be seen as a metric of how well a se
 So we can borrow this idea to evaluate how well the dataset trajectories cover the input-output space $\Yset \times \Uset$.
 
 In practice, we only have access to a finite number of dataset input-output points $\ud_i$ and $\yd_i$, $i = 1, 2, \ldots, N_1+N_2+\dots+N_K$, each of them belonging to a certain dataset trajectory.
-We can also try to sample a number of different box sizes $\epsilon$, and count the number of boxes needed to cover all the input-ouput points.
+We can also try to sample a number of different box sizes $\epsilon$, and count the number of boxes needed to cover all the input-output points.
 
 Also, we face the choice of evaluating the box-counting dimension only using input-output pairs within the constraint set $\Uset \times \Yset$ or using the whole dataset.
 The former choice might be able to pick the most important part of the dataset, while the latter can give a more comprehensive evaluation of the dataset.
 These two choices are also compared in the numerical example in \cref{sec:non-linear-system-numerical-example}.
 
-For illustration, we choose a dataset from the numerical example in \cref{sec:non-linear-system-numerical-example}, which consists of 40 dataset trajectories, each of them having 50 input-output pairs.
+For illustration, we choose a dataset from the numerical example in \cref{sec:non-linear-system-numerical-example}, which consists of 40 dataset trajectories, each of them having 100 input-output pairs.
 As mentioned before, we take one pair of input-output as one point in the input-output space $\Uset \times \Yset$.
 In this case, the input-output space is three-dimensional: $\Real^1 \times \Real^2$.
 For visualization, we only plot the output part of the trajectory, as seen in \cref{fig:two-dim-dataset-example}.
@@ -278,18 +311,26 @@ The preprocessing of the dataset can be found in \cref{sec:non-linear-system-num
 In \cref{fig:two-dim-dataset-example}, the x-axis is the first system state $\xelone$, and the y-axis is the second system state $\xeltwo$.
 The blue curves represent the dataset trajectories.
 
-\includefig{two-dim-dataset-example.png}{0.6}{Output part of example dataset trajectories}{fig:two-dim-dataset-example}
+\includefig{double-integrator-data-40-100.pdf}{0.6}{Output part of example dataset trajectories.}{fig:two-dim-dataset-example}
 
-Then we sample a number of box sizes $\epsilon$, and count the number of boxes needed to cover all the input-output points.
-As we care about the logarithm of box size, we sample in the logarithmic space.
+Then we pick box sizes uniformly in the logarithmic scale within a certain range, and count the number of boxes needed to cover all the input-output points.
+% As we care about the logarithm of box size, we sample in the logarithmic space.
 In this test case, we choose 30 different $\log_2(\epsilon)$ values with uniform distance from the range $[-5, 0]$.
 Note that as the box size becomes smaller, only the sampled box size that results in a different number of box than the previous size is kept.
-Then we can plot the number of boxes needed to cover the dataset trajectories, as a function of the logarithm of box size, as seen in \cref{fig:two-dim-dataset-large-size-range}.
-
-\includefig{two-dim-dataset-large-size-range.png}{0.6}{Number of boxes needed to cover the dataset trajectories and box size, drawn in logarithmic scale}{fig:two-dim-dataset-large-size-range}
-
+Then we can plot the number of boxes needed to cover the dataset trajectories, as a function of the logarithm of box size.
+With a proper choice of box size range, the plot will show a linear relationship, and we can do linear regression on the sampled points.
+The slope of the linear function will be the box-counting dimension of the dataset, as shown in \cref{fig:two-dim-dataset-good-size-range}.
 In the figure, x-axis is the logarithm of reciprocal of box size, and y-axis is the logarithm of the number of boxes needed to cover the dataset trajectories.
-The green dots represent the sampled points.
+The green dots represent the sampled points, and the dotted line is the linear function fitted to the sampled points.
+
+\includefig{double-integrator-fractal-dimension-good-size-range.pdf}{0.7}{Number of boxes needed to cover the dataset trajectories and box size, drawn in logarithmic scale, with a proper choice of box size region.}{fig:two-dim-dataset-good-size-range}
+
+\subsection{Avoid Dependence on Box Size Range}\label{subsec:choosing-box-size-range}
+
+However, the choice of box size range is crucial for evaluating the box-counting dimension of the dataset.
+As we can see from \cref{fig:two-dim-dataset-large-size-range}, the slope of the graph changes a lot when the box size range is changed.
+
+\includefig{double-integrator-fractal-dimension-large-size-range.pdf}{0.7}{Number of boxes needed to cover the dataset trajectories and box size, drawn in logarithmic scale, with larger size range.}{fig:two-dim-dataset-large-size-range}
 
 We can see that, when the box size is not small enough, in \cref{fig:two-dim-dataset-large-size-range} when the size is larger than $2^{-2}$, we can not observe the linear behavior as described in \cref{eq:box-counting-dimension-log}.
 This is plausible, as \cref{eq:box-counting-dimension-log} is only a good approximation if the box size is small, even in the case of smooth manifold or actual fractals.
@@ -298,40 +339,55 @@ And when the box size is too small, in \cref{fig:two-dim-dataset-large-size-rang
 This is due to the fact that we are working with a finite number of dataset points, so when the box size is small enough, each box will contain at most one dataset point, and the number of boxes needed to cover the dataset will be the same as the number of dataset points.
 
 So with this observation, we need to choose a proper range of box size to evaluate the box-counting dimension of the dataset.
-As shown in \cref{fig:two-dim-dataset-large-size-range}, we choose the range $[2^{-3.3}, 2^{-2.2}]$ to evaluate the box-counting dimension of the dataset.
-Within this region, $\log_2\left(N(\epsilon)\right)$ and $\log_2\left(\frac{1}{\epsilon}\right)$ shows a fairly good linear behavior, as seen in \cref{fig:two-dim-dataset-good-size-range}.
+As shown in \cref{fig:two-dim-dataset-good-size-range}, we choose the range $[2^{-3.9}, 2^{-3.0}]$ to evaluate the box-counting dimension of the dataset.
+% Within this region, $\log_2\left(N(\epsilon)\right)$ and $\log_2\left(\frac{1}{\epsilon}\right)$ shows a fairly good linear behavior, as seen in \cref{fig:two-dim-dataset-good-size-range}.
 
-\includefig{two-dim-dataset-good-size-range.png}{0.7}{Number of boxes needed to cover the dataset trajectories and box size, drawn in logarithmic scale, with a proper choice of box size region}{fig:two-dim-dataset-good-size-range}
+% Then we can fit a linear function to the sampled points in the range $[2^{-3.3}, 2^{-2.2}]$, and the slope of the linear function will be the box-counting dimension of the dataset.
+% In this case, the slope is $2.24$, so the box-counting dimension of the dataset is $2.24$.
 
-Then we can fit a linear function to the sampled points in the range $[2^{-3.3}, 2^{-2.2}]$, and the slope of the linear function will be the box-counting dimension of the dataset.
-In this case, the slope is $2.24$, so the box-counting dimension of the dataset is $2.24$.
+However, even with a proper choice of box size range, the sensitivity of the box-counting dimension to the box size range is still large, this dependency can overcome the difference between different datasets, as shown in the numerical example in \cref{sec:non-linear-system-numerical-example}.
+To overcome this drawback, we propose a method of comparing datasets without choosing a specific box size region for each of them.
 
-The drawbacks and further improvements for this method may include:
+The idea is: we can choose a proper range of box size, and grid it into several points.
+Then we take each point and calculate the box-counting dimension of the dataset using a size range around that point.
+From this process we can get a vector of box-counting dimension values for a dataset, each of them relating to a box size range centered around a certain box size.
+By this method we can approximately get the relationship between the box-counting dimension and the box size region, and compare different datasets using this relationship.
 
-\begin{enumerate}
-    \item For real datasets, the fractal dimension value heavily depends on the region of box size we choose to evaluate.
-    This difference can be larger than the difference between different datasets, as is shown in \cref{sec:non-linear-system-numerical-example}.
-    Also, the best region for calculating the fractal dimension may differ for different datasets, so it is unfair to choose a singe region for all datasets.
-    Although a method of comparing datasets independent of this region is proposed in \cref{sec:non-linear-system-numerical-example}, a systematic way of choosing this region and getting a single value to compare different datasets is still missing.
-    \item The fractal dimension only deals with the space-filling property of a set, but not the size of the covered region.
-    For example, if we rescale a fractal into a smaller size, the fractal dimension will not change, but the region it covers will be smaller.
-    That also holds for the box-counting dimension of dataset trajectories.
-    With a set of dataset trajectories that covers a small region very well but does not contain any information outside the small region, the box-counting dimension might be larger, but the dataset is not so rich.
-    It might be possible to include the constant $\log D$ in \cref{eq:box-counting-dimension-log} into consideration, but it is not clear how to do it.
-    \item The box-counting dimension can only be a metric for evaluating the richness of a dataset, but does not provide any quantitative information about how well the dataset can be used for making predictions or fitting a model.
-    The quantitative relation between the box-counting dimension and the quality of prediction or fitted model is still unknown.
-\end{enumerate}
+We still use the logarithmic scale.
+For the specific example, when evaluating the complete dataset, we choose the box size range $[2^{-2.0}, 2^{-4.5}]$, and grid the range into 50 different points.
+For each point, for example $s = -3.0$, we take the size range $[2^{-3.0-0.5}, 2^{-3.0+0.5}]$ to evaluate the box-counting dimension of the dataset.
+By this method, we obtain an approximate relationship between the box-counting dimension and the box size region, as shown in \cref{fig:two-dim-dataset-dimension-single}.
+In this figure, the higher a curve corresponding to a dataset is, the richer is the dataset.
 
+\includefig{double-integrator-dimension-size-single.pdf}{0.7}{Approximate relationship between the box-counting dimension and the box size for the example dataset.}{fig:two-dim-dataset-dimension-single}
+
+Although this method can be used to evaluate and compare the richness of datasets, as shown in \cref{sec:non-linear-system-numerical-example}, a systematic way of choosing this region and getting a single value to compare different datasets is still missing.
+Also, the fractal dimension only deals with the space-filling property of a set, but not the size of the covered region.
+For example, if we rescale a fractal into a smaller size, the fractal dimension will not change, but the region it covers will be smaller.
+That also holds for the box-counting dimension of dataset trajectories.
+With a set of dataset trajectories that covers a small region very well but does not contain any information outside, the box-counting dimension might still be larger.
+To avoid this problem, it might be possible to take the constant $\log C$ in \cref{eq:box-counting-dimension-log} into consideration.
+In addition, the box-counting dimension does not provide any quantitative information about how well the dataset can be used for making predictions or fitting a model.
+Finally, it would be interesting to see if the box-counting dimension can be used to select or discard dataset trajectories, to construct a rich dataset of smaller size.
+
+% The quantitative relation between the box-counting dimension and the quality of prediction or fitted model is still unknown.
 These points are left for future investigation.
 
+We also briefly discuss of the computational complexity of the box-counting dimension method.
+Since we need to compute the number of boxes in the ambient space $\RealVec{m+p}$, both time and space complexity would be exponential in $m$ and $p$, since the number of candidate boxes is exponential in them.
+In practice, as mentioned in \cref{sec:result-dynamic-model}, on a laptop computer with Apple M1 chip and 16GB memory, it is only possible to compute the box-counting dimension for datasets within in 4 dimension space.
+The complexity also increases exponentially as the box size becomes smaller, as the number of boxes needed to cover the evaluation region will increase exponentially.
+But this is not an issue in practice, because we do not need too small box size as discussed in \cref{subsec:choosing-box-size-range}.
+There might be more efficient ways of computing the box-counting dimension, and we leave this for future work.
 
+
+% \newpage
 \section{Numerical Example}\label{sec:non-linear-system-numerical-example}
 
 In this section, we present a numerical example of using the weighting method in \cref{sec:weighting-method} to make predictions for a non-linear system, and using the fractal dimension method in \cref{sec:fractal-dimension-method} to evaluate the richness of the dataset.
-As can be seen from the example, the dataset that is better evaluated by the fractal dimension method can make better predictions using the weighting method, with a proper choice of hyperparameters.
+As can be seen from the example, the proposed prediction method yields more precise prediction than the indirect method, and richer datasets attain higher scores by the proposed metric.
 
 For this section, we use the following continuous non-linear system:
-
 \begin{align} \label{eq:continuous-non-linear-system}
     x = \begin{bmatrix}
         \xelone \\
@@ -343,7 +399,7 @@ For this section, we use the following continuous non-linear system:
     \end{bmatrix} = \begin{bmatrix}
         3 \xeltwo \\
         u - 0.5 \sin(\xelone) - 0.5 \xelone \left(\cos(\xeltwo^2)\right)^2
-    \end{bmatrix}
+    \end{bmatrix} \textstop
 \end{align}
 
 We use a numerical integrator \cite{gardner2022sundials} to simulate the system for a sample time $\SI{0.03}{\second}$.
@@ -351,7 +407,7 @@ Within each time step, the control input $u$ is kept constant.
 We assume the system state is observable.
 The system is equipped with state/output constraint $\Yset = \Xset = \left\{x \;|\; -\pi \leq \xelone \leq \pi,\, -0.5 \leq \xeltwo \leq 0.5 \right\}$, and input constraint $\Uset = \left\{u \;|\; -1 \leq u \leq 1 \right\}$.
 
-So we have a discrete time invariant non-linear system $\left(\Xset,\Uset,\Yset,f,g\right)$, where $\Xset$, $\Uset$, $\Yset$ are defined above, $f$ being the map from current state and constant control input of system \cref{eq:continuous-non-linear-system} to next state after $\SI{0.03}{\second}$, and $g\left(x, u\right) = x$.
+So we have a discrete time invariant non-linear system $\left(\Xset,\Uset,\Yset,f,g\right)$, where $\Xset$, $\Uset$, $\Yset$ are defined above, $f$ being the map from current state and constant control input of system \cref{eq:continuous-non-linear-system} to the next state after $\SI{0.03}{\second}$, and $g\left(x, u\right) = x$.
 
 Since we assume the system state is observable, we can directly deal with the system state without worrying about the output.
 The prediction method can still be applied, with the initial input part of mosaic-Hankel matrix $\Up$ being empty and the future input part $\Uf$ being changed to $\Uf = \hankel{L}{\subseq{\ud}{l-1}{N-2}}$.
@@ -371,83 +427,92 @@ And \cref{eq:weighted-indirect-method-w-solution} will be reformulated as:
 
 where $\Xp = \hankel{1}{\subseq{x^d}{0}{N-L-1}}$ and $\Xf = \hankel{L}{\subseq{x^d}{1}{N-1}}$, being the initial state part and future state part of the state mosaic-Hankel matrix, respectively.
 
-As a new notation, we use variables with check $\check{(-)}$ to denote the real system states or outputs, if the proposed input sequence $\subseq{u}{t}{t+L-1}$ is applied to the real system.
-For example, in this specific case, if we further simulate the system for $L$ steps applying $\subseq{u}{t}{t+L-1}$, we will get the state/output sequence $\checkx_j$ and $\checky_j$, $t+1 \leq j \leq t+L$.
+% As a new notation, we use variables with check $\check{(-)}$ to denote the real system states or outputs, if the proposed input sequence $\subseq{u}{t}{t+L-1}$ is applied to the real system.
+% For example, in this specific case, if we further simulate the system for $L$ steps applying $\subseq{u}{t}{t+L-1}$, we will get the state/output sequence $\checkx_j$ and $\checky_j$, $t+1 \leq j \leq t+L$.
 
-For the hyperparameters of the weighting method, we choose $Q = \begin{bmatrix} \frac{1}{4 \pi^2} & 0 \\ 0 & 1 \end{bmatrix}$, to compensate for different size of $\xelone$ and $\xeltwo$; and $w(x) = e^{-\sqrt{x}}$.
+For the hyperparameters of the weighting method, we choose $Q = \begin{bmatrix} \frac{1}{4 \pi^2} & 0 \\ 0 & 1 \end{bmatrix}$ to compensate for different size of $\xelone$ and $\xeltwo$; and $w(x) = e^{-2x}$.
 Also, we set the weight of $\Wt(i,i)$ to zero if there are enough sub-trajectories that are close enough to current initial condition $x_t$.
-The prediction horizon is set to $L = 3$.
+The prediction horizon is set to $L = 15$.
 
 For the datasets to be compared, we grid the state space with 10 points in the first dimension and 4 points in the second dimension, and pick the resulting 40 points as the initial conditions.
-For each initial condition, we simulate the system for 300 steps with each input uniformly sampled from $\Uset$.
-So we have 40 dataset trajectories, each of them having 300 input-output pairs.
+For each initial condition, we simulate the system for 500 steps with each input uniformly sampled from $\Uset$.
+So we have 40 dataset trajectories, each of them having 500 input-output pairs.
 
-This forms the largest dataset, which we call $\dataset_6$.
-We also form smaller datasets $\dataset_1$ to $\dataset_5$ by picking the first 50, 100, 150, 200, 250 input-output pairs from each dataset trajectory, respectively.
+This forms the largest dataset, which we call $\dataset_8$.
+We also form smaller datasets $\dataset_0$ to $\dataset_7$ by picking the first 100, 120, 140, 160, 180, 200, 250, 300 input-output pairs from each dataset trajectory, respectively.
 
-To evaluate the quality of prediction yield by different datasets, we define the following cost for a given dataset $\dataset$, tested on a certain initial condition $y_t$ and proposed input sequence $\subseq{u}{t}{t+L-1}$:
-
-\begin{equation}\label{eq:prediction-cost-single-point}
-    cost\left(\dataset; x_t, \subseq{u}{t}{t+L-1}\right) = \sum_{j=t+1}^{t+L} \mnormsq{\left(\checkx_j - x_j\right)}{Q}
-\end{equation}
-
-where $Q$ is the same weighting matrix as used in the weighting method, $y_j$ and $\checky_j$ are the predicted and real output at time step $j$, respectively.
+% To evaluate the quality of prediction yield by different datasets, we define the following cost for a given dataset $\dataset$, tested on a certain initial condition $y_t$ and proposed input sequence $\subseq{u}{t}{t+L-1}$:
+% \begin{equation}\label{eq:prediction-cost-single-point}
+%     cost\left(\dataset; x_t, \subseq{u}{t}{t+L-1}\right) = \sum_{j=t+1}^{t+L} \mnormsq{\left(\checkx_j - x_j\right)}{Q} \textperiod
+% \end{equation}
 
 To evaluate the quality of prediction at different initial conditions and input sequences, we also grid the state and input space $\Xset \times \Uset$ with 10 points on each dimension, resulting in 1000 different initial condition and input pairs.
-For each pair $x_{t,i}$ and $u_{t,i}$, we start from $x_{t,i}$ and repeat $u_{t,i}$ $L$ times as the proposed input sequence $\subseq{u}{t}{t+L-1}$, then calculate the cost \cref{eq:prediction-cost-single-point} for each dataset $\dataset_1$ to $\dataset_5$.
-Then for each dataset, we have 1000 cost values, and we can calculate the mean and maximum of them.
+For each pair of initial state $x_i$ and input $u_i$, we start from $x_i$ and repeat $u_i$ $L$ times as the proposed input sequence $\subseq{u}{t}{t+L-1}$.
+Then for each time step $j$, we calculate the average prediction error:
+\begin{equation}\label{eq:prediction-error-single-step-average}
+    e_j(\dataset_k) = \frac{1}{N} \sum_{i=1}^{N} \mnormsq{\left(\checkx_{j,i} - x_{j,i}\right)}{Q} \textperiod
+\end{equation}
+where $Q$ is the same weighting matrix as used in the weighting method, $x_{j,i}$ and $\checkx_{j,i}$ are the predicted and real state at time step $j$ with initial state $x_i$ and input $u_i$, respectively.
+And $i$ enumerates over all the initial conditions and input sequences.
+We also present the prediction error using same datasets, but with the original indirect method, as a comparison.
 
+From \cref{fig:two-dim-prediction-error-weight}, we can see that the prediction error decreases as the length of single dataset trajectory increases, or as the dataset becomes richer.
+
+\includefig{double-integrator-prediction-error-weight.pdf}{0.7}{Average prediction error for different datasets, with the proposed weighting method.}{fig:two-dim-prediction-error-weight}
+
+In contrast, the prediction error using the original indirect method increases as the dataset becomes richer, as shown in \cref{fig:two-dim-prediction-error-indirect}.
+This shows that original indirect method is not able to utilize the rich dataset to make better prediction.
+
+\includefig{double-integrator-prediction-error-plain.pdf}{0.7}{Average prediction error for different datasets, with original indirect method.}{fig:two-dim-prediction-error-indirect}
+
+Also, it can be seen in \cref{fig:two-dim-prediction-error-compare} that with a rich enough dataset $\dataset_8$, the proposed weighting method yields smaller prediction error than the original indirect method.
+
+\includefig{double-integrator-prediction-error-compare.pdf}{0.7}{Comparison between prediction error using the weighting method and original indirect method, with rich enough dataset.}{fig:two-dim-prediction-error-compare}
+
+% Also, we present two box-dimension values for each dataset, one evaluated using the whole dataset, and one evaluated using only the input-output pairs within the constraint set $\Xset \times \Uset$.
+
+% {\renewcommand{\arraystretch}{1.3}%
+% \begin{center}
+% \captionof{table}{Mean, Maximum Cost and Box-counting Dimension \label{tab:cost-and-dim}}
+% \begin{tabular}{ >{\raggedleft}p{0.3\linewidth}|c|c|c|c|c|c }
+%     Dataset & $\dataset_1$ & $\dataset_2$ & $\dataset_3$ & $\dataset_4$ & $\dataset_5$ & $\dataset_6$ \\
+%     \hline
+%     Length of single trajectory in dataset & 50 & 100 & 150 & 200 & 250 & 300 \\
+%     \hline
+%     Mean cost (\num{e-4})& \num{316.85} & \num{9.49} & \num{5.82} & \num{5.62} & \num{5.29} & \num{5.05} \\
+%     \hline
+%     Maximum cost (\num{e-2})& \num{762.84} & \num{2.81} & \num{1.22} & \num{1.20} & \num{1.22} & \num{1.10} \\
+%     \hline
+%     Box-counting dimension (whole dataset) & 2.18 & 2.05 & 2.20 & 2.30 & 2.32 & 2.34 \\
+%     \hline
+%     Box-counting dimension (within constraint) & 2.09 & 2.27 & 2.39 & 2.47 & 2.45 & 2.47 \\
+% \end{tabular}
+% \end{center}
+% }
+
+% As we can see from \cref{tab:cost-and-dim}, the box-counting dimension of the dataset increases as the length of single dataset trajectory increases, and the prediction cost decreases.
+% There are also some exceptions for the maximum cost, but it is plausible that more data will deteriorate the quality of prediction on certain initial conditions and input sequences, since dataset far away from the current initial condition and input sequence will contribute negatively to the prediction quality.
+
+Then we compare the box-counting dimension of different datasets.
 Before calculating the box-counting dimension of the datasets, we normalize the datasets with the bound of the constraint set $\Xset \times \Uset$.
+We use the same method as described in \cref{subsec:choosing-box-size-range} to calculate the box-counting dimension for different box sizes.
 
-Also, we present two box-dimension values for each dataset, one evaluated using the whole dataset, and one evaluated using only the input-output pairs within the constraint set $\Xset \times \Uset$.
-
-{\renewcommand{\arraystretch}{1.3}%
-\begin{center}
-\captionof{table}{Mean, Maximum Cost and Box-counting Dimension \label{tab:cost-and-dim}}
-\begin{tabular}{ >{\raggedleft}p{0.3\linewidth}|c|c|c|c|c|c }
-    Dataset & $\dataset_1$ & $\dataset_2$ & $\dataset_3$ & $\dataset_4$ & $\dataset_5$ & $\dataset_6$ \\
-    \hline
-    Length of single trajectory in dataset & 50 & 100 & 150 & 200 & 250 & 300 \\
-    \hline
-    Mean cost (\num{e-4})& \num{316.85} & \num{9.49} & \num{5.82} & \num{5.62} & \num{5.29} & \num{5.05} \\
-    \hline
-    Maximum cost (\num{e-2})& \num{762.84} & \num{2.81} & \num{1.22} & \num{1.20} & \num{1.22} & \num{1.10} \\
-    \hline
-    Box-counting dimension (whole dataset) & 2.18 & 2.05 & 2.20 & 2.30 & 2.32 & 2.34 \\
-    \hline
-    Box-counting dimension (within constraint) & 2.09 & 2.27 & 2.39 & 2.47 & 2.45 & 2.47 \\
-\end{tabular}
-\end{center}
-}
-
-As we can see from \cref{tab:cost-and-dim}, the box-counting dimension of the dataset increases as the length of single dataset trajectory increases, and the prediction cost decreases.
-There are also some exceptions for the maximum cost, but it is plausible that more data will deteriorate the quality of prediction on certain initial conditions and input sequences, since dataset far away from the current initial condition and input sequence will contribute negatively to the prediction quality.
-
-As mentioned in \cref{sec:fractal-dimension-method}, the box-counting dimension of a dataset heavily depends on the region of box size we choose to evaluate.
-To overcome this drawback, we propose a method of comparing datasets without choosing a specific box size region for each of them.
-
-The idea is, we can choose a proper range of box size, and grid it into several points.
-Then we take each point and calculate the box-counting dimension of the dataset using a size range around that point.
-From this process we can get a vector of box-counting dimension values for a dataset, each of them relating to a box size range centered around a certain box size.
-By this method we can approximately get the relationship between the box-counting dimension and the box size region, and compare different datasets using this relationship.
-
-We still use the logarithmic scale.
-For the specific example, when evaluating the complete dataset, we choose the box size range $[2^{-0}, 2^{-5.0}]$, and grid the range into 50 different points.
-For each point, for example $s = -3.0$, we take the size range $[2^{-3.0-0.5}, 2^{-3.0+0.5}]$ to evaluate the box-counting dimension of the dataset.
-Then we have \cref{fig:two-dim-example-varying-range-all}, showing the box-counting dimension of six datasets with different range center point.
-
-\includefig{two-dim-example-varying-range-all.png}{0.7}{The relationship between center box-size range (in logarithmic scale) and fitted box-counting dimension of complete dataset}{fig:two-dim-example-varying-range-all}
+\includefig{double-integrator-dimension-size-all.pdf}{0.7}{The relationship between center box-size range (in logarithmic scale) and fitted box-counting dimension of complete dataset.}{fig:two-dim-example-varying-range-all}
 
 As we can see from \cref{fig:two-dim-example-varying-range-all}, the box-counting dimension varies a lot with the center point of the box size range, and this variance can be larger than the difference between different datasets.
-However, \cref{fig:two-dim-example-varying-range-all} can also be used to compare different datasets independent of the box size range.
+However, \cref{fig:two-dim-example-varying-range-all} can also be used to compare different datasets independent of the box size range, as stated in \cref{subsec:choosing-box-size-range}.
 We can see that in general, the box-counting dimension of the dataset increases as the length of single dataset trajectory increases.
-This can be observed from the fact, for example, the curve corresponds to $\dataset_3$, which is of length 150, is almost always below the curve corresponds to $\dataset_4$, which is of length 200.
-In this specific case, the only outlier is the curve corresponds to $\dataset_2$, which is of length 100, but the corresponding curve lies under that of $\dataset_1$, which is of length 50.
+This can be observed from the fact, for example, the curve corresponds to $\dataset_8$, where each trajectory is of length 500, is always above the curve corresponds to $\dataset_7$, where the length is 300.
+% In this specific case, the only outlier is the curve corresponds to $\dataset_2$, which is of length 100, but the corresponding curve lies under that of $\dataset_1$, which is of length 50.
 
 We also present \cref{fig:two-dim-example-varying-range-constrained}, which shows the box-counting dimension of six datasets evaluated using only the input-output pairs within the constraint set $\Xset \times \Uset$.
 
-\includefig{two-dim-example-varying-range-constrained.png}{0.7}{The relationship between center box-size range (in logarithmic scale) and fitted box-counting dimension of dataset within cnostraint}{fig:two-dim-example-varying-range-constrained}
+\includefig{double-integrator-dimension-size-in-constraint.pdf}{0.7}{The relationship between center box-size range (in logarithmic scale) and fitted box-counting dimension of dataset within constraint.}{fig:two-dim-example-varying-range-constrained}
 
-In this case, it is clearer that the box-counting dimension of the dataset increases as the length of single dataset trajectory increases, as the curves are almost ordered by the length of single dataset trajectory.
+In this case, the box-counting dimension of the dataset still increases as the length of single trajectory increases.
+However, the difference between different datasets is less obvious than that in \cref{fig:two-dim-example-varying-range-all}.
+This confirms our intuition in \cref{sec:fractal-dimension-method}, that restricting the evaluation to the input-output pairs within the constraint may result in a less comprehensive evaluation of the dataset.
 
-From this example, especially from \cref{tab:cost-and-dim} and \cref{fig:two-dim-example-varying-range-constrained}, we can see that the with properly chosen hyperparameters, the prediction method proposed in \cref{sec:weighting-method} can make better predictions with a dataset that is better evaluated by the fractal dimension method proposed in \cref{sec:fractal-dimension-method}.
+% In this case, it is clearer that the box-counting dimension of the dataset increases as the length of single dataset trajectory increases, as the curves are almost ordered by the length of single dataset trajectory.
+
+% From this example, especially from \cref{tab:cost-and-dim} and \cref{fig:two-dim-example-varying-range-constrained}, we can see that the with properly chosen hyperparameters, the prediction method proposed in \cref{sec:weighting-method} can make better predictions with a dataset that is better evaluated by the fractal dimension method proposed in \cref{sec:fractal-dimension-method}.

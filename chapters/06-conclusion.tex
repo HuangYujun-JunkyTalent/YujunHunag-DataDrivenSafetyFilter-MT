@@ -2,7 +2,7 @@
 
 In this thesis, we proposed different formulations of data-driven predictive safety filter, data-driven prediction method for non-linear systems, a metric to estimate the richness of datasets of non-linear systems, and applied the data-driven predictive safety filter to the model of a miniature racing vehicle.
 
-The filter for noise-free LTI systems are designed in \cref{chap:nominal-ddsf}, and it is proved that it is equivalent to the model-based predictive safety filter.
+The filter for noise-free LTI systems is designed in \cref{chap:nominal-ddsf}, and it is proven that it is equivalent to the model-based predictive safety filter.
 
 For noisy LTI systems, we proposed two different robust data-driven predictive safety filters in \cref{chap:robust-ddsf-lti}, namely the direct and indirect robust data-driven predictive safety filters.
 They both have similar qualitative guarantees, but numerical results show that the indirect robust data-driven predictive safety filter is less conservative than the direct robust data-driven predictive safety filter and yields better performance.
@@ -13,13 +13,13 @@ We also proposed a metric based on fractal dimension to estimate the richness of
 By a numerical example of two-dimensional nonlinear system, we showed that with properly chosen hyperparameters, the proposed prediction method yields more precise prediction than existing methods.
 Also, the metric is higher for richer datasets.
 There are many directions for further research in this area.
-For example, the weighting scheme can depend on the extended state.
-It will also be interesting to find a systematic way of optimizing the weighting scheme, probably by using machine learning techniques.
+For example, hyperparameters used in the weighting scheme can vary according to the extended state.
+It will also be interesting to find a systematic way of optimizing these hyperparameters, probably by using machine learning techniques.
 It is also possible to incorporate the weighting method into the direct method.
-By using the metric to estimate the richness of datasets, we can also try to construct richer datasets with shorter trajactories.
+By using the metric to estimate the richness of datasets, we can also try to construct richer datasets with shorter trajectories.
 
-In \cref{chap:test-chronos}, we applied the indirect robust data-driven predictive safety filter to an RC vehicle.
+In \cref{chap:test-chronos}, we applied the indirect robust data-driven predictive safety filter and the proposed prediction method to the model of a miniature racing vehicle.
 We showed that with the simplified kinematic model, the filter is able to keep the vehicle within track boundaries, even with practical level of noise.
 Different forms of terminal constraints for the vehicle model are also proposed and compared.
 For the dynamic model, with the prediction method introduced in \cref{chap:non-linear-system} and noise-free observation, the filter is also able to keep the vehicle within track boundaries.
-It is still not clear how to systematically evaluate the overall performance of a safety filter, and a rigorous analysis of the influence of hyperparameters for the vehicle model is also needed.
+It is still not clear how to systematically evaluate the overall performance of a safety filter, and some improvements will be needed before the filter can be applied to a real RC vehicle.

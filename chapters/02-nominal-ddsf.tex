@@ -73,7 +73,7 @@ This formulation also provides closed-loop guarantees similar to the state-based
         \subseq{\haty}{-n}{L-n-2}(t+1) &= \subseq{\stary}{-n+1}{L-n-1}(t),  \quad \haty_{L-n-1}(t+1) = \ys \textstop
     \end{align*}
 
-    Due to terminal constraint \cref{eq:model-based-safety-filter-terminal}, we have $\hatx_{L-n-1}(t+1) = \xs_{L-n}(t) = \xs$.
+    Due to terminal constraint \cref{eq:model-based-safety-filter-terminal}, we have $\hatx_{L-n-1}(t+1) = \hatx_{L-n}(t) = \xs$.
     Because the optimal solution $\staru(t)$, $\starx(t)$, and $\stary(t)$ satisfy the dynamic constraint \cref{eq:model-based-safety-filter-dynamics}, we can conclude that \cref{eq:model-based-safety-filter-dynamics} also holds for $\sequence{\hatu}{k}{-n}{L-n-2}(t+1)$, $\sequence{\hatx}{k}{-n}{L-n-1}(t+1)$ and $\sequence{\haty}{k}{-n}{L-n-2}(t+1)$.
     Also, from \cref{def:safe-input-output-equilibrium}, we have $\hatx_{L-n}(t+1) = \xs = A \xs + B \us = A \starx_{L-n}(t) + B \us = A \hatx_{L-n-1}(t) + B \hatu_{L-n-1}(t)$.
     So we can conclude the dynamic constraint \cref{eq:model-based-safety-filter-dynamics} also holds for $\sequence{\hatu}{k}{-n}{L-n-1}(t+1)$, $\sequence{\hatx}{k}{-n}{L-n}(t+1)$ and $\sequence{\haty}{k}{-n}{L-n-1}(t+1)$.
@@ -183,7 +183,7 @@ And we can prove that \cref{eq:model-based-safety-filter} and \cref{eq:nominal-d
 Combining \cref{thm:guarantee-model-based-lti} and \cref{thm:nominal-equivalence}, we can conclude that the nominal data-driven safety filter \cref{eq:nominal-ddsf} also provides closed-loop guarantees for controllable LTI system.
 
 \begin{corollary}\label{cor:guarantee-nominal-ddsf}
-    For noise-free controllable LTI systems, if \cref{asm:L-larger-n-and-1,asm:dataset-L-2n-rich} hold and the online observations $\subseq{u}{t_0-n}{t_0-1}$ and $\subseq{y}{t_0-n}{t_0-1}$ are the same, then the nominal data-driven safety filter \cref{eq:nominal-ddsf} yields the same closed-loop response as the model-based safety filter \cref{eq:model-based-safety-filter} after time step $t_0$, thus also provides closed-loop constraint satisfaction and recursive feasibility with one-step receding horizon scheme.
+    For noise-free controllable LTI systems, if \cref{asm:L-larger-n-and-1,asm:dataset-L-2n-rich} hold and the online observations $\subseq{u}{t_0-n}{t_0-1}$ and $\subseq{y}{t_0-n}{t_0-1}$ are the same, then the nominal data-driven safety filter \cref{eq:nominal-ddsf} yields the same closed-loop response as the model-based safety filter \cref{eq:model-based-safety-filter} after time step $t_0$, thus also provides closed-loop constraint satisfaction and recursive feasibility for the nominal data-driven safety filter \cref{eq:nominal-ddsf} with one-step receding horizon scheme.
 \end{corollary}
 
 \section{Improvements on Nominal Data-Driven Safety Filter}\label{sec:improvements-nominal}

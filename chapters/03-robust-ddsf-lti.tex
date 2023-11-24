@@ -95,12 +95,12 @@ As a result, we need $n$ objective inputs from the learning-based controller.
 
 As stated before, we need to add slack variable $\sigma$ to compensate for the effect of prediction error, which is introduced by the noise in dataset and online observation.
 Constraint \cref{eq:robust-ddsf-direct-sigma} is an auxiliary constraint to render an upper-bound on $\sigma$.
-Since the purpose of $\sigma$ is to compensate for the effect of noise, and the noise comes into the prediction both by initial condition and the noisy dataset, it should have an upper bound related to $\barvareps$ and variable $\alpha$, as can be reflected in \cref{eq:robust-ddsf-direct-sigma}.
+Since the purpose of $\sigma$ is to compensate for the effect of noise, which comes from constraints \cref{eq:robust-ddsf-direct-dynamic,eq:robust-ddsf-direct-initial}, it should have an upper bound related to $\barvareps$ and variable $\alpha$, as can be reflected in \cref{eq:robust-ddsf-direct-sigma}.
 % Also, since the noise originate from the dataset is amplified by $\alpha$, this upper bound should also be related to $\alpha$.
 It is worth-noticing that, constraint \cref{eq:robust-ddsf-direct-sigma} is not convex.
 As stated in \cite{berberichDataDrivenRobust2021}, in practice it can be omitted, since it will be satisfied automatically with proper choice of regularizing constants $\lamalpha$ and $\lamsigma$.
-Also, in order to retain closed-loop guarantees, it is enough to replace the constraint with a convex relaxation of the form $\infnorm{\sigma} \leq C \barvareps$, where $C$ is a large enough constant.
-For $\sigma$ this regularizing constant is not affected by $\barvareps$, since this regularizing effect should still exist even if the noise bound is zero.
+Also, in order to retain closed-loop guarantees, it is enough to replace the constraint \cref{eq:robust-ddsf-direct-sigma} with a convex relaxation of the form $\infnorm{\sigma} \leq C \barvareps$, where $C$ is a large enough constant.
+For $\sigma$ this regularizing term $\lamsigma \norm{\sigma}_2^2$ is not affected by $\barvareps$, since this regularizing effect should still exist even if the noise bound is zero.
 In practice, $\sigma$ should be kept near zero by choosing $\lamsigma$ and $\lamalpha$ properly.
 
 Since the noise also affect the prediction by noisy dataset, which will be reflected in the dynamic constraint \cref{eq:robust-ddsf-direct-dynamic}, we need to add a regularizer term $\lamalpha \barvareps \twonorm{\alpha}^2$.
@@ -328,9 +328,10 @@ Note that we drop \cref{asm:objective-input-bound}, which says the deviation of 
 
 \subsection{Numerical Example for Indirect Formulation}\label{subsec:numerical-example-indirect}
 
-We use the same system as in \cref{subsec:numerical-example-direct}, to illustrate the effectiveness of the indirect formulation \cref{eq:robust-ddsf-indirect}.
+In this section we provide a numerical example to illustrate the effectiveness of the indirect formulation \cref{eq:robust-ddsf-indirect}.
+% We first use the same system as in \cref{subsec:numerical-example-direct}.
 
-First we use exactly the same setup as in \cref{subsec:numerical-example-direct}, and we choose the constraint tightening constants $c_i$ to be: $c_1 = 0.5$, $c_i = 0.1$ for $i \geq 2$.
+First we use exactly the same system and setup as in \cref{subsec:numerical-example-direct}, and choose the regularizing constant $\lamsigma = 500$, constraint tightening constants $c_i$: $c_1 = 0.5$, $c_j = 0.1$ for $j \geq 2$.
 
 The closed-loop input and output are shown in \cref{fig:robust-indirect-nonconservative} and \cref{fig:robust-indirect-no-interference}.
 
@@ -393,4 +394,4 @@ In practice, we can always start from a conservative constraint tightening schem
 Also, it's worth noticing that the number of optimization variables in the indirect formulation \cref{eq:robust-ddsf-indirect} has nothing to do with the size of dataset trajectory, and is only related to the prediction horizon $L$.
 This is a big advantage of the indirect formulation, since it makes the problem scalable to large dataset.
 Also, due to less optimization variables, the indirect formulation is usually faster to solve than the direct formulation.
-In the example above, the direct formulation takes about $0.79$ seconds to solve, while the indirect formulation only takes about $0.08$ seconds to solve.
+In the example above, the former takes only $0.08$ seconds to solve, while the latter takes about $0.79$ seconds.

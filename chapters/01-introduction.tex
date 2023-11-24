@@ -21,7 +21,7 @@ This idea of data-driven prediction is not new, and has been firstly developed i
 As introduced in \cite{willemsNotePersistencyExcitation2005}, the behavior of an LTI system can be fully captured by a rich enough dataset trajectory, which is commonly referred to as the \emph{fundamental lemma}.
 Based on this fundamental lemma, the prediction of future outputs of a system can be achieved without the need of a model.
 It firstly applied in the context of model predictive control (MPC), which also requires a model of the system to make predictions, and uses the predictions to tackle the control task directly \cite{garciaModelPredictiveControl1989}.
-The combination of data-driven prediction and MPC is introduced in \cite{coulsonDataenabledPredictiveControl2019} in the name of \emph{Data-enabled predictive control (DeePC)}, where a dataset trajectory is directly used to predict future trajectories of the system.
+The combination of data-driven prediction and MPC is introduced in \cite{coulsonDataenabledPredictiveControl2019} in the name of \emph{Data-enabled predictive control (DeePC)}.
 
 This data-driven prediction method has also been extended to linear time invariant affine systems in \cite{martinelliDataDrivenAffine2022}, and to multiple dataset trajectories in \cite{vanwaardeMultiple2020}.
 However, noise-free linear system is a very special case, and there are many challenges when extending the idea to more general systems, such as noisy linear systems and non-linear systems.
@@ -37,7 +37,7 @@ It is worth noticing that although the DeePC is originally designed for LTI syst
 
 With the success of data-driven predictive control, it is natural to ask whether it is possible to design a data-driven predictive safety filter, which can be used to ensure safety of the system under arbitrary control inputs, and only requires dataset trajectories for off-line design.
 Simultaneously to this thesis, a data-driven safety filter for noise-free LTI systems is proposed in \cite{bajelaniDataDrivenSafetyFilter2023}.
-However, an extensive discussion of robust formulation and the, applicability to non-linear systems, and comparison of different formulations is yet to be done.
+However, an extensive discussion of robust formulation, the applicability to non-linear systems, and comparison of different formulations is yet to be done.
 This thesis aims to fill this gap.
 
 Apart from successful applications to real-world systems, a lot of effort has gone into showing theoretical guarantees of these data-driven methods, for example the comparison between \emph{Direct} and \emph{Indirect} methods in DeePC \cite{dorflerBridgingDirectIndirect2023}.
@@ -61,8 +61,7 @@ The rationale is to linearize the system around current state, then applying Dee
 Therefore, the dataset is updated at each time step with recent observations.
 With mild assumptions, bound on the tracking error is established in \cite{berberichLinearTrackingMPCData2022}.
 Simulation results show that the proposed controller can successfully track a reference trajectory.
-This result relies on the assumption that the recent online observations are rich enough, and it lacks the ability to adapt to different system behaviors.
-Also, it does not make use of possibly very rich off-line and historical dataset trajectories.
+This result relies on the assumption that the recent online observations are rich enough, and does not make use of possibly very rich off-line and historical dataset trajectories.
 In this thesis, we propose another data-driven prediction scheme for non-linear systems, which is also based on local linearization, but takes advantage of rich off-line and historical dataset trajectories.
 
 There are also works on a data-driven formulation that is different from DeePC, such as the one proposed in \cite{huangRobustDataEnabledPredictive2023}.
@@ -128,7 +127,7 @@ This usually occurs when we are defining the variables of an optimization proble
 We also accept the fact $\RealVec{n} \times \RealVec{m} = \RealVec{n+m}$, and similarly $\Xset \times \Yset \subseteq \RealVec{n+m}$ if $\Xset \subseteq \RealVec{n}$ and $\Yset \subseteq \RealVec{m}$.
 
 In this thesis we extensively discuss optimization problems.
-We use variables without accents to denote online observation and closed loop response.
+We use variables without accents to denote noise-free online observation and closed loop response.
 Subscripts are used to denote time steps, for example $x_t$ denotes the state of the system at time step $t$.
 And we use different accents to denote different types of variables, as shown in \cref{tab:opt-accents}.
 In the table $a$ is just a dummy variable to show the accents.
@@ -164,7 +163,7 @@ Without further notice, we always deal with discrete time invariant systems.
     $g: \Real^n \times \Real^m \rightarrow \Real^p$ is the output function.
 \end{definition}
 
-For the rest of the thesis, without further notice, we always assume the dimension of state, input and output are $n$, $m$ and $p$ respectively.
+For the rest of the thesis, without further notice, we always assume the dimension of state, input and output are $n$, $m$ and $p$, respectively.
 
 Note that we define the functions $f$ and $g$ on the ambient linear space $\Real^n$ and $\Real^m$, instead of the constraint sets $\Xset$ and $\Uset$.
 This is for the convenience of discussing \emph{trajectories} and \emph{safe trajectories} of the system, where a trajectory is a list of input-output pairs that satisfy the system dynamics but can violate the constraints.
@@ -186,9 +185,9 @@ As for a safe trajectory, it is a trajectory that can be extended into an infini
     \setlength{\topsep}{0pt}
     \setlength{\parskip}{0pt}
     \begin{enumerate}
-        \item $\hatx_{t+1} = f\left(\hatx_t, \hatu_t\right)$, $\haty_t = g\left(\hatx_t, \hatu_t\right)$ hold for any $t$ in $\listinIinf{i}$.
-        \item $\hatx_t \in \Xset$, $\hatu_t \in \Uset$, $\haty_t \in \Yset$ hold for any $t$ in $\listinIinf{i}$.
-        \item $\hatu_t = u_t$, $\tildey_t = y_t$ hold for any $t$ in $\listinI{i}{j}$.
+        \item $\hatx_{t+1} = f\left(\hatx_t, \hatu_t\right)$, $\haty_t = g\left(\hatx_t, \hatu_t\right)$ hold for all $t$ in $\listinIinf{i}$.
+        \item $\hatx_t \in \Xset$, $\hatu_t \in \Uset$, $\haty_t \in \Yset$ hold for all $t$ in $\listinIinf{i}$.
+        \item $\hatu_t = u_t$, $\tildey_t = y_t$ hold for all $t$ in $\listinI{i}{j}$.
     \end{enumerate}
     }
 \end{definition}
@@ -249,7 +248,7 @@ It is possible that two LTI systems have the same behavior, but the dimension of
 In this thesis we focus on the input-output behavior of the system, and we don't deal with state constrains, so we work with minimal realizations \cite{markovskyBehavioralSystemsTheory2021} to avoid this complexity.
 
 \begin{definition}[Minimal realization]\label{def:lti-minimal-realization}
-    An LTI system with system dynamics $\ltimatrices$ is called minimal realization, if the dimension $n$ of its state space is the smallest among all LTI systems with the same behavior.
+    An LTI system with system dynamics $\ltimatrices$ is called a minimal realization, if the dimension $n$ of its state space is the smallest among all LTI systems with the same behavior.
 \end{definition}
 
 \begin{remark}\label{remark:observability-minimal}
@@ -304,7 +303,7 @@ The \emph{Hankel matrix} of certain depth constructed with a sequence of vectors
 
 Each column of the Hankel matrix is the vertical stack of a sub-sequence with length $L$ of the original sequence. 
 And all columns cover all possible length-$L$ sub-sequences of the original sequence.
-Suppose we have a sequence of inputs $\sequence{u}{t}{i}{j}$, then the Hankel matrix $\hankel{L}{\sequence{u}{t}{i}{j}}$ can be constructed by taking a ``window'' of length $L$ and slide it along the sequence, and stack all the windows vertically.
+Suppose we have a sequence of inputs $\sequence{u}{t}{i}{j}$, then the Hankel matrix $\hankel{L}{\sequence{u}{t}{i}{j}}$ can be constructed by taking a ``window'' of length $L$ and slide it along the sequence, and stack all the windows horizontally.
 
 The \emph{fundamental lemma} of data-driven predictive control, as introduced in \cite{willemsNotePersistencyExcitation2005}, states that the behavior of an LTI system can be fully captured by a \emph{rich enough} dataset trajectory.
 Here rich enough is formally captured by the definition of \emph{persistently exciting} dataset trajectory:
@@ -323,7 +322,7 @@ Then we can state the fundamental lemma as:
 
 \begin{lemma}[Fundamental lemma]\label{lemma:fundamental-lemma}
     Consider a controllable LTI system and a dataset trajectory $\datasetSequence{u}{N}$ and $\datasetSequence{y}{N}$ of the system.
-    If $\datasetSequence{u}{N}$ is persistently exciting of order $L+n$, then $\sequence{u}{t}{0}{L-1}$ and $\sequence{y}{t}{0}{1}$ form a trajectory of the system if and only if there exist $\alpha \in \RealVec{N-L+1}$, which makes the following equation hold:
+    If $\datasetSequence{u}{N}$ is persistently exciting of order $L+n$, then $\sequence{u}{t}{0}{L-1}$ and $\sequence{y}{t}{0}{L-1}$ form a trajectory of the system if and only if there exist $\alpha \in \RealVec{N-L+1}$, which makes the following equation hold:
     \begin{equation*}
         \begin{bmatrix}
             \subseq{u}{0}{L-1} \\
@@ -410,7 +409,7 @@ With a dynamic system $\left(\Xset = \RealVec{n}, \Uset, \Yset, f, g(x,u) = x\ri
     \bar{x}_k \in \Xset, \quad k \in \left[0, L-1\right] \textperiod \label{eq:state-based-safety-filter-output}
 \end{align}
 \end{subequations}
-where $L$ is the prediction horizon, $x_t$ is the current state of the system, $\uObj(t)$ is current control input supposed by the learning based controller$\pi_l$, $R$ is the weighting matrix used to examine the distance between the actual input and the desired input.
+where $L$ is the prediction horizon, $x_t$ is the current state of the system, $\uObj(t)$ is current control input supposed by the learning based controller $\pi_l$, $R$ is the weighting matrix used to examine the distance between the actual input and the desired input.
 
 $\Sset_f$ is a safe terminal set of the system, modified from Assumption 4.2 in \cite{wabersichPredictiveSafetyFilter2021a}.
 
